@@ -1,0 +1,86 @@
+{
+  "name": "remly",
+  "version": "0.1.0",
+  "description": "A Remoting Object framework for communicating for C/S on top of any transport that transfers JSON data.",
+  "engines": {
+    "node": ">=10.16"
+  },
+  "author": "ty",
+  "license": "MIT",
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "postinstall": "npm run -s bootstrap && npm run -s update-ts-project-refs",
+    "update-ts-project-refs": "node bin/update-ts-project-refs.js -f",
+    "update-packages": "npm run -s update-package-locks",
+    "check-package-metadata": "node bin/check-package-metadata.js",
+    "prerelease": "npm run build:full && cross-env CI=1 npm run mocha && npm run lint",
+    "release": "lerna version && lerna publish from-git --yes",
+    "update-package-locks": "node bin/rebuild-package-locks",
+    "update-peer-deps": "node bin/update-peer-deps -f",
+    "update-all-deps": "npm update && lerna exec -- npm update && npm run update-package-locks",
+    "update-monorepo-file": "node bin/update-monorepo-file",
+    "sync-dev-deps": "node bin/sync-dev-deps",
+    "version": "npm run update-peer-deps",
+    "outdated": "npm outdated --depth 0 && lerna exec --no-bail \"npm outdated --depth 0\"",
+    "coverage:nyc": "tib-nyc report --reporter=text-lcov",
+    "coverage:ci": "tib-nyc report --reporter=text-lcov | coveralls",
+    "precoverage": "npm test",
+    "coverage": "open-cli coverage/index.html",
+    "lint": "npm run prettier:check && npm run eslint && node bin/check-package-locks",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "eslint": "tib-eslint --report-unused-disable-directives --cache .",
+    "eslint:fix": "npm run eslint -- --fix",
+    "prettier:cli": "tib-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
+    "prettier:check": "npm run prettier:cli -- --check",
+    "prettier:fix": "npm run prettier:cli -- --write",
+    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"examples/*/dist\"",
+    "clean:lerna": "lerna clean",
+    "prebuild": "npm run prettier:fix",
+    "build": "tib-tsc -b",
+    "build:full": "npm ci --ignore-scripts && lerna bootstrap --ci && npm run clean && npm run build",
+    "pretest": "npm run clean && npm run build",
+    "test": "tib-nyc npm run mocha",
+    "test:ci": "tib-nyc npm run mocha",
+    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.js\" \"examples/*/dist/__tests__/**/*.js\"",
+    "posttest": "npm run lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@commitlint/travis-cli": "^11.0.0",
+    "@tib/bsert": "^0.2.1",
+    "@tib/build": "^6.3.4",
+    "@tib/defer": "^0.1.2",
+    "@tib/eslint-config": "^8.2.4",
+    "@tib/testlab": "^3.4.4",
+    "@types/mocha": "^8.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
+    "coveralls": "^3.1.0",
+    "cross-env": "^7.0.2",
+    "cz-conventional-changelog": "^3.3.0",
+    "delay": "^4.4.0",
+    "eslint": "^7.10.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-eslint-plugin": "^2.3.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "fs-extra": "^9.0.1",
+    "husky": "^4.3.0",
+    "lerna": "^3.22.1",
+    "markdown-table": "^2.0.0",
+    "open-cli": "^6.0.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.0.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}

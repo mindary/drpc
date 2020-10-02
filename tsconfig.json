@@ -1,0 +1,12 @@
+{
+  "extends": "@tib/build/config/tsconfig.common.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "references": [
+    {
+      "path": "packages/core/tsconfig.json"
+    }
+  ],
+  "files": []
+}
