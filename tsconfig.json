@@ -6,6 +6,18 @@
   "references": [
     {
       "path": "packages/core/tsconfig.json"
+    },
+    {
+      "path": "packages/schedule/tsconfig.json"
+    },
+    {
+      "path": "packages/serializer/tsconfig.json"
+    },
+    {
+      "path": "packages/server/tsconfig.json"
+    },
+    {
+      "path": "packages/tcp/tsconfig.json"
     }
   ],
   "files": []

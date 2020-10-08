@@ -16,9 +16,7 @@ async function checkPackageLocks() {
   const packages = await project.getPackages();
   const packageNames = packages.map(p => p.name);
   const rootPath = project.rootPath;
-  const lockFiles = packages.map(p =>
-    path.relative(rootPath, path.join(p.location, 'package-lock.json')),
-  );
+  const lockFiles = packages.map(p => path.relative(rootPath, path.join(p.location, 'package-lock.json')));
 
   const checkResults = await Promise.all(
     lockFiles.map(async lockFile => {

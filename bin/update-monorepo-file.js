@@ -21,9 +21,7 @@ function getPackageRelativeUri(pkg) {
 async function getSortedPackages() {
   const project = new Project(process.cwd());
   const packages = await project.getPackages();
-  packages.sort((p1, p2) =>
-    getPackageRelativeUri(p1).localeCompare(getPackageRelativeUri(p2)),
-  );
+  packages.sort((p1, p2) => getPackageRelativeUri(p1).localeCompare(getPackageRelativeUri(p2)));
   return packages;
 }
 
@@ -33,11 +31,7 @@ function getPackageFields(pkg) {
   const relativeUri = getPackageRelativeUri(pkg);
   const pkgUrl = `https://github.com/strongloop/loopback-next/tree/master/${relativeUri}`;
 
-  return [
-    `[${relativeUri}](${pkgUrl})`,
-    pkg.private ? '_(private)_' : pkg.name,
-    packageJson.description,
-  ];
+  return [`[${relativeUri}](${pkgUrl})`, pkg.private ? '_(private)_' : pkg.name, packageJson.description];
 }
 
 function updateTable(packages) {

@@ -41,8 +41,7 @@ async function checkMonorepoFile(packages, rootPath) {
   for (const p of packages) {
     const packagePath = path.relative(rootPath, p.location);
 
-    const packageExists =
-      monorepoFile.includes(p.name) || monorepoFile.includes(packagePath);
+    const packageExists = monorepoFile.includes(p.name) || monorepoFile.includes(packagePath);
 
     if (!packageExists) {
       errors.push(`${p.name} is not added in the MONOREPO.md file`);
@@ -98,9 +97,7 @@ async function checkPkgsPackageJson(packages, rootPkg) {
   for (const p of pkgs) {
     const pkg = fs.readJsonSync(path.join(p.location, 'package.json'));
 
-    const isTypescriptPackage = fs.existsSync(
-      path.join(p.location, 'tsconfig.json'),
-    );
+    const isTypescriptPackage = fs.existsSync(path.join(p.location, 'tsconfig.json'));
     const isCorrectMain = pkg.main && pkg.main === 'dist/index.js';
 
     if (isTypescriptPackage && !isCorrectMain) {
@@ -113,10 +110,7 @@ async function checkPkgsPackageJson(packages, rootPkg) {
       errors.push(getErrorText(p.name, 'types'));
     }
 
-    const isPublicAccess =
-      pkg.publishConfig &&
-      pkg.publishConfig.access &&
-      pkg.publishConfig.access === 'public';
+    const isPublicAccess = pkg.publishConfig && pkg.publishConfig.access && pkg.publishConfig.access === 'public';
 
     if (!isPublicAccess) {
       errors.push(getErrorText(p.name, 'publicConfig.access'));
@@ -137,16 +131,13 @@ async function checkPkgsPackageJson(packages, rootPkg) {
     const isCorrectRepositoryUrl =
       pkg.repository &&
       pkg.repository.url &&
-      pkg.repository.url.includes(
-        'https://github.com/strongloop/loopback-next.git',
-      );
+      pkg.repository.url.includes('https://github.com/strongloop/loopback-next.git');
 
     if (!isCorrectRepositoryUrl) {
       errors.push(getErrorText(p.name, 'repository.url'));
     }
 
-    const isCorrectRepositoryDirectory =
-      pkg.repository && pkg.repository.directory;
+    const isCorrectRepositoryDirectory = pkg.repository && pkg.repository.directory;
     const isRepositoryDirectoryExist = fs.existsSync(p.location);
 
     if (!isCorrectRepositoryDirectory) {

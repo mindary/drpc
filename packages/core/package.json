@@ -1,9 +1,8 @@
 {
   "name": "@remly/core",
-  "description": "Define and implement core constructs",
+  "description": "A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.",
   "version": "0.1.0",
-  "keywords": [
-  ],
+  "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
@@ -21,13 +20,26 @@
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "tslib": "^2.0.1"
+    "@remly/schedule": "^0.1.0",
+    "@remly/serializer": "^0.1.0",
+    "@tib/bufio": "^1.1.2",
+    "debug": "^4.2.0",
+    "emittery": "^0.7.1",
+    "micromatch": "^4.0.2",
+    "shortid": "^2.2.15",
+    "ts-essentials": "^7.0.0",
+    "tslib": "^2.0.2"
   },
   "devDependencies": {
     "@tib/build": "^6.3.4",
+    "@tib/defer": "^0.1.2",
     "@tib/eslint-config": "^8.2.4",
     "@tib/testlab": "^3.4.4",
-    "@types/node": "^14.11.2"
+    "@types/micromatch": "^4.0.1",
+    "@types/node": "^14.11.5",
+    "@types/shortid": "^0.0.29",
+    "delay": "^4.4.0",
+    "get-port": "^5.1.1"
   },
   "files": [
     "README.md",

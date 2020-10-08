@@ -60,9 +60,7 @@ async function updateReferences(options) {
     const tsconfigMeta = loadTsConfig(pkgLocation, dryRun);
     const tsconfigFile = tsconfigMeta.file;
     rootRefs.push({
-      path: path
-        .join(path.relative(project.rootPath, pkgLocation), TSCONFIG)
-        .replace(/\\/g, '/'),
+      path: path.join(path.relative(project.rootPath, pkgLocation), TSCONFIG).replace(/\\/g, '/'),
     });
     const tsconfig = tsconfigMeta.tsconfig;
     const originalTsconfigJson = JSON.stringify(tsconfig, null, 2);
@@ -141,9 +139,7 @@ async function updateReferences(options) {
   } else {
     console.log('\n%s', path.relative(project.rootPath, rootTsconfigFile));
     console.log(rootTsconfigJson);
-    console.log(
-      '\nThis is a dry-run. Please use -f option to update tsconfig files.',
-    );
+    console.log('\nThis is a dry-run. Please use -f option to update tsconfig files.');
   }
 }
 
