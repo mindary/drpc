@@ -20,5 +20,5 @@ See `spec.md`.
 
 ## Licence
 
-* Copyright (c) 2020, Yuan Tao (MIT License). 
-* Copyright (c) 2017, Christopher Jeffrey (MIT License).
+- Copyright (c) 2020, Yuan Tao (MIT License).
+- Copyright (c) 2017, Christopher Jeffrey (MIT License).

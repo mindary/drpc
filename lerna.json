@@ -1,7 +1,8 @@
 {
   "packages": [
     "examples/*",
-    "packages/*"
+    "packages/*",
+    "transports/*"
   ],
   "command": {
     "bootstrap": {

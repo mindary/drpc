@@ -1,10 +1,12 @@
 {
   "include": [
     "packages/*/dist",
+    "transports/*/dist",
     "examples/*/dist"
   ],
   "exclude": [
     "packages/*/dist/__tests__/",
+    "transports/*/dist/__tests__/",
     "examples/*/dist/__tests__/"
   ],
   "extension": [

@@ -1,6 +1,7 @@
 .github/
 /coverage
 packages/*/dist
+transports/*/dist
 examples/*/dist
 *.json
 CHANGELOG.md

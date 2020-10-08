@@ -1,6 +1,6 @@
 {
   "name": "@remly/tcp",
-  "description": "The TCP broker for remly",
+  "description": "The remly TCP transport",
   "version": "0.1.0",
   "keywords": [],
   "main": "dist/index.js",

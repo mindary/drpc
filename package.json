@@ -33,7 +33,7 @@
     "prettier:cli": "tib-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
     "prettier:check": "npm run prettier:cli -- --check",
     "prettier:fix": "npm run prettier:cli -- --write",
-    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"examples/*/dist\"",
+    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
     "clean:lerna": "lerna clean",
     "prebuild": "npm run prettier:fix",
     "build": "tib-tsc -b",
@@ -41,7 +41,7 @@
     "pretest": "npm run clean && npm run build",
     "test": "tib-nyc npm run mocha",
     "test:ci": "tib-nyc npm run mocha",
-    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.js\" \"examples/*/dist/__tests__/**/*.js\"",
+    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.js\" \"transports/*/dist/__tests__/**/*.js\" \"examples/*/dist/__tests__/**/*.js\"",
     "posttest": "npm run lint"
   },
   "dependencies": {},
