@@ -1,8 +1,9 @@
 import {assert} from 'ts-essentials';
-import {AbstractConnection, ConnectionDataEvents, ConnectionEmptyEvents} from './abstract';
-import {EventHandler, EventName} from './types';
+import {AbstractConnection, ConnectionDataEvents, ConnectionEmptyEvents, ConnectionOptions} from './abstract';
+import {SignalHandler, SignalName} from './types';
 import {Service} from './registry';
 import {TypedService} from './typed-service';
+import {syncl} from './utils';
 
 export * from './abstract';
 
@@ -13,16 +14,24 @@ export * from './abstract';
  */
 export abstract class Connection<
   DataEvents extends ConnectionDataEvents = ConnectionDataEvents,
-  EmptyEvents extends EventName = ConnectionEmptyEvents
+  EmptyEvents extends SignalName = ConnectionEmptyEvents
 > extends AbstractConnection<DataEvents & ConnectionDataEvents, EmptyEvents | ConnectionEmptyEvents> {
-  call(method: string, params?: any, timeout?: number) {
+  protected constructor(options?: ConnectionOptions) {
+    super(options);
+  }
+
+  service<S extends Service>(namespace?: string): TypedService<S> {
+    return new TypedService<Service>(this, namespace);
+  }
+
+  async call(method: string, params?: any, timeout?: number) {
     assert(typeof method === 'string', 'Event must be a string.');
 
     const id = this._sequence;
 
     if (++this._sequence === 0x100000000) this._sequence = 0;
 
-    this.sendCall(id, method, params);
+    await this.sendCall(id, method, params);
 
     assert(!this._jobs[id], 'ID collision.');
 
@@ -31,18 +40,14 @@ export abstract class Connection<
     });
   }
 
-  listen(event: EventName, handler: EventHandler) {
-    assert(typeof event === 'string', 'Event must be a string.');
+  listen(signal: string, handler: SignalHandler) {
+    assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
-    return this._ee.on(event, handler);
+    return this._ee.on(signal, handler);
   }
 
-  fire(event: string, data?: any) {
-    assert(typeof event === 'string', 'Event must be a string.');
-    this.sendEvent(event, data);
-  }
-
-  service<S extends Service>(namespace?: string): TypedService<S> {
-    return new TypedService<Service>(this, namespace);
+  async signal(signal: string, data?: any) {
+    assert(typeof signal === 'string', 'Event must be a string.');
+    await this.sendSignal(signal, data);
   }
 }

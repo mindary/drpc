@@ -5,6 +5,9 @@
   },
   "references": [
     {
+      "path": "extensions/serializer-msgpack/tsconfig.json"
+    },
+    {
       "path": "packages/core/tsconfig.json"
     },
     {
@@ -17,10 +20,16 @@
       "path": "packages/server/tsconfig.json"
     },
     {
-      "path": "transports/http/tsconfig.json"
+      "path": "packages/tests/tsconfig.json"
     },
     {
       "path": "transports/tcp/tsconfig.json"
+    },
+    {
+      "path": "transports/worker/tsconfig.json"
+    },
+    {
+      "path": "transports/ws/tsconfig.json"
     }
   ],
   "files": []

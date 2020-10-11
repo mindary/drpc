@@ -9,7 +9,7 @@ tcp sockets or web sockets).
 
 ```c
 enum {
-  EVENT = 0,
+  SIGNAL = 0,
   CALL = 1,
   ACK = 2,
   ERROR = 3,
@@ -20,7 +20,7 @@ enum {
 
 Communication is split into 4 different messages:
 
-- EVENT (0)
+- SIGNAL (0)
 - CALL (1)
 - ACK (2)
 - ERROR (3)
@@ -58,19 +58,19 @@ Payload size is implied by the body size sent in the header.
 
 ## Messages
 
-### `EVENT` packet
+### `SIGNAL` packet
 
 ```c
 typedef struct {
   packet_header_t header;
-  uint8_t event_str_size;
-  char event[event_str_size];
+  uint8_t signal_str_size;
+  char signal[signal_str_size];
   char *payload;
-} event_packet_t;
+} signal_packet_t;
 ```
 
-The EVENT message (`packet_type = 0`) is sent to a remote node without any expectation of a response. Event names are
-serialized as strings within the message itself, prefixed by a 1 byte size. If an unknown event is received, the client
+The SIGNAL message (`packet_type = 0`) is sent to a remote node without any expectation of a response. Signal names are
+serialized as strings within the message itself, prefixed by a 1 byte size. If an unknown signal is received, the client
 SHOULD ignore the message without disconnecting.
 
 ### `CALL` packet
@@ -85,7 +85,7 @@ typedef struct {
 } call_packet_t;
 ```
 
-The CALL message (`packet_type = 1`) is similar to the EVENT message with one difference: it expects a response in a
+The CALL message (`packet_type = 1`) is similar to the SIGNAL message with one difference: it expects a response in a
 reasonable amount of time, in the form of an ACK message. Each CALL message includes a 4 byte `id`, which will be used
 to correlate an incoming ACK message. If no ACK with a corresponding `id` is received within a preset timeout, the
 client SHOULD ignore any future ACKs.
@@ -100,8 +100,8 @@ typedef struct {
 } ack_packet_t;
 ```
 
-The ACK message (`packet_type = 2`) is sent in response to a CALL message in the event of a successful call. The payload
-represents the result of the call. The corresponding CALL `id` field must be reserialized in the ACK message.
+The ACK message (`packet_type = 2`) is sent in response to a CALL message in the signal of a successful call. The
+payload represents the result of the call. The corresponding CALL `id` field must be reserialized in the ACK message.
 
 If an ACK message is received without a corresponding `id` internally, the receiving node SHOULD ignore the message
 without disconnection.
@@ -118,7 +118,7 @@ typedef struct {
 } error_packet_t;
 ```
 
-The ERROR message (`packet_type = 3`) is sent in response to a CALL message in the event of a unsuccessful call. The
+The ERROR message (`packet_type = 3`) is sent in response to a CALL message in the signal of a unsuccessful call. The
 body includes the corresponding CALL `id` as well as an error `code` and `msg` string. The `code` shall be interpreted
 by the client.
 

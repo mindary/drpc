@@ -110,3 +110,37 @@ export function isPlainObject(o: any) {
 export function protoKeys(o: any) {
   return Object.getOwnPropertyNames(Object.getPrototypeOf(o)).filter(key => key !== 'constructor');
 }
+
+export async function readBinary(data: Buffer | ArrayBuffer | Blob | string): Promise<Buffer> {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Bad data object');
+  }
+
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+
+  if (data instanceof ArrayBuffer) {
+    return Buffer.from(data);
+  }
+
+  if (typeof data === 'string') {
+    return Buffer.from(data);
+  }
+
+  if (isArrayLike(data)) {
+    return Buffer.from(data);
+  }
+
+  if (typeof Blob !== 'undefined' && Blob) {
+    if (data instanceof Blob) {
+      return new Promise<Buffer>(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(Buffer.from(reader.result ? reader.result : ''));
+        reader.readAsArrayBuffer(data);
+      });
+    }
+  }
+
+  throw new Error('Bad data object');
+}

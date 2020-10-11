@@ -1,27 +1,20 @@
 import * as net from 'net';
-import {Registry} from '@remly/core';
-import {Server, ServerDataEvents, ServerOptions} from '@remly/server';
+import {DefaultRegistry, Registry} from '@remly/core';
+import {Server, ServerOptions} from '@remly/server';
 import {TCPConnection, TCPConnectionOptions} from './connection';
 
-export interface TCPServerDataEvents extends ServerDataEvents<TCPConnection> {}
+export class TCPServer extends Server<TCPConnection> {
+  public readonly registry: Registry = new DefaultRegistry();
 
-export interface TCPServerOptions extends ServerOptions {}
-
-export class TCPServer<DataEvents extends TCPServerDataEvents = TCPServerDataEvents> extends Server<
-  TCPConnection,
-  DataEvents & TCPServerDataEvents
-> {
-  public readonly registry: Registry = new Registry();
-
-  static createServer(options?: TCPServerOptions) {
-    return new TCPServer(options);
+  static createServer(options?: ServerOptions) {
+    return new this(options);
   }
 
   static attach(server: net.Server) {
     return this.createServer().attach(server);
   }
 
-  constructor(options?: TCPServerOptions) {
+  constructor(options?: ServerOptions) {
     super(options);
   }
 
@@ -32,7 +25,7 @@ export class TCPServer<DataEvents extends TCPServerDataEvents = TCPServerDataEve
   attach(server: net.Server) {
     server.on('connection', (socket: net.Socket) => {
       if (socket.remoteAddress) {
-        this.createAndBindConnection({socket});
+        this.createAndRegisterConnection({socket});
       }
     });
 

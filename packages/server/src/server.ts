@@ -1,7 +1,18 @@
-import {Connection, ConnectionOptions, EventName, Handler, RegisterOptions, Registry} from '@remly/core';
+import {
+  Connection,
+  ConnectionOptions,
+  DefaultRegistry,
+  EventName,
+  Handler,
+  RegisterOptions,
+  Registry,
+} from '@remly/core';
+import {ConnectionError} from './errors';
 import Emittery = require('emittery');
+import {UnsubscribeFn} from 'emittery';
 
 export interface ServerDataEvents<T> {
+  error: Error;
   connection: T;
   connectionClose: T;
 }
@@ -21,12 +32,16 @@ export abstract class Server<
   protected options: ServerOptions;
   protected registry: Registry;
 
-  protected connections: Record<string, T> = {};
+  protected _connections: Record<string, T> = {};
+
+  get connections(): Record<string, T> {
+    return this._connections;
+  }
 
   protected constructor(options?: ServerOptions) {
     super();
     this.options = options = options ?? {};
-    this.registry = options.registry ?? new Registry();
+    this.registry = options.registry ?? new DefaultRegistry();
   }
 
   protected abstract createConnection<O extends ConnectionOptions>(options?: O): T;
@@ -39,30 +54,72 @@ export abstract class Server<
     };
   }
 
-  protected bindConnection(connection: T) {
-    connection.on('close', () => {
-      this.unregisterConnection(connection);
-    });
+  protected createAndRegisterConnection<O>(options?: O) {
+    return this.registerConnection(this.createConnection(this.buildConnectionOptions(options)));
+  }
 
-    this.registerConnection(connection);
+  protected registerConnection(connection: T) {
+    if (this._connections[connection.id]) {
+      return connection;
+    }
+
+    this._bindConnection(connection);
+
+    this._connections[connection.id] = connection;
+    // eslint-disable-next-line no-void
+    void this.emit('connection', connection);
 
     return connection;
   }
 
-  protected createAndBindConnection<O>(options?: O) {
-    return this.bindConnection(this.createConnection(this.buildConnectionOptions(options)));
-  }
-
-  protected registerConnection(connection: T) {
-    this.connections[connection.id] = connection;
-    // eslint-disable-next-line no-void
-    void this.emit('connection', connection);
-  }
-
   protected unregisterConnection(connection: T) {
-    delete this.connections[connection.id];
+    if (!this._connections[connection.id]) {
+      return connection;
+    }
+
+    delete this._connections[connection.id];
+
+    this._unbindConnection(connection);
+
     // eslint-disable-next-line no-void
     void this.emit('connectionClose', connection);
+    return connection;
+  }
+
+  private _bindConnection(connection: T) {
+    if ((connection as any).__remly_unsubs__) {
+      return;
+    }
+
+    const unsubs: UnsubscribeFn[] = [];
+
+    unsubs.push(
+      connection.on('error', (err: Error) => {
+        this.error(new ConnectionError(connection, err));
+      }),
+    );
+
+    unsubs.push(
+      connection.on('close', () => {
+        this.unregisterConnection(connection);
+      }),
+    );
+
+    (connection as any).__remly_unsubs__ = unsubs;
+  }
+
+  private _unbindConnection(connection: T) {
+    if (!(connection as any).__remly_unsubs__) {
+      return;
+    }
+
+    (connection as any).__remly_unsubs__.forEach((unsub: UnsubscribeFn) => unsub());
+    delete (connection as any).__remly_unbind__;
+  }
+
+  error(err: Error) {
+    // eslint-disable-next-line no-void
+    void this.emit('error', err);
   }
 
   register<T extends object>(service: T, opts?: RegisterOptions): void;

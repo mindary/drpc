@@ -1,0 +1,45 @@
+{
+  "name": "@remly/worker",
+  "description": "The remly web worker transport",
+  "version": "0.1.0",
+  "keywords": [],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10.16"
+  },
+  "author": "ty ",
+  "license": "MIT ",
+  "scripts": {
+    "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "tib-tsc",
+    "clean": "tib-clean remly-worker*.tgz dist *.tsbuildinfo package",
+    "pretest": "npm run build",
+    "test": "tib-mocha \"dist/__tests__/**/*.test.js\"",
+    "unit": "tib-mocha \"dist/__tests__/unit/**/*.test.js\"",
+    "verify": "npm pack && tar xf remly-worker*.tgz && tree package && npm run clean"
+  },
+  "dependencies": {
+    "@remly/core": "^0.1.0",
+    "@remly/server": "^0.1.0",
+    "tslib": "^2.0.3"
+  },
+  "devDependencies": {
+    "@remly/tests": "^0.1.0",
+    "@tib/build": "^6.3.4",
+    "@tib/eslint-config": "^8.2.4",
+    "@tib/testlab": "^3.4.4",
+    "@types/node": "^14.11.8",
+    "ts-essentials": "^7.0.0"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ],
+  "browser": {
+    "./dist/worker.js": "./dist/worker-browser.js",
+    "./dist/index.js": "./dist/browser.js"
+  }
+}

@@ -1,9 +1,8 @@
 import {assert} from 'ts-essentials';
 import net from 'net';
-import {Connection, DefaultParser, Packet, Registry} from '@remly/core';
+import {Connection, ConnectionOptions, Packet, StandardParser, syncl} from '@remly/core';
 
-export interface TCPConnectionOptions {
-  registry?: Registry;
+export interface TCPConnectionOptions extends ConnectionOptions {
   socket?: net.Socket;
 }
 
@@ -21,42 +20,50 @@ export class TCPConnection extends Connection {
   constructor(options?: TCPConnectionOptions) {
     super({
       ...options,
-      parser: new DefaultParser(),
+      parser: new StandardParser(),
     });
     this.socket = options?.socket;
     if (this.socket) {
       this.init();
+      // socket already connected
+      if (!this.socket.connecting && !this.socket.destroyed && !this.connected) {
+        this.doConnected();
+      }
     }
   }
 
   protected bind() {
     assert(this.socket);
 
-    this.socket.on('connect', () => this.doConnected());
+    this.socket.on('connect', () => {
+      this.doConnected();
+    });
 
     this.socket.on('data', data => {
       this.feed(data);
     });
 
-    this.socket.on('error', err => {
-      this.error(err);
-      this.end();
-    });
+    this.socket.on(
+      'error',
+      syncl(async (err: any) => {
+        this.error(err);
+        await this.end();
+      }, this),
+    );
 
-    this.socket.on('close', () => {
-      this.end();
-    });
+    this.socket.on(
+      'close',
+      syncl(async () => {
+        await this.end();
+      }, this),
+    );
   }
 
-  protected close() {
-    if (this.socket) {
-      this.socket.destroy();
-    }
+  protected async close() {
+    this.socket?.destroy();
   }
 
-  protected send(packet: Packet) {
-    if (this.socket) {
-      this.socket.write(packet.frame());
-    }
+  protected async send(packet: Packet) {
+    this.socket?.write(packet.frame());
   }
 }

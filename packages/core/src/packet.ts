@@ -27,7 +27,7 @@ export class Header {
  */
 
 export const PacketTypes = {
-  EVENT: 0,
+  SIGNAL: 0,
   CALL: 1,
   ACK: 2,
   ERROR: 3,
@@ -59,7 +59,7 @@ export class Packet {
     let size;
 
     switch (type) {
-      case Packet.types.EVENT:
+      case Packet.types.SIGNAL:
         size = br.readU8();
         name = br.readString(size, 'ascii');
         payload = br.readBytes(br.left());
@@ -107,7 +107,7 @@ export class Packet {
     let size = 0;
 
     switch (this.type) {
-      case Packet.types.EVENT:
+      case Packet.types.SIGNAL:
         size += 1;
         size += this.name.length;
         size += this.payload.length;
@@ -151,7 +151,7 @@ export class Packet {
     bw.writeU32(0);
 
     switch (this.type) {
-      case Packet.types.EVENT:
+      case Packet.types.SIGNAL:
         bw.writeU8(this.name.length);
         bw.writeString(this.name, 'ascii');
         bw.writeBytes(this.payload);

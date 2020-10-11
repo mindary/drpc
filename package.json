@@ -33,7 +33,7 @@
     "prettier:cli": "tib-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
     "prettier:check": "npm run prettier:cli -- --check",
     "prettier:fix": "npm run prettier:cli -- --write",
-    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
+    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"extensions/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
     "clean:lerna": "lerna clean",
     "prebuild": "npm run prettier:fix",
     "build": "tib-tsc -b",
@@ -41,10 +41,9 @@
     "pretest": "npm run clean && npm run build",
     "test": "tib-nyc npm run mocha",
     "test:ci": "tib-nyc npm run mocha",
-    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.js\" \"transports/*/dist/__tests__/**/*.js\" \"examples/*/dist/__tests__/**/*.js\"",
+    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"extensions/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
     "posttest": "npm run lint"
   },
-  "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
@@ -61,7 +60,7 @@
     "cross-env": "^7.0.2",
     "cz-conventional-changelog": "^3.3.0",
     "delay": "^4.4.0",
-    "eslint": "^7.10.0",
+    "eslint": "^7.11.0",
     "eslint-config-prettier": "^6.12.0",
     "eslint-plugin-eslint-plugin": "^2.3.0",
     "eslint-plugin-mocha": "^8.0.0",
@@ -71,6 +70,7 @@
     "markdown-table": "^2.0.0",
     "open-cli": "^6.0.1",
     "rimraf": "^3.0.2",
+    "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   },
   "config": {

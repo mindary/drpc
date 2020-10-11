@@ -22,13 +22,13 @@
   "dependencies": {
     "@tib/defer": "^0.1.2",
     "ts-essentials": "^7.0.0",
-    "tslib": "^2.0.2"
+    "tslib": "^2.0.3"
   },
   "devDependencies": {
     "@tib/build": "^6.3.4",
     "@tib/eslint-config": "^8.2.4",
     "@tib/testlab": "^3.4.4",
-    "@types/node": "^14.11.5",
+    "@types/node": "^14.11.8",
     "delay": "^4.4.0"
   },
   "files": [

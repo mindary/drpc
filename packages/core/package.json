@@ -28,7 +28,7 @@
     "micromatch": "^4.0.2",
     "shortid": "^2.2.15",
     "ts-essentials": "^7.0.0",
-    "tslib": "^2.0.2"
+    "tslib": "^2.0.3"
   },
   "devDependencies": {
     "@tib/build": "^6.3.4",
@@ -36,7 +36,7 @@
     "@tib/eslint-config": "^8.2.4",
     "@tib/testlab": "^3.4.4",
     "@types/micromatch": "^4.0.1",
-    "@types/node": "^14.11.5",
+    "@types/node": "^14.11.8",
     "@types/shortid": "^0.0.29",
     "delay": "^4.4.0",
     "get-port": "^5.1.1"

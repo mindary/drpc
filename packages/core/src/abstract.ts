@@ -1,16 +1,16 @@
 import {assert} from 'ts-essentials';
 import Emittery from 'emittery';
 import shortid from 'shortid';
+import {Defer} from '@tib/defer';
 import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
-import {EventName} from './types';
+import {SignalName} from './types';
 import {Packet} from './packet';
 import * as utils from './utils';
-import {rawLength, syncl} from './utils';
+import {rawLength, readBinary, syncl} from './utils';
 import {InvalidParamsError, makeRemError, RemError, TimeoutError, UnknownError} from './error';
-import {Parser} from './parser';
-import {DefaultParser} from './parser.default';
-import {Registry} from './registry';
+import {DefaultParser, Parser} from './parsers';
+import {DefaultRegistry, Registry} from './registry';
 
 const debug = require('debug')('remly:connection');
 const DUMMY = Buffer.alloc(0);
@@ -37,7 +37,7 @@ export interface ConnectionDataEvents {
   nojob: NoJob;
 }
 
-export type ConnectionEmptyEvents = 'connect' | 'close';
+export type ConnectionEmptyEvents = 'open' | 'close';
 
 export interface ConnectionOptions {
   id?: string;
@@ -65,9 +65,11 @@ const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
  */
 export abstract class AbstractConnection<
   DataEvents extends ConnectionDataEvents = ConnectionDataEvents,
-  EmptyEvents extends EventName = ConnectionEmptyEvents
+  EmptyEvents extends SignalName = ConnectionEmptyEvents
 > extends Emittery.Typed<DataEvents & ConnectionDataEvents, EmptyEvents | ConnectionEmptyEvents> {
   protected _id: string;
+
+  protected _ready: Defer<void>;
 
   protected _timer?: any;
   protected _challenge?: Buffer;
@@ -79,6 +81,7 @@ export abstract class AbstractConnection<
   protected _sequence: number;
   protected _connected: boolean;
   protected _ended: boolean;
+  protected _ending: boolean;
 
   protected _keepalive: number;
   protected _aliveTimeout: number;
@@ -94,9 +97,9 @@ export abstract class AbstractConnection<
 
   protected abstract bind(): void;
 
-  protected abstract close(): void;
+  protected abstract async close(): Promise<void>;
 
-  protected abstract send(packet: Packet): void;
+  protected abstract async send(packet: Packet): Promise<void>;
 
   get id() {
     return this._id;
@@ -116,7 +119,7 @@ export abstract class AbstractConnection<
 
   get registry() {
     if (!this._registry) {
-      this._registry = new Registry();
+      this._registry = new DefaultRegistry();
     }
     return this._registry;
   }
@@ -162,17 +165,22 @@ export abstract class AbstractConnection<
     this._sequence = 0;
     this._connected = false;
     this._ended = false;
+    this._ready = new Defer<void>();
   }
 
   protected init() {
+    debug(this.id, 'init');
     assert(this.parser, '`parser` is required, but not provide');
     this._start = Date.now();
 
     this.bind();
-    this.parser.on('error', err => {
-      this.error(err);
-      this.end();
-    });
+    this.parser.on(
+      'error',
+      syncl(async (err: any) => {
+        this.error(err);
+        await this.end();
+      }, this),
+    );
 
     this.parser.on(
       'message',
@@ -181,12 +189,12 @@ export abstract class AbstractConnection<
           await this.handleMessage(packet);
         } catch (e) {
           try {
-            this.sendError(packet.id, new UnknownError());
+            await this.sendError(packet.id, new UnknownError());
           } catch (_) {
             //
           }
           this.error(e);
-          this.end();
+          await this.end();
         }
       }, this),
     );
@@ -194,15 +202,34 @@ export abstract class AbstractConnection<
     this.startStall();
   }
 
-  feed(data: Buffer) {
-    return this.parser.feed(data);
+  async ready(): Promise<void> {
+    if (this._ending) {
+      throw new Error('connection is ending');
+    }
+
+    if (this._ended) {
+      throw new Error('connection already ended');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    if (!this._ready) {
+      this._ready = new Defer<void>();
+    }
+    return this._ready;
+  }
+
+  async feed(data: any) {
+    return this.parser.feed(await readBinary(data));
   }
 
   protected doConnected() {
+    debug(this.id, 'doConnected');
     this._connected = true;
+    this._ready.resolve();
+
     this.onConnected();
     // eslint-disable-next-line no-void
-    void this.emit('connect');
+    void this.emit('open');
   }
 
   protected onConnected() {
@@ -218,24 +245,29 @@ export abstract class AbstractConnection<
   }
 
   protected startStall() {
-    assert(this._timer == null);
-    this._timer = setInterval(() => this.maybeStall(), this.interval);
+    debug('startStall');
+    assert(this._timer == null, 'already start stall');
+    this._timer = setInterval(
+      syncl(() => this.maybeStall(), this),
+      this.interval,
+    );
   }
 
   protected stopStall() {
-    assert(this._timer != null);
+    debug('stopStall');
+    assert(this._timer != null, 'stall has not been started');
     clearInterval(this._timer);
     this._timer = undefined;
   }
 
-  protected maybeStall() {
+  protected async maybeStall() {
     const now = Date.now();
     let i, key, job;
 
     if (!this._connected) {
       if (now - this._start > this.connectTimeout) {
         this.error(new TimeoutError('Timed out waiting for connection.'));
-        this.end();
+        await this.end();
         return;
       }
       return;
@@ -255,36 +287,42 @@ export abstract class AbstractConnection<
     if (!this._challenge && now - this._lastActive > this._keepalive) {
       this._challenge = utils.nonce();
       this._lastActive = now;
-      this.sendPing(this._challenge);
+      await this.sendPing(this._challenge);
       return;
     }
 
     if (now - this._lastActive > this._aliveTimeout) {
       this.error('Connection is stalling (ping).');
-      this.end();
+      await this.end();
       return;
     }
   }
 
   protected error(err: Error | string) {
-    if (!(err instanceof Error)) err = new Error(err);
+    if (!(err instanceof Error)) {
+      err = new Error(err);
+    }
 
     // eslint-disable-next-line no-void
     void this.emit('error', err);
   }
 
-  end() {
-    debug('end');
+  async end() {
+    if (this._ended || this._ending) {
+      return;
+    }
+    this._ending = true;
+
     const jobs = this._jobs;
     const keys = Object.keys(jobs);
 
-    if (this._ended) return;
-
-    this.close();
+    debug(this.id, 'end');
+    await this.close();
     this.stopStall();
 
     this._connected = false;
     this._challenge = undefined;
+    this._ending = false;
     this._ended = true;
 
     this._jobs = {};
@@ -293,15 +331,14 @@ export abstract class AbstractConnection<
       jobs[key].reject(new Error('Connection was destroyed.'));
     }
 
-    // eslint-disable-next-line no-void
-    void this.emit('close');
+    await this.emit('close');
   }
 
   protected async handleMessage(packet: Packet) {
     let result;
 
     switch (packet.type) {
-      case Packet.types.EVENT:
+      case Packet.types.SIGNAL:
         await this.handleEvent(packet.name, packet.payload);
         break;
       case Packet.types.CALL:
@@ -314,10 +351,10 @@ export abstract class AbstractConnection<
         this.handleError(packet.id, packet.code, packet.msg, packet.payload);
         break;
       case Packet.types.PING:
-        this.handlePing(packet.payload);
+        await this.handlePing(packet.payload);
         break;
       case Packet.types.PONG:
-        this.handlePong(packet.payload);
+        await this.handlePong(packet.payload);
         break;
       default:
         throw new Error('Unknown packet.');
@@ -344,9 +381,9 @@ export abstract class AbstractConnection<
     try {
       const params = parseParams(data);
       const result = await this.registry.invoke(name, params);
-      this.sendAck(id, result);
+      await this.sendAck(id, result);
     } catch (e) {
-      this.sendError(id, makeRemError(e));
+      await this.sendError(id, makeRemError(e));
     }
   }
 
@@ -379,65 +416,71 @@ export abstract class AbstractConnection<
     job.reject(new RemError({code, message, data: this.deserialize(data)}));
   }
 
-  protected handlePing(nonce: Buffer) {
-    this.sendPong(nonce);
+  protected async handlePing(nonce: Buffer) {
+    await this.sendPong(nonce);
   }
 
-  protected handlePong(nonce: Buffer) {
+  protected async handlePong(nonce: Buffer) {
     if (!this._challenge || nonce.compare(this._challenge) !== 0) {
       this.error('Remote node sent bad pong.');
-      this.end();
+      await this.end();
       return;
     }
     this._challenge = undefined;
   }
 
-  protected sendEvent(event: string, data?: any) {
+  protected async sendSignal(signal: string, data?: any) {
+    await this.ready();
     const packet = new Packet();
-    packet.type = Packet.types.EVENT;
-    packet.name = event;
+    packet.type = Packet.types.SIGNAL;
+    packet.name = signal;
     packet.payload = this.serialize(data);
-    this.send(packet);
+    await this.send(packet);
   }
 
-  protected sendCall(id: number, event: string, data?: any) {
+  protected async sendCall(id: number, event: string, data?: any) {
+    await this.ready();
     const packet = new Packet();
     packet.type = Packet.types.CALL;
     packet.id = id;
     packet.name = event;
     packet.payload = this.serialize(data);
-    this.send(packet);
+    await this.send(packet);
   }
 
-  protected sendAck(id: number, data: Buffer) {
+  protected async sendAck(id: number, data: Buffer) {
+    await this.ready();
     const packet = new Packet();
     packet.type = Packet.types.ACK;
     packet.id = id;
     packet.payload = this.serialize(data);
-    this.send(packet);
+    await this.send(packet);
   }
 
-  protected sendError(id: number, err: RemError) {
+  protected async sendError(id: number, err: RemError) {
+    await this.ready();
     const packet = new Packet();
     packet.type = Packet.types.ERROR;
     packet.id = id;
     packet.msg = err.message;
     packet.code = err.code;
     packet.payload = this.serialize(err.data);
-    this.send(packet);
+    await this.send(packet);
   }
 
-  protected sendPing(nonce: Buffer) {
+  protected async sendPing(nonce: Buffer) {
+    await this.ready();
     const packet = new Packet();
     packet.type = Packet.types.PING;
     packet.payload = nonce;
-    this.send(packet);
+    await this.send(packet);
   }
 
-  protected sendPong(nonce: Buffer) {
+  protected async sendPong(nonce: Buffer) {
+    await this.ready();
     const packet = new Packet();
     packet.type = Packet.types.PONG;
     packet.payload = nonce;
-    this.send(packet);
+    await this.send(packet);
   }
 }

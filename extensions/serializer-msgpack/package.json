@@ -1,0 +1,39 @@
+{
+  "name": "@remly/serializer-msgpack",
+  "description": "The msgpack serializer for remly",
+  "version": "0.1.0",
+  "keywords": [],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10.16"
+  },
+  "author": "ty ",
+  "license": "MIT ",
+  "scripts": {
+    "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "tib-tsc",
+    "clean": "tib-clean remly-serializer-msgpack*.tgz dist *.tsbuildinfo package",
+    "pretest": "npm run build",
+    "test": "tib-mocha \"dist/__tests__/**/*.js\"",
+    "unit": "tib-mocha \"dist/__tests__/unit/**/*.js\"",
+    "verify": "npm pack && tar xf remly-serializer-msgpack*.tgz && tree package && npm run clean"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^2.2.1",
+    "@remly/serializer": "^0.1.0",
+    "tslib": "^2.0.3"
+  },
+  "devDependencies": {
+    "@tib/build": "^6.3.4",
+    "@tib/eslint-config": "^8.2.4",
+    "@tib/testlab": "^3.4.4",
+    "@types/node": "^14.11.8"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ]
+}

@@ -1,11 +1,12 @@
 import {expect} from '@tib/testlab';
 import delay from 'delay';
-import {MockClient, MockServer} from './mocks/rpc';
+import {PickProperties} from 'ts-essentials';
 import {ErrorCode, ErrorMessages} from '../error-code';
 import {RemError, TimeoutError} from '../error';
-import {peace} from './support';
-import {PickProperties} from 'ts-essentials/dist/types';
 import {monster, Monster} from './mocks/monster';
+import {MockServer} from './mocks/mock.server';
+import {MockClient} from './mocks/mock.client';
+import {peace} from './support';
 
 describe('connection', function () {
   describe('call', function () {
@@ -17,8 +18,8 @@ describe('connection', function () {
       client = MockClient.connect(server);
     });
 
-    afterEach(() => {
-      client.end();
+    afterEach(async () => {
+      await client.end();
     });
 
     it('should work in sync', async function () {
@@ -83,7 +84,7 @@ describe('connection', function () {
         const [_, err] = await peace(() => client.call('action'));
         expect(err).instanceOf(TimeoutError);
 
-        client.end();
+        await client.end();
       });
     });
 
@@ -102,7 +103,7 @@ describe('connection', function () {
         const [_, err] = await peace(() => client.call('action', undefined, 200));
         expect(err).instanceOf(TimeoutError);
 
-        client.end();
+        await client.end();
       });
     });
   });
@@ -123,11 +124,11 @@ describe('connection', function () {
       const results = await Promise.all([client.call('action1', 10), client.call('action2', 20)]);
       expect(results).deepEqual([10, 40]);
 
-      client.end();
+      await client.end();
     });
   });
 
-  describe('listen and fire', function () {
+  describe('listen and signal', function () {
     let server: MockServer;
     let client: MockClient;
 
@@ -136,15 +137,15 @@ describe('connection', function () {
       client = MockClient.connect(server);
     });
 
-    afterEach(() => {
-      client.end();
+    afterEach(async () => {
+      await client.end();
     });
 
     it('should receive event', async function () {
       const connection = client.target;
       let x = -1;
       client.listen('action', (value: number) => (x = value));
-      connection.fire('action', 5);
+      await connection.signal('action', 5);
       await delay(100);
       expect(x).equal(5);
     });
@@ -156,8 +157,8 @@ describe('connection', function () {
       client.listen('setx', (value: number) => (x = value));
       client.listen('sety', (value: number) => (y = value));
 
-      connection.fire('setx', 5);
-      connection.fire('sety', 6);
+      await connection.signal('setx', 5);
+      await connection.signal('sety', 6);
 
       await delay(100);
       expect(x).equal(5);
@@ -170,7 +171,7 @@ describe('connection', function () {
       let y = -1;
       client.listen('action', (value: number) => (x = value));
       client.listen('action', (value: number) => (y = value));
-      connection.fire('action', 5);
+      await connection.signal('action', 5);
       await delay(100);
       expect(x).equal(5);
       expect(y).equal(5);
@@ -180,8 +181,8 @@ describe('connection', function () {
       const connection = client.target;
       let x = -1;
       const cancel = client.listen('action', (value: number) => (x = value));
-      connection.fire('action', 5);
       cancel();
+      await connection.signal('action', 5);
       await delay(100);
       expect(x).equal(-1);
     });
@@ -196,8 +197,8 @@ describe('connection', function () {
       client = MockClient.connect(server);
     });
 
-    afterEach(() => {
-      client.end();
+    afterEach(async () => {
+      await client.end();
     });
 
     it('should call with typed parameters', async function () {

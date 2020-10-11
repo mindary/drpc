@@ -13,7 +13,18 @@ export interface RegisterOptions {
   scope?: any;
 }
 
-export class Registry {
+export interface Registry {
+  readonly methods: Record<string, Method>;
+  register<T extends object>(service: T, opts?: RegisterOptions): void;
+  register<T extends object, K extends keyof T>(service: T, names: (K | string)[], opts?: RegisterOptions): void;
+  register(name: string, handler: Handler, opts?: RegisterOptions): void;
+  unregister(pattern: string | string[]): string[];
+  clear(): void;
+  get(name: string): Method;
+  invoke(name: string, params?: any): Promise<any>;
+}
+
+export class DefaultRegistry implements Registry {
   protected _methods: Record<string, Method> = {};
 
   get methods() {
