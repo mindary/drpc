@@ -1,7 +1,7 @@
 {
   "name": "@remly/server",
   "description": "The remly abstract server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "verify": "npm pack && tar xf remly-server*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.2.0",
+    "@remly/core": "^0.3.0",
     "emittery": "^0.7.1",
     "make-error-cause": "^2.3.0",
     "tslib": "^2.0.3"
