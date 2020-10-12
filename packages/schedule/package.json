@@ -8,8 +8,11 @@
   "engines": {
     "node": ">=10.16"
   },
-  "author": "ty ",
-  "license": "MIT ",
+  "author": "Yuan Tao",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "tib-tsc",
@@ -39,5 +42,6 @@
   ],
   "browser": {
     "./dist/time.js": "./dist/time-browser.js"
-  }
+  },
+  "gitHead": "eaaafbe9c077952fcc5199d00fa01ce0ab302201"
 }
