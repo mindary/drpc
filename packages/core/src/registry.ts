@@ -32,9 +32,6 @@ export class DefaultRegistry implements Registry {
     return this._methods;
   }
 
-  /**
-   * TODO: 通过 service 对象方式注册时，用注解 @expose 标示需要暴露的方法，并注册为 Method，非 @expose 方法不暴露。
-   */
   register<T extends object>(service: T, opts?: RegisterOptions): void;
   register<T extends object, K extends keyof T>(service: T, names: (K | string)[], opts?: RegisterOptions): void;
   register(name: string, handler: Handler, opts?: RegisterOptions): void;
