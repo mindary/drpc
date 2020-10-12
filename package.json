@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=10.16"
   },
-  "author": "ty",
+  "author": "Yuan Tao",
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap",
@@ -81,8 +81,5 @@
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
