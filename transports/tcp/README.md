@@ -15,7 +15,8 @@ const {TCPServer, TCPClient} = require('@remly/tcp');
   });
   server.register('greet', name => `Hello, ${name}!`);
   server.on('connection', connection => {
-    connection.signal('message', 'Welcome').catch(console.error);
+    // eslint-disable-next-line no-void
+    void connection.signal('message', 'Welcome');
   });
   await server.start();
 
