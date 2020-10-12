@@ -1,12 +1,4 @@
-# @remly/tcp
-
-> The remly TCP transport
-
-## Usage
-
-### TCPServer and TCPClient
-```js
-const {TCPServer, TCPClient} = require('@remly/tcp');
+const {TCPServer, TCPClient} = require('..');
 
 (async () => {
   const server = TCPServer.createServer({
@@ -32,4 +24,3 @@ const {TCPServer, TCPClient} = require('@remly/tcp');
   // Welcome
   // Hello, Tom!
 })();
-```
