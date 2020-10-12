@@ -2,11 +2,11 @@ const {TCPServer, TCPClient} = require('..');
 
 (async () => {
   const server = TCPServer.createServer({
-    port: 3000
+    port: 3000,
   });
-  server.register('greet', (name) => `Hello, ${name}!`);
+  server.register('greet', name => `Hello, ${name}!`);
   server.on('connection', connection => {
-    connection.signal('message', 'Welcome').catch(console.error)
+    connection.signal('message', 'Welcome').catch(console.error);
   });
   await server.start();
 
