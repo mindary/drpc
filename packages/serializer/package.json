@@ -1,9 +1,8 @@
 {
   "name": "@remly/serializer",
   "description": "The serialization framework for remly",
-  "version": "0.1.0",
-  "keywords": [
-  ],
+  "version": "0.2.0",
+  "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
