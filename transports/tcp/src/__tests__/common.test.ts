@@ -1,31 +1,25 @@
-import net from 'net';
 import findAvailablePort from 'get-port';
-import {asyncFromCallback, common} from '@remly/tests';
+import {CommonTestSuite} from '@remly/transport-tests';
 import {TCPServer} from '../server';
 import {TCPClient} from '../client';
 
 describe('tcp', function () {
-  let netServer: net.Server;
   let server: TCPServer;
   let client: TCPClient;
 
   beforeEach(async () => {
     const port = await findAvailablePort();
-    netServer = net.createServer();
-    server = new TCPServer().attach(netServer);
-    netServer.listen(port);
-    client = TCPClient.connect(port);
+    server = new TCPServer({port});
+    await server.start();
 
-    common.setupServer(server);
+    client = TCPClient.connect(port);
+    CommonTestSuite.setupServer(server);
   });
 
   afterEach(async () => {
     await client.end();
-    await asyncFromCallback(cb => netServer.close(cb));
+    await server.stop();
   });
 
-  describe(
-    'common',
-    common.test(() => client),
-  );
+  CommonTestSuite.suite(() => client);
 });

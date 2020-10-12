@@ -1,6 +1,6 @@
 {
-  "name": "@remly/tests",
-  "description": "The test suites for remly common testings",
+  "name": "@remly/example-greeting",
+  "description": "An example greeting application for remly",
   "version": "0.1.0",
   "keywords": [],
   "main": "dist/index.js",
@@ -13,22 +13,24 @@
   "scripts": {
     "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "tib-tsc",
-    "clean": "tib-clean remly-tests*.tgz dist *.tsbuildinfo package",
+    "clean": "tib-clean remly-example-greeting*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
     "test": "tib-mocha \"dist/__tests__/**/*.js\"",
     "unit": "tib-mocha \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-tests*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf remly-example-greeting*.tgz && tree package && npm run clean",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@remly/core": "^0.1.0",
     "@remly/server": "^0.1.0",
-    "ts-essentials": "^7.0.0",
+    "@remly/tcp": "^0.1.0",
+    "chalk": "^4.1.0",
     "tslib": "^2.0.3"
   },
   "devDependencies": {
-    "@tib/build": "^6.3.4",
-    "@tib/eslint-config": "^8.2.4",
-    "@tib/testlab": "^3.4.4",
+    "@tib/build": "^6.4.0",
+    "@tib/eslint-config": "^8.3.0",
+    "@tib/testlab": "^3.5.0",
     "@types/node": "^14.11.8"
   },
   "files": [

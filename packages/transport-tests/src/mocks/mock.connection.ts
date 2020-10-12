@@ -15,7 +15,7 @@ export class MockConnection extends Connection {
   protected async close() {}
 
   protected async send(packet: Packet) {
-    this.target.feed(packet.frame());
+    await this.target.feed(packet.frame());
   }
 
   pipe<T extends Connection>(target: T): T {

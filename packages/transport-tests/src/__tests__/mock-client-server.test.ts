@@ -1,6 +1,6 @@
 import {MockServer} from '../mocks/mock.server';
 import {MockClient} from '../mocks/mock.client';
-import {common} from '../common';
+import {CommonTestSuite} from '../common-test-suite';
 
 describe('tests', function () {
   let server: MockServer;
@@ -10,11 +10,8 @@ describe('tests', function () {
     server = new MockServer();
     client = MockClient.connect(server);
 
-    common.setupServer(server);
+    CommonTestSuite.setupServer(server);
   });
 
-  describe(
-    'common',
-    common.test(() => client),
-  );
+  CommonTestSuite.suite(() => client);
 });

@@ -2,7 +2,8 @@ import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
 import {Handler, Method} from './method';
 import {UnimplementedError} from './error';
-import {isPlainObject, protoKeys} from './utils';
+import {ExposeMetadata} from './types';
+import {getAllExposeMetadata} from './decorders';
 
 export interface Service {
   [name: string]: any;
@@ -31,6 +32,9 @@ export class DefaultRegistry implements Registry {
     return this._methods;
   }
 
+  /**
+   * TODO: 通过 service 对象方式注册时，用注解 @expose 标示需要暴露的方法，并注册为 Method，非 @expose 方法不暴露。
+   */
   register<T extends object>(service: T, opts?: RegisterOptions): void;
   register<T extends object, K extends keyof T>(service: T, names: (K | string)[], opts?: RegisterOptions): void;
   register(name: string, handler: Handler, opts?: RegisterOptions): void;
@@ -39,18 +43,20 @@ export class DefaultRegistry implements Registry {
     handler?: Handler | string[] | RegisterOptions,
     opts?: RegisterOptions,
   ) {
-    let names: Set<string> | undefined = undefined;
     let scope;
     let service;
+    let metadata: Record<string, ExposeMetadata> = {};
     if (typeof nameOrService === 'string') {
       assert(typeof handler === 'function', 'Handler must be a function.');
       service = {[nameOrService]: handler};
+      metadata[nameOrService] = {};
     } else {
       service = scope = nameOrService;
       if (Array.isArray(handler)) {
-        names = new Set<string>(handler);
+        handler.forEach(name => (metadata[name] = {}));
       } else {
         opts = <RegisterOptions>handler;
+        metadata = getAllExposeMetadata(service.constructor as any) ?? {};
       }
     }
 
@@ -59,19 +65,21 @@ export class DefaultRegistry implements Registry {
     // prefer to use opts.scope then service
     scope = opts.scope ?? scope;
 
-    if (!names) {
-      names = new Set(Object.keys(service));
-      if (!isPlainObject(service)) {
-        protoKeys(service).forEach(names.add, names);
-      }
-    }
+    // if (!metadata) {
+    // names = new Set(Object.keys(service));
+    // if (!isPlainObject(service)) {
+    //   protoKeys(service).forEach(names.add, names);
+    // }
+    // }
 
-    for (const name of names)
+    for (const name of Object.keys(metadata)) {
       if (typeof (service as any)[name] === 'function') {
         assert(!this._methods[name], `Method already bound: "${name}"`);
-        const full = namespace ? namespace + '.' + name : name;
+        const alias = metadata[name].alias ?? name;
+        const full = namespace ? namespace + '.' + alias : alias;
         this._methods[full] = new Method((service as any)[name], scope);
       }
+    }
   }
 
   unregister(pattern: string | string[]): string[] {

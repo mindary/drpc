@@ -8,7 +8,7 @@ export class Interval<H extends ScheduleHandler = ScheduleHandler> {
 
   protected hInterval?: any;
 
-  static interval<H extends ScheduleHandler>(handler: H, interval: number, ...args: Parameters<H>) {
+  static interval<SR extends ScheduleHandler>(handler: SR, interval: number, ...args: Parameters<SR>) {
     return new Interval(handler, interval, ...args);
   }
 

@@ -113,6 +113,10 @@ export abstract class AbstractConnection<
     return this._connected;
   }
 
+  get ending() {
+    return this._ending;
+  }
+
   get ended() {
     return this._ended;
   }

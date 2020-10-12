@@ -1,13 +1,13 @@
-import {common, waitForConnection} from '@remly/tests';
-import {WorkerServer} from '../server';
 import path from 'path';
+import {CommonTestSuite, waitForConnection} from '@remly/transport-tests';
+import {WorkerServer} from '../server';
 
 describe('worker/common', function () {
   let server: WorkerServer;
 
   beforeEach(async () => {
     server = new WorkerServer();
-    common.setupServer(server);
+    CommonTestSuite.setupServer(server);
     server.open(path.resolve(__dirname, './common.worker.js'));
   });
 
@@ -15,8 +15,5 @@ describe('worker/common', function () {
     await server.close();
   });
 
-  describe(
-    'common',
-    common.test(() => waitForConnection(server)),
-  );
+  CommonTestSuite.suite(() => waitForConnection(server));
 });

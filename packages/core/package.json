@@ -23,6 +23,7 @@
     "@remly/schedule": "^0.1.0",
     "@remly/serializer": "^0.1.0",
     "@tib/bufio": "^1.1.2",
+    "@tib/metadata": "^2.5.0",
     "debug": "^4.2.0",
     "emittery": "^0.7.1",
     "micromatch": "^4.0.2",
@@ -31,10 +32,10 @@
     "tslib": "^2.0.3"
   },
   "devDependencies": {
-    "@tib/build": "^6.3.4",
+    "@tib/build": "^6.4.0",
     "@tib/defer": "^0.1.2",
-    "@tib/eslint-config": "^8.2.4",
-    "@tib/testlab": "^3.4.4",
+    "@tib/eslint-config": "^8.3.0",
+    "@tib/testlab": "^3.5.0",
     "@types/micromatch": "^4.0.1",
     "@types/node": "^14.11.8",
     "@types/shortid": "^0.0.29",

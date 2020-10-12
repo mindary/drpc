@@ -39,9 +39,12 @@ export class TCPConnection extends Connection {
       this.doConnected();
     });
 
-    this.socket.on('data', data => {
-      this.feed(data);
-    });
+    this.socket.on(
+      'data',
+      syncl(async (data: any) => {
+        await this.feed(data);
+      }, this),
+    );
 
     this.socket.on(
       'error',

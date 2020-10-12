@@ -5,6 +5,9 @@
   },
   "references": [
     {
+      "path": "examples/example-greeting/tsconfig.json"
+    },
+    {
       "path": "extensions/serializer-msgpack/tsconfig.json"
     },
     {
@@ -20,7 +23,7 @@
       "path": "packages/server/tsconfig.json"
     },
     {
-      "path": "packages/tests/tsconfig.json"
+      "path": "packages/transport-tests/tsconfig.json"
     },
     {
       "path": "transports/tcp/tsconfig.json"

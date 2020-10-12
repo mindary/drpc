@@ -1,6 +1,6 @@
 import http from 'http';
 import findAvailablePort from 'get-port';
-import {asyncFromCallback, common} from '@remly/tests';
+import {asyncFromCallback, CommonTestSuite} from '@remly/transport-tests';
 import {WSServer} from '../server';
 import {WSClient} from '../client';
 
@@ -16,7 +16,7 @@ describe('ws', function () {
     _server.listen(port);
     client = WSClient.connect(port);
 
-    common.setupServer(server);
+    CommonTestSuite.setupServer(server);
   });
 
   afterEach(async () => {
@@ -24,8 +24,5 @@ describe('ws', function () {
     await asyncFromCallback(cb => _server.close(cb));
   });
 
-  describe(
-    'common',
-    common.test(() => client),
-  );
+  CommonTestSuite.suite(() => client);
 });

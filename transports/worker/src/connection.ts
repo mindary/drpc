@@ -43,7 +43,8 @@ export class WorkerConnection extends Connection {
     this.worker.on(
       'exit',
       syncl(async (code: number) => {
-        if (code !== 0) {
+        if (code !== 0 && !this.ending) {
+          // ignore exit error for end()
           this.error(new Error(`Worker stopped with exit code ${code}`));
         }
         await this.end();

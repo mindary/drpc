@@ -10,7 +10,7 @@ export class Timeout<H extends ScheduleHandler = ScheduleHandler> {
   protected rescheduled: number;
   protected hTimeout?: any;
 
-  static timeout<H extends ScheduleHandler>(handler: H, timeout: number, ...args: Parameters<H>) {
+  static timeout<SR extends ScheduleHandler>(handler: SR, timeout: number, ...args: Parameters<SR>) {
     return new Timeout(handler, timeout, ...args);
   }
 

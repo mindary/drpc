@@ -122,11 +122,11 @@ export abstract class Server<
     void this.emit('error', err);
   }
 
-  register<T extends object>(service: T, opts?: RegisterOptions): void;
-  register<T extends object, K extends keyof T>(service: T, names: (K | string)[], opts?: RegisterOptions): void;
+  register<S extends object>(service: S, opts?: RegisterOptions): void;
+  register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
   register(name: string, handler: Handler, opts?: RegisterOptions): void;
-  register<T extends object>(
-    nameOrService: string | T,
+  register<S extends object>(
+    nameOrService: string | S,
     handler?: Handler | string[] | RegisterOptions,
     opts?: RegisterOptions,
   ) {

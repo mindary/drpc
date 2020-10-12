@@ -28,10 +28,10 @@
     "ws": "^7.3.1"
   },
   "devDependencies": {
-    "@remly/tests": "^0.1.0",
-    "@tib/build": "^6.3.4",
-    "@tib/eslint-config": "^8.2.4",
-    "@tib/testlab": "^3.4.4",
+    "@remly/transport-tests": "^0.1.0",
+    "@tib/build": "^6.4.0",
+    "@tib/eslint-config": "^8.3.0",
+    "@tib/testlab": "^3.5.0",
     "@types/node": "^14.11.8",
     "@types/url-parse": "^1.4.3",
     "@types/ws": "^7.2.7",

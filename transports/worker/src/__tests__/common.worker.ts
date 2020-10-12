@@ -1,5 +1,5 @@
 import {isMainThread, parentPort} from 'worker_threads';
-import {common} from '@remly/tests';
+import {CommonTestSuite} from '@remly/transport-tests';
 import {WorkerClient} from '../client';
 
 if (isMainThread || !parentPort) {
@@ -11,4 +11,4 @@ client.on('error', error => {
   console.error(error);
 });
 
-common.setupConnection(client);
+CommonTestSuite.setupConnection(client);

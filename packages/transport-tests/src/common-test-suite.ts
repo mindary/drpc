@@ -1,11 +1,11 @@
 import {expect} from '@tib/testlab';
 import {Defer} from '@tib/defer';
-import {monster, MonsterService} from './mocks';
-import {ClientProvider, ServerAndClientProvider} from './types';
 import {Connection} from '@remly/core';
 import {Server} from '@remly/server';
+import {ConnProvider} from './types';
+import {monster, MonsterService} from './mocks';
 
-export namespace common {
+export namespace CommonTestSuite {
   export function setupConnection(conn: Connection, notRegister?: boolean) {
     if (!notRegister) {
       conn.registry.register(monster);
@@ -22,33 +22,40 @@ export namespace common {
     server.on('error', (err: any) => console.log(err));
   }
 
-  export function test<C extends Connection = Connection>(provider: ClientProvider) {
-    return () => {
+  export function suite<C extends Connection = Connection>(provider: ConnProvider) {
+    describe('RPC common operations', () => {
+      let conn: Connection;
+
+      beforeEach(async () => {
+        conn = await provider();
+      });
+
+      afterEach(async () => {
+        await conn.end();
+      });
+
       it('should be able to call a success-method on the server ', async () => {
-        const client = await provider();
-        const service = client.service<MonsterService>();
+        const service = conn.service<MonsterService>();
         const result = await service.call('add', [1, 2]);
         expect(result).equal(3);
       });
 
       it('should be able to call an error-method on the server', async () => {
-        const client = await provider();
-        const service = client.service<MonsterService>();
+        const service = conn.service<MonsterService>();
         await expect(service.call('error')).rejectedWith(/An error message/);
       });
 
       it('should be able to listen event', async () => {
-        const client = await provider();
         const done = new Defer();
         const results: any[] = [];
-        client.listen('echo-reply', (msg: string) => {
+        conn.listen('echo-reply', (msg: string) => {
           results.push(msg);
           done.resolve();
         });
-        await client.signal('echo', 'Tom');
+        await conn.signal('echo', 'Tom');
         await done;
         expect(results).deepEqual(['Hello Tom']);
       });
-    };
+    });
   }
 }

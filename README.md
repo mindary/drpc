@@ -1,6 +1,27 @@
 # remly
 
-A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.
+A binary-only RPC protocol for multiple transports such as TCP, WebSocket, Worker and so on.
+
+## Usage
+
+### TCPServer and TCPClient
+
+```js
+import {TCPServer, TCPClient} from '@remly/tcp';
+
+(async () => {
+  const server = TCPServer.createServer({
+    port: 3000
+  });
+  server.register('greet', (name) => `Hello, ${name}!`);
+  await server.start();
+  
+  const client = TCPClient.connect(3000);
+  const result = await client.call('greet', ['Tom']);
+  console.log(result);
+  // => Hello, Tom!
+})()
+```
 
 ## Why?
 
