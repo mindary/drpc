@@ -1,6 +1,7 @@
 import {expect} from '@loopback/testlab';
 import {TCPClient} from '@remly/tcp';
 import {AddressInfo} from 'net';
+import findAvailablePort from 'get-port';
 import {GreetingApplication} from '../application';
 import {Greeting} from '../types';
 
@@ -34,7 +35,7 @@ describe('GreetingApplication', function () {
   async function givenRunningApplicationWithCustomConfiguration() {
     app = new GreetingApplication({
       server: {
-        port: 3000,
+        port: await findAvailablePort(),
         host: '127.0.0.1',
       },
     });
