@@ -22,7 +22,7 @@
     "sync-dev-deps": "node bin/sync-dev-deps",
     "version": "npm run update-peer-deps",
     "outdated": "npm outdated --depth 0 && lerna exec --no-bail \"npm outdated --depth 0\"",
-    "coverage:nyc": "tib-nyc report --reporter=text-lcov",
+    "coverage:summary": "tib-nyc report --reporter=text-summary",
     "coverage:ci": "tib-nyc report --reporter=text-lcov | coveralls",
     "precoverage": "npm test",
     "coverage": "open-cli coverage/index.html",
