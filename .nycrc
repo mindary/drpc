@@ -2,14 +2,12 @@
   "include": [
     "packages/*/dist",
     "extensions/*/dist",
-    "transports/*/dist",
-    "examples/*/dist"
+    "transports/*/dist"
   ],
   "exclude": [
     "packages/*/dist/__tests__/",
     "extensions/*/dist/__tests__/",
-    "transports/*/dist/__tests__/",
-    "examples/*/dist/__tests__/"
+    "transports/*/dist/__tests__/"
   ],
   "extension": [
     ".js",
