@@ -1,5 +1,5 @@
-import {expect} from '@tib/testlab';
-import {Defer} from '@tib/defer';
+import {expect} from '@loopback/testlab';
+import {Defer} from '@loopx/defer';
 import delay from 'delay';
 import {Timeout} from '../timeout';
 import {assertNear} from './support';

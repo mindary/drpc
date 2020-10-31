@@ -1,4 +1,4 @@
-import {expect} from '@tib/testlab';
+import {expect} from '@loopback/testlab';
 import delay from 'delay';
 import {PickProperties} from 'ts-essentials';
 import {ErrorCode, ErrorMessages} from '../error-code';

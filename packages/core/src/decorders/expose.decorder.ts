@@ -1,7 +1,7 @@
 import {Constructor, ExposeMetadata} from '../types';
-import {MetadataInspector, MethodDecoratorFactory} from '@tib/metadata';
+import {MetadataInspector, MethodDecoratorFactory} from '@loopback/metadata';
 import {EXPOSE_METADATA_LEY} from '../keys';
-import {MetadataMap} from '@tib/metadata/src/types';
+import {MetadataMap} from '@loopback/metadata/src/types';
 
 export function expose(metadata?: ExposeMetadata | string) {
   if (typeof metadata === 'string') {

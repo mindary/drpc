@@ -22,64 +22,67 @@
     "sync-dev-deps": "node bin/sync-dev-deps",
     "version": "npm run update-peer-deps",
     "outdated": "npm outdated --depth 0 && lerna exec --no-bail \"npm outdated --depth 0\"",
-    "coverage:summary": "tib-nyc report --reporter=text-summary",
-    "coverage:ci": "tib-nyc report --reporter=text-lcov | coveralls",
+    "coverage:summary": "lb-nyc report --reporter=text-summary",
+    "coverage:ci": "lb-nyc report --reporter=text-lcov | coveralls",
     "precoverage": "npm test",
     "coverage": "open-cli coverage/index.html",
     "lint": "npm run prettier:check && npm run eslint && node bin/check-package-locks",
     "lint:fix": "npm run eslint:fix && npm run prettier:fix",
-    "eslint": "tib-eslint --report-unused-disable-directives --cache .",
+    "eslint": "lb-eslint --report-unused-disable-directives --cache .",
     "eslint:fix": "npm run eslint -- --fix",
-    "prettier:cli": "tib-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
+    "prettier:cli": "lb-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
     "prettier:check": "npm run prettier:cli -- --check",
     "prettier:fix": "npm run prettier:cli -- --write",
-    "clean": "lerna run clean && tib-clean \"packages/*/dist\" \"extensions/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
+    "clean": "lerna run clean && lb-clean \"packages/*/dist\" \"extensions/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
     "clean:lerna": "lerna clean",
     "prebuild": "npm run prettier:fix",
-    "build": "tib-tsc -b",
+    "build": "lb-tsc -b",
     "build:full": "npm ci --ignore-scripts && lerna bootstrap --ci && npm run clean && npm run build",
     "pretest": "npm run clean && npm run build",
-    "test": "tib-nyc npm run mocha",
-    "test:ci": "tib-nyc npm run mocha",
-    "mocha": "tib-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"extensions/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
+    "test": "lb-nyc npm run mocha",
+    "test:ci": "lb-nyc npm run mocha",
+    "mocha": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"extensions/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
     "posttest": "npm run lint"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@commitlint/travis-cli": "^11.0.0",
-    "@tib/bsert": "^0.2.1",
-    "@tib/build": "^6.4.0",
-    "@tib/defer": "^0.1.2",
-    "@tib/eslint-config": "^8.3.0",
-    "@tib/testlab": "^3.5.0",
+    "@loopx/bsert": "^0.3.0",
+    "@loopback/build": "^6.2.5",
+    "@loopx/defer": "^1.0.0",
+    "@loopback/eslint-config": "^10.0.1",
+    "@loopback/testlab": "^3.2.7",
     "@types/mocha": "^8.0.3",
-    "@typescript-eslint/eslint-plugin": "^4.4.0",
-    "@typescript-eslint/parser": "^4.4.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
     "coveralls": "^3.1.0",
     "cross-env": "^7.0.2",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^7.11.0",
-    "eslint-config-prettier": "^6.12.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-eslint-plugin": "^2.3.0",
     "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "fs-extra": "^9.0.1",
     "husky": "^4.3.0",
+    "if-env": "^1.0.4",
     "lerna": "^3.22.1",
+    "lint-staged": "^10.5.0",
     "markdown-table": "^2.0.0",
     "open-cli": "^6.0.1",
-    "rimraf": "^3.0.2",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.5"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "if-env LINT_STAGED=0 && echo \"lint-staged disabled via LINT_STAGED env var\" || lint-staged"
+    }
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   }
 }

@@ -1,4 +1,4 @@
-import {expect, sinon} from '@tib/testlab';
+import {expect, sinon} from '@loopback/testlab';
 import {EventEmitter} from 'events';
 import {SinonStub} from 'sinon';
 import {rawLength, sync} from '../utils';

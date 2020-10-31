@@ -1,5 +1,5 @@
 import {noop} from 'ts-essentials';
-import {expect} from '@tib/testlab';
+import {expect} from '@loopback/testlab';
 import {DefaultRegistry} from '../registry';
 import {createNoop} from './support';
 import {monster} from './mocks/monster';

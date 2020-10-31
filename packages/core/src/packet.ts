@@ -1,4 +1,4 @@
-import {BufferReader, StaticWriter} from '@tib/bufio';
+import {BufferReader, StaticWriter} from '@loopx/bufio';
 import {crc32} from './crc32';
 
 const DUMMY = Buffer.alloc(0);

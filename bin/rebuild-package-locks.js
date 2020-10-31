@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const Project = require('@lerna/project');
 const filterPackages = require('@lerna/filter-packages');
-const build = require('@tib/build');
+const build = require('@loopback/build');
 
 /**
  * Remove all package-lock.json and node_modules for all packages

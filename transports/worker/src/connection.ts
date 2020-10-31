@@ -53,7 +53,7 @@ export class WorkerConnection extends Connection {
   }
 
   protected async close() {
-    await this.worker?.terminate();
+    return this.worker?.terminate();
   }
 
   protected async send(packet: Packet) {

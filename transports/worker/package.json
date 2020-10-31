@@ -14,12 +14,12 @@
     "access": "public"
   },
   "scripts": {
-    "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
-    "build": "tib-tsc",
-    "clean": "tib-clean remly-worker*.tgz dist *.tsbuildinfo package",
+    "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "lb-tsc",
+    "clean": "lb-clean remly-worker*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
-    "test": "tib-mocha \"dist/__tests__/**/*.test.js\"",
-    "unit": "tib-mocha \"dist/__tests__/unit/**/*.test.js\"",
+    "test": "lb-mocha \"dist/__tests__/**/*.test.js\"",
+    "unit": "lb-mocha \"dist/__tests__/unit/**/*.test.js\"",
     "verify": "npm pack && tar xf remly-worker*.tgz && tree package && npm run clean"
   },
   "dependencies": {
@@ -29,11 +29,11 @@
   },
   "devDependencies": {
     "@remly/transport-tests": "^0.3.1",
-    "@tib/build": "^6.4.0",
-    "@tib/eslint-config": "^8.3.0",
-    "@tib/testlab": "^3.5.0",
-    "@types/node": "^14.11.8",
-    "ts-essentials": "^7.0.0"
+    "@loopback/build": "^6.2.5",
+    "@loopback/eslint-config": "^10.0.1",
+    "@loopback/testlab": "^3.2.7",
+    "@types/node": "^14.14.6",
+    "ts-essentials": "^7.0.1"
   },
   "files": [
     "README.md",
@@ -44,6 +44,5 @@
   "browser": {
     "./dist/worker.js": "./dist/worker-browser.js",
     "./dist/index.js": "./dist/browser.js"
-  },
-  "gitHead": "eaaafbe9c077952fcc5199d00fa01ce0ab302201"
+  }
 }

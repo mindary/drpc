@@ -1,4 +1,4 @@
-import {expect} from '@tib/testlab';
+import {expect} from '@loopback/testlab';
 import {MsgpackSerializer} from '../msgpack.serializer';
 import {json1} from './fixtures';
 

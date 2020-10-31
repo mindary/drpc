@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-shadow
 export enum ErrorCode {
   /**
    * Invalid method parameter(s).

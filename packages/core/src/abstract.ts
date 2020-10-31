@@ -1,7 +1,7 @@
 import {assert} from 'ts-essentials';
 import Emittery from 'emittery';
 import shortid from 'shortid';
-import {Defer} from '@tib/defer';
+import {Defer} from '@loopx/defer';
 import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
 import {SignalName} from './types';
@@ -97,9 +97,9 @@ export abstract class AbstractConnection<
 
   protected abstract bind(): void;
 
-  protected abstract async close(): Promise<void>;
+  protected abstract close(): Promise<any>;
 
-  protected abstract async send(packet: Packet): Promise<void>;
+  protected abstract send(packet: Packet): Promise<any>;
 
   get id() {
     return this._id;

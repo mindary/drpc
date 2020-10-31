@@ -1,4 +1,4 @@
-import {expect} from '@tib/testlab';
+import {expect} from '@loopback/testlab';
 import {TCPClient} from '@remly/tcp';
 import {AddressInfo} from 'net';
 import {GreetingApplication} from '../application';

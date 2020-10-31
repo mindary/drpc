@@ -1,5 +1,5 @@
 {
-  "extends": "@tib/build/config/tsconfig.common.json",
+  "extends": "@loopback/build/config/tsconfig.common.json",
   "compilerOptions": {
     "composite": true
   },

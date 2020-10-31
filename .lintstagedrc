@@ -1,0 +1,9 @@
+{
+  "*.{ts,js}": [
+    "npx lb-prettier --write",
+    "npx lb-eslint --fix --report-unused-disable-directives --cache"
+  ],
+  "*.{md}": [
+    "npx lb-prettier --write"
+  ]
+}

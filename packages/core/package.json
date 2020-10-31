@@ -14,33 +14,33 @@
     "access": "public"
   },
   "scripts": {
-    "acceptance": "tib-mocha \"dist/__tests__/acceptance/**/*.js\"",
-    "build": "tib-tsc",
-    "clean": "tib-clean remly-core*.tgz dist *.tsbuildinfo package",
+    "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "lb-tsc",
+    "clean": "lb-clean remly-core*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
-    "test": "tib-mocha \"dist/__tests__/**/*.js\"",
-    "unit": "tib-mocha \"dist/__tests__/unit/**/*.js\"",
+    "test": "lb-mocha \"dist/__tests__/**/*.js\"",
+    "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
     "@remly/schedule": "^0.3.1",
     "@remly/serializer": "^0.3.1",
-    "@tib/bufio": "^1.1.2",
-    "@tib/metadata": "^2.5.0",
+    "@loopback/metadata": "^3.0.2",
+    "@loopx/bufio": "^1.2.1",
     "debug": "^4.2.0",
-    "emittery": "^0.7.1",
+    "emittery": "^0.7.2",
     "micromatch": "^4.0.2",
-    "shortid": "^2.2.15",
-    "ts-essentials": "^7.0.0",
+    "shortid": "^2.2.16",
+    "ts-essentials": "^7.0.1",
     "tslib": "^2.0.3"
   },
   "devDependencies": {
-    "@tib/build": "^6.4.0",
-    "@tib/defer": "^0.1.2",
-    "@tib/eslint-config": "^8.3.0",
-    "@tib/testlab": "^3.5.0",
+    "@loopback/build": "^6.2.5",
+    "@loopx/defer": "^1.0.0",
+    "@loopback/eslint-config": "^10.0.1",
+    "@loopback/testlab": "^3.2.7",
     "@types/micromatch": "^4.0.1",
-    "@types/node": "^14.11.8",
+    "@types/node": "^14.14.6",
     "@types/shortid": "^0.0.29",
     "delay": "^4.4.0",
     "get-port": "^5.1.1"
@@ -50,6 +50,5 @@
     "dist",
     "src",
     "!*/__tests__"
-  ],
-  "gitHead": "eaaafbe9c077952fcc5199d00fa01ce0ab302201"
+  ]
 }

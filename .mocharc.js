@@ -1,5 +1,5 @@
-const {mergeMochaConfigs} = require('@tib/build');
-const defaultConfig = require('@tib/build/config/.mocharc.json');
+const {mergeMochaConfigs} = require('@loopback/build');
+const defaultConfig = require('@loopback/build/config/.mocharc.json');
 
 const MONOREPO_CONFIG = {};
 
