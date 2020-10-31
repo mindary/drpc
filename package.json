@@ -7,6 +7,10 @@
   },
   "author": "Yuan Tao",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tikrbits/remly"
+  },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "postinstall": "npm run -s bootstrap && npm run -s update-ts-project-refs",
