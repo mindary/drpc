@@ -1,7 +1,7 @@
 {
   "name": "@remly/serializer-msgpack",
   "description": "The msgpack serializer for remly",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.4.1",
-    "@remly/serializer": "^0.3.1",
+    "@remly/serializer": "^0.4.0",
     "tslib": "^2.1.0"
   },
   "devDependencies": {

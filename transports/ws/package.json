@@ -1,7 +1,7 @@
 {
   "name": "@remly/ws",
   "description": "The remly WebSocket transport",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,18 +27,18 @@
     "verify": "npm pack && tar xf remly-http*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.3.1",
-    "@remly/server": "^0.3.1",
+    "@remly/core": "^0.4.0",
+    "@remly/server": "^0.4.0",
     "ts-essentials": "^7.0.1",
     "tslib": "^2.1.0",
     "url-parse": "^1.5.1",
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@remly/transport-tests": "^0.3.1",
     "@loopback/build": "^6.2.9",
     "@loopback/eslint-config": "^10.0.5",
     "@loopback/testlab": "^3.2.12",
+    "@remly/transport-tests": "^0.4.0",
     "@types/node": "^14.14.33",
     "@types/url-parse": "^1.4.3",
     "@types/ws": "^7.4.0",

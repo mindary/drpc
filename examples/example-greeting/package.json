@@ -1,7 +1,7 @@
 {
   "name": "@remly/example-greeting",
   "description": "An example greeting application for remly",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,9 +24,9 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@remly/core": "^0.3.1",
-    "@remly/server": "^0.3.1",
-    "@remly/tcp": "^0.3.1",
+    "@remly/core": "^0.4.0",
+    "@remly/server": "^0.4.0",
+    "@remly/tcp": "^0.4.0",
     "chalk": "^4.1.0",
     "tslib": "^2.1.0"
   },

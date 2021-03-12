@@ -1,7 +1,7 @@
 {
   "name": "@remly/core",
   "description": "A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,10 +27,10 @@
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/schedule": "^0.3.1",
-    "@remly/serializer": "^0.3.1",
     "@loopback/metadata": "^3.1.1",
     "@loopx/bufio": "^1.2.1",
+    "@remly/schedule": "^0.4.0",
+    "@remly/serializer": "^0.4.0",
     "debug": "^4.3.1",
     "emittery": "^0.8.1",
     "micromatch": "^4.0.2",
@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@loopback/build": "^6.2.9",
-    "@loopx/defer": "^1.0.0",
     "@loopback/eslint-config": "^10.0.5",
     "@loopback/testlab": "^3.2.12",
+    "@loopx/defer": "^1.0.0",
     "@types/micromatch": "^4.0.1",
     "@types/node": "^14.14.33",
     "@types/shortid": "^0.0.29",
