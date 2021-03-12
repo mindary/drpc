@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 
 async function updatePeerDeps() {
   // List all packages within the monorepo

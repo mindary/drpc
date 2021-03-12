@@ -6,7 +6,7 @@ export type Service = {
 };
 
 export class TypedService<S extends Service = Service> {
-  constructor(protected readonly connection: Connection<any, any>, protected readonly namespace?: string) {}
+  constructor(protected readonly connection: Connection, protected readonly namespace?: string) {}
 
   call<K extends keyof S>(
     method: K,

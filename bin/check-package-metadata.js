@@ -9,7 +9,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 
 /**
  * Check existence of LICENSE file in the monorepo packages

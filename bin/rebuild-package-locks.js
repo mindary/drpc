@@ -8,7 +8,7 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 const filterPackages = require('@lerna/filter-packages');
 const build = require('@loopback/build');
 

@@ -4,7 +4,6 @@ import shortid from 'shortid';
 import {Defer} from '@loopx/defer';
 import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
-import {SignalName} from './types';
 import {Packet} from './packet';
 import * as utils from './utils';
 import {rawLength, readBinary, syncl} from './utils';
@@ -29,15 +28,15 @@ export interface NoJob {
   id: number;
 }
 
-export interface ConnectionDataEvents {
+export type ConnectionEventData = {
   error: Error;
   /**
    * Triggered when a response is received and the corresponding job has timed out or expired.
    */
   nojob: NoJob;
-}
-
-export type ConnectionEmptyEvents = 'open' | 'close';
+  open: undefined;
+  close: undefined;
+};
 
 export interface ConnectionOptions {
   id?: string;
@@ -63,10 +62,7 @@ const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
  * @constructor
  * @ignore
  */
-export abstract class AbstractConnection<
-  DataEvents extends ConnectionDataEvents = ConnectionDataEvents,
-  EmptyEvents extends SignalName = ConnectionEmptyEvents
-> extends Emittery.Typed<DataEvents & ConnectionDataEvents, EmptyEvents | ConnectionEmptyEvents> {
+export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   protected _id: string;
 
   protected _ready: Defer<void>;

@@ -67,13 +67,13 @@ export class TCPServer extends Server<TCPConnection> {
     if (this._server) return;
     this._server = net.createServer();
     this.attach(this._server);
-    await new Promise(resolve => this._server!.listen(this.options, resolve));
+    await new Promise(resolve => this._server!.listen(this.options, () => resolve(undefined)));
     return this;
   }
 
   async stop() {
     if (!this._server) return;
-    await new Promise((resolve, reject) => this._server!.close(err => (err ? reject(err) : resolve())));
+    await new Promise((resolve, reject) => this._server!.close(err => (err ? reject(err) : resolve(undefined))));
     this._server = undefined;
     return this;
   }

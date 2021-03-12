@@ -1,7 +1,7 @@
 import Emittery from 'emittery';
 import {Packet} from '../packet';
 
-export abstract class Parser extends Emittery.Typed<{
+export abstract class Parser extends Emittery<{
   error: Error;
   message: Packet;
 }> {

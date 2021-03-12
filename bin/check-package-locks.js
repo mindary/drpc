@@ -9,7 +9,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 
 async function checkPackageLocks() {
   const project = new Project(process.cwd());

@@ -9,7 +9,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 
 async function syncDevDeps() {
   const project = new Project(process.cwd());

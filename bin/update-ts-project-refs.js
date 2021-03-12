@@ -12,8 +12,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const debug = require('debug')('loopback:build');
 
-const Project = require('@lerna/project');
-const PackageGraph = require('@lerna/package-graph');
+const {Project} = require('@lerna/project');
+const {PackageGraph} = require('@lerna/package-graph');
 
 const TSCONFIG = 'tsconfig.json';
 const TSCONFIG_BUILD = 'tsconfig.build.json';

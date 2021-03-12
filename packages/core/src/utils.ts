@@ -129,14 +129,14 @@ export async function readBinary(data: Buffer | ArrayBuffer | Blob | string): Pr
   }
 
   if (isArrayLike(data)) {
-    return Buffer.from(data);
+    return Buffer.from(data as any);
   }
 
   if (typeof Blob !== 'undefined' && Blob) {
     if (data instanceof Blob) {
       return new Promise<Buffer>(resolve => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(Buffer.from(reader.result ? reader.result : ''));
+        reader.onloadend = () => resolve(Buffer.from((reader.result ? reader.result : '') as any));
         reader.readAsArrayBuffer(data);
       });
     }

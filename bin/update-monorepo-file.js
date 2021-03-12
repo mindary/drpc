@@ -8,7 +8,7 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const Project = require('@lerna/project');
+const {Project} = require('@lerna/project');
 const createMarkdownTable = require('markdown-table');
 
 const MONOREPO_FILE_DIST = 'docs/site';

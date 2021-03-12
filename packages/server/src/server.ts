@@ -17,8 +17,6 @@ export interface ServerDataEvents<T> {
   connectionClose: T;
 }
 
-export type ServerEmptyEvents = EventName;
-
 export interface ServerOptions {
   registry?: Registry;
   connection?: ConnectionOptions;
@@ -26,9 +24,8 @@ export interface ServerOptions {
 
 export abstract class Server<
   T extends Connection,
-  DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>,
-  EmptyEvents extends ServerEmptyEvents = ServerEmptyEvents
-> extends Emittery.Typed<DataEvents & ServerDataEvents<T>, EmptyEvents | ServerEmptyEvents> {
+  DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>
+> extends Emittery<DataEvents & ServerDataEvents<T>> {
   protected options: ServerOptions;
   protected registry: Registry;
 

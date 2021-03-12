@@ -1,9 +1,8 @@
 import {assert} from 'ts-essentials';
-import {AbstractConnection, ConnectionDataEvents, ConnectionEmptyEvents, ConnectionOptions} from './abstract';
-import {SignalHandler, SignalName} from './types';
+import {AbstractConnection, ConnectionOptions} from './abstract';
+import {SignalHandler} from './types';
 import {Service} from './registry';
 import {TypedService} from './typed-service';
-import {syncl} from './utils';
 
 export * from './abstract';
 
@@ -12,10 +11,7 @@ export * from './abstract';
  * @constructor
  * @ignore
  */
-export abstract class Connection<
-  DataEvents extends ConnectionDataEvents = ConnectionDataEvents,
-  EmptyEvents extends SignalName = ConnectionEmptyEvents
-> extends AbstractConnection<DataEvents & ConnectionDataEvents, EmptyEvents | ConnectionEmptyEvents> {
+export abstract class Connection extends AbstractConnection {
   protected constructor(options?: ConnectionOptions) {
     super(options);
   }

@@ -29,14 +29,14 @@
   "dependencies": {
     "@loopx/defer": "^1.0.0",
     "ts-essentials": "^7.0.1",
-    "tslib": "^2.0.3"
+    "tslib": "^2.1.0"
   },
   "devDependencies": {
-    "@loopback/build": "^6.2.5",
-    "@loopback/eslint-config": "^10.0.1",
-    "@loopback/testlab": "^3.2.7",
-    "@types/node": "^14.14.6",
-    "delay": "^4.4.0"
+    "@loopback/build": "^6.2.9",
+    "@loopback/eslint-config": "^10.0.5",
+    "@loopback/testlab": "^3.2.12",
+    "@types/node": "^14.14.33",
+    "delay": "^5.0.0"
   },
   "files": [
     "README.md",
