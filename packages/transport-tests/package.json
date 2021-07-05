@@ -30,14 +30,14 @@
     "@remly/core": "^0.4.0",
     "@remly/server": "^0.4.0",
     "delay": "^5.0.0",
-    "ts-essentials": "^7.0.1",
-    "tslib": "^2.1.0"
+    "ts-essentials": "^7.0.2",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@loopback/build": "^6.2.9",
-    "@loopback/eslint-config": "^10.0.5",
-    "@loopback/testlab": "^3.2.12",
-    "@types/node": "^14.14.33"
+    "@loopback/build": "^6.4.1",
+    "@loopback/eslint-config": "^10.2.1",
+    "@loopback/testlab": "^3.4.1",
+    "@types/node": "^16.0.0"
   },
   "files": [
     "README.md",
