@@ -14,10 +14,7 @@ export interface ServerOptions {
   connection?: ConnectionOptions;
 }
 
-export abstract class Server<
-  T extends Connection,
-  DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>,
-> extends Emittery<DataEvents & ServerDataEvents<T>> {
+export abstract class Server<T extends Connection, DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>> extends Emittery<DataEvents & ServerDataEvents<T>> {
   protected options: ServerOptions;
   protected registry: Registry;
 
@@ -39,11 +36,8 @@ export abstract class Server<
   }
 
   register<S extends object>(service: S, opts?: RegisterOptions): void;
-
   register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
-
   register(name: string, handler: Handler, opts?: RegisterOptions): void;
-
   register<S extends object>(
     nameOrService: string | S,
     handler?: Handler | string[] | RegisterOptions,
