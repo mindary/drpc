@@ -62,13 +62,6 @@ export class DefaultRegistry implements Registry {
     // prefer to use opts.scope then service
     scope = opts.scope ?? scope;
 
-    // if (!metadata) {
-    // names = new Set(Object.keys(service));
-    // if (!isPlainObject(service)) {
-    //   protoKeys(service).forEach(names.add, names);
-    // }
-    // }
-
     for (const name of Object.keys(metadata)) {
       if (typeof (service as any)[name] === 'function') {
         assert(!this._methods[name], `Method already bound: "${name}"`);
