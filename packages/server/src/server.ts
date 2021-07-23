@@ -14,7 +14,10 @@ export interface ServerOptions {
   connection?: ConnectionOptions;
 }
 
-export abstract class Server<T extends Connection, DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>> extends Emittery<DataEvents & ServerDataEvents<T>> {
+export abstract class Server<
+  T extends Connection,
+  DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>,
+> extends Emittery<DataEvents & ServerDataEvents<T>> {
   protected options: ServerOptions;
   protected registry: Registry;
 

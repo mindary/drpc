@@ -10,7 +10,7 @@ export namespace CommonTestSuite {
     if (!notRegister) {
       conn.registry.register(monster);
     }
-    conn.listen('echo', async (msg: string) => {
+    conn.subscribe('echo', async (msg: string) => {
       await conn.signal('echo-reply', 'Hello ' + msg);
     });
   }
@@ -45,10 +45,10 @@ export namespace CommonTestSuite {
         await expect(service.call('error')).rejectedWith(/An error message/);
       });
 
-      it('should be able to listen event', async () => {
+      it('should be able to subscribe event', async () => {
         const done = aDefer();
         const results: any[] = [];
-        conn.listen('echo-reply', (msg: string) => {
+        conn.subscribe('echo-reply', (msg: string) => {
           results.push(msg);
           done.resolve();
         });
