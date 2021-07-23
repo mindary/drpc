@@ -13,9 +13,9 @@ describe('connection', function () {
     let server: MockServer;
     let client: MockClient;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       server = new MockServer();
-      client = MockClient.connect(server);
+      client = await MockClient.connect(server);
     });
 
     afterEach(async () => {
@@ -76,7 +76,7 @@ describe('connection', function () {
           return 10;
         });
 
-        const client = MockClient.connect(server, {
+        const client = await MockClient.connect(server, {
           interval: 50,
           requestTimeout: 200,
         });
@@ -96,7 +96,7 @@ describe('connection', function () {
           return 10;
         });
 
-        const client = MockClient.connect(server, {
+        const client = await MockClient.connect(server, {
           interval: 50,
         });
 
@@ -119,7 +119,7 @@ describe('connection', function () {
         return v * 2;
       });
 
-      const client = MockClient.connect(server);
+      const client = await MockClient.connect(server);
 
       const results = await Promise.all([client.call('action1', 10), client.call('action2', 20)]);
       expect(results).deepEqual([10, 40]);
@@ -132,9 +132,9 @@ describe('connection', function () {
     let server: MockServer;
     let client: MockClient;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       server = new MockServer();
-      client = MockClient.connect(server);
+      client = await MockClient.connect(server);
     });
 
     afterEach(async () => {
@@ -192,9 +192,9 @@ describe('connection', function () {
     let server: MockServer;
     let client: MockClient;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       server = new MockServer();
-      client = MockClient.connect(server);
+      client = await MockClient.connect(server);
     });
 
     afterEach(async () => {

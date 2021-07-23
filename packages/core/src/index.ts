@@ -6,5 +6,4 @@ export * from './utils';
 export * from './registry';
 export * from './parsers';
 export * from './method';
-export * from './abstract';
-export * from './connection';
+export * from './connections';

@@ -20,14 +20,12 @@ export abstract class Parser extends Emittery<{
    * @param {String} msg
    */
 
-  protected error(msg: string) {
-    // eslint-disable-next-line no-void
-    void this.emit('error', new Error(msg));
+  protected async error(msg: string) {
+    await this.emit('error', new Error(msg));
   }
 
-  protected message(packet: Packet) {
-    // eslint-disable-next-line no-void
-    void this.emit('message', packet);
+  protected async message(packet: Packet) {
+    await this.emit('message', packet);
   }
 
   abstract feed(data: Buffer): void;

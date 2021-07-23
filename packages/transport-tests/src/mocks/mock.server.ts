@@ -16,8 +16,8 @@ export class MockServer extends Server<MockConnection> {
     this.options = options ?? {};
   }
 
-  accept(client: MockClient) {
-    const connection = this.createAndRegisterConnection();
+  async accept(client: MockClient) {
+    const connection = await this.createAndRegisterConnection();
     client.pipe(connection).pipe(client);
   }
 

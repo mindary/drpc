@@ -4,12 +4,12 @@ import shortid from 'shortid';
 import aDefer, {DeferredPromise} from 'a-defer';
 import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
-import {Packet} from './packet';
-import * as utils from './utils';
-import {rawLength, readBinary, syncl} from './utils';
-import {InvalidParamsError, makeRemError, RemError, TimeoutError, UnknownError} from './error';
-import {DefaultParser, Parser} from './parsers';
-import {DefaultRegistry, Registry} from './registry';
+import {Packet} from '../packet';
+import * as utils from '../utils';
+import {rawLength, readBinary, syncl} from '../utils';
+import {InvalidParamsError, makeRemError, RemError, TimeoutError, UnknownError} from '../error';
+import {DefaultParser, Parser} from '../parsers';
+import {DefaultRegistry, Registry} from '../registry';
 
 const debug = require('debug')('remly:connection');
 const DUMMY = Buffer.alloc(0);
@@ -63,66 +63,20 @@ const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
  * @ignore
  */
 export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
-  protected _id: string;
-
-  protected _ready: DeferredPromise<void>;
-
-  protected _timer?: any;
-  protected _challenge?: Buffer;
-  protected _lastActive = 0;
-
-  protected _jobs: Record<string, Job>;
-  protected _ee: Emittery;
-  protected _start: number;
-  protected _sequence: number;
-  protected _connected: boolean;
-  protected _ended: boolean;
-  protected _ending: boolean;
-
-  protected _keepalive: number;
-  protected _aliveTimeout: number;
-
-  protected _registry?: Registry;
-
   public readonly parser: Parser;
   public readonly serializer: Serializer;
-
   public readonly interval: number;
   public readonly requestTimeout: number;
   public readonly connectTimeout: number;
-
-  protected abstract bind(): void;
-
-  protected abstract close(): Promise<any>;
-
-  protected abstract send(packet: Packet): Promise<any>;
-
-  get id() {
-    return this._id;
-  }
-
-  get keepalive() {
-    return this._keepalive;
-  }
-
-  get connected() {
-    return this._connected;
-  }
-
-  get ending() {
-    return this._ending;
-  }
-
-  get ended() {
-    return this._ended;
-  }
-
-  get registry() {
-    if (!this._registry) {
-      this._registry = new DefaultRegistry();
-    }
-    return this._registry;
-  }
+  protected _ready: DeferredPromise<void>;
+  protected _timer?: any;
+  protected _challenge?: Buffer;
+  protected _lastActive = 0;
+  protected _jobs: Record<string, Job>;
+  protected _start: number;
+  protected _sequence: number;
+  protected _aliveTimeout: number;
+  protected removeEmittery: Emittery;
 
   protected constructor(options?: ConnectionOptions) {
     super();
@@ -150,6 +104,45 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this.reset();
   }
 
+  protected _id: string;
+
+  get id() {
+    return this._id;
+  }
+
+  protected _connected: boolean;
+
+  get connected() {
+    return this._connected;
+  }
+
+  protected _ended: boolean;
+
+  get ended() {
+    return this._ended;
+  }
+
+  protected _ending: boolean;
+
+  get ending() {
+    return this._ending;
+  }
+
+  protected _keepalive: number;
+
+  get keepalive() {
+    return this._keepalive;
+  }
+
+  protected _registry?: Registry;
+
+  get registry() {
+    if (!this._registry) {
+      this._registry = new DefaultRegistry();
+    }
+    return this._registry;
+  }
+
   setKeepAlive(keepalive: number) {
     if (keepalive < this.interval) {
       keepalive = this.interval;
@@ -158,9 +151,58 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this._aliveTimeout = keepalive * 1.5;
   }
 
+  async ready(): Promise<void> {
+    if (this._ending) {
+      throw new Error('connection is ending');
+    }
+
+    if (this._ended) {
+      throw new Error('connection already ended');
+    }
+
+    return (this._ready = this._ready ?? aDefer<void>());
+  }
+
+  async feed(data: any) {
+    return this.parser.feed(await readBinary(data));
+  }
+
+  async end() {
+    if (this._ended || this._ending) {
+      return;
+    }
+    this._ending = true;
+
+    const jobs = this._jobs;
+    const keys = Object.keys(jobs);
+
+    debug(this.id, 'end');
+    await this.close();
+    this.stopStall();
+
+    this._connected = false;
+    this._challenge = undefined;
+    this._ending = false;
+    this._ended = true;
+
+    this._jobs = {};
+
+    for (const key of keys) {
+      jobs[key].reject(new Error('Connection was destroyed.'));
+    }
+
+    await this.emit('close');
+  }
+
+  protected abstract bind(): void;
+
+  protected abstract close(): Promise<any>;
+
+  protected abstract send(packet: Packet): Promise<any>;
+
   protected reset() {
     this._jobs = {};
-    this._ee = new Emittery();
+    this.removeEmittery = new Emittery();
     this._start = 0;
     this._sequence = 0;
     this._connected = false;
@@ -174,13 +216,10 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this._start = Date.now();
 
     this.bind();
-    this.parser.on(
-      'error',
-      syncl(async (err: any) => {
-        this.error(err);
-        await this.end();
-      }, this),
-    );
+    this.parser.on('error', async (err: any) => {
+      await this.error(err);
+      await this.end();
+    });
 
     this.parser.on(
       'message',
@@ -193,7 +232,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
           } catch (_) {
             //
           }
-          this.error(e);
+          await this.error(e);
           await this.end();
         }
       }, this),
@@ -202,34 +241,14 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this.startStall();
   }
 
-  async ready(): Promise<void> {
-    if (this._ending) {
-      throw new Error('connection is ending');
-    }
-
-    if (this._ended) {
-      throw new Error('connection already ended');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    if (!this._ready) {
-      this._ready = aDefer<void>();
-    }
-    return this._ready;
-  }
-
-  async feed(data: any) {
-    return this.parser.feed(await readBinary(data));
-  }
-
-  protected doConnected() {
+  protected async doConnected() {
     debug(this.id, 'doConnected');
     this._connected = true;
     this._ready.resolve();
 
     this.onConnected();
-    // eslint-disable-next-line no-void
-    void this.emit('open');
+
+    await this.emit('open');
   }
 
   protected onConnected() {
@@ -266,7 +285,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
 
     if (!this._connected) {
       if (now - this._start > this.connectTimeout) {
-        this.error(new TimeoutError('Timed out waiting for connection.'));
+        await this.error(new TimeoutError('Timed out waiting for connection.'));
         await this.end();
         return;
       }
@@ -292,46 +311,18 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     }
 
     if (now - this._lastActive > this._aliveTimeout) {
-      this.error('Connection is stalling (ping).');
+      await this.error('Connection is stalling (ping).');
       await this.end();
       return;
     }
   }
 
-  protected error(err: Error | string) {
+  protected async error(err: Error | string) {
     if (!(err instanceof Error)) {
       err = new Error(err);
     }
 
-    // eslint-disable-next-line no-void
-    void this.emit('error', err);
-  }
-
-  async end() {
-    if (this._ended || this._ending) {
-      return;
-    }
-    this._ending = true;
-
-    const jobs = this._jobs;
-    const keys = Object.keys(jobs);
-
-    debug(this.id, 'end');
-    await this.close();
-    this.stopStall();
-
-    this._connected = false;
-    this._challenge = undefined;
-    this._ending = false;
-    this._ended = true;
-
-    this._jobs = {};
-
-    for (const key of keys) {
-      jobs[key].reject(new Error('Connection was destroyed.'));
-    }
-
-    await this.emit('close');
+    await this.emit('error', err);
   }
 
   protected async handleMessage(packet: Packet) {
@@ -345,10 +336,10 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
         result = await this.handleCall(packet.id, packet.name, packet.payload);
         break;
       case Packet.types.ACK:
-        this.handleAck(packet.id, packet.payload);
+        await this.handleAck(packet.id, packet.payload);
         break;
       case Packet.types.ERROR:
-        this.handleError(packet.id, packet.code, packet.msg, packet.payload);
+        await this.handleError(packet.id, packet.code, packet.msg, packet.payload);
         break;
       case Packet.types.PING:
         await this.handlePing(packet.payload);
@@ -366,7 +357,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   }
 
   protected async handleEvent(event: string, data: Buffer) {
-    await this._ee.emit(event, this.deserialize(data));
+    await this.removeEmittery.emit(event, this.deserialize(data));
   }
 
   protected async handleCall(id: number, name: string, data: Buffer) {
@@ -387,12 +378,11 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     }
   }
 
-  protected handleAck(id: number, data: Buffer) {
+  protected async handleAck(id: number, data: Buffer) {
     const job = this._jobs[id];
     if (!job) {
       // throw new Error('Job not found for ' + id + '.');
-      // eslint-disable-next-line no-void
-      void this.emit('nojob', {type: 'ack', id});
+      await this.emit('nojob', {type: 'ack', id});
       return;
     }
     delete this._jobs[id];
@@ -401,13 +391,12 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     job.resolve(value);
   }
 
-  protected handleError(id: number, code: number, message: string, data?: Buffer) {
+  protected async handleError(id: number, code: number, message: string, data?: Buffer) {
     const job = this._jobs[id];
 
     if (!job) {
       // throw new Error('Job not found for ' + id + '.');
-      // eslint-disable-next-line no-void
-      void this.emit('nojob', {type: 'error', id});
+      await this.emit('nojob', {type: 'error', id});
       return;
     }
 
@@ -422,7 +411,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
 
   protected async handlePong(nonce: Buffer) {
     if (!this._challenge || nonce.compare(this._challenge) !== 0) {
-      this.error('Remote node sent bad pong.');
+      await this.error('Remote node sent bad pong.');
       await this.end();
       return;
     }

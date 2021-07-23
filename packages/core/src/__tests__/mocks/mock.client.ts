@@ -1,4 +1,4 @@
-import {Connection, ConnectionOptions} from '../../connection';
+import {Connection, ConnectionOptions} from '../../connections';
 import {MockServer} from './mock.server';
 import {MockConnection} from './mock.connection';
 
@@ -9,8 +9,8 @@ export class MockClient extends MockConnection {
     return new this(options).connect(server);
   }
 
-  connect(server: MockServer) {
-    server.accept(this);
+  async connect(server: MockServer) {
+    await server.accept(this);
     return this;
   }
 }

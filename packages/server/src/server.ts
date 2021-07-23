@@ -5,7 +5,9 @@ import Emittery = require('emittery');
 
 export interface ServerDataEvents<T> {
   error: Error;
+  connect: T;
   connection: T;
+  disconnect: T;
   connectionClose: T;
 }
 
@@ -33,9 +35,8 @@ export abstract class Server<
     return this._connections;
   }
 
-  error(err: Error) {
-    // eslint-disable-next-line no-void
-    void this.emit('error', err);
+  async error(err: Error) {
+    await this.emit('error', err);
   }
 
   register<S extends object>(service: S, opts?: RegisterOptions): void;
@@ -63,25 +64,26 @@ export abstract class Server<
     };
   }
 
-  protected createAndRegisterConnection<O>(options?: O) {
+  protected async createAndRegisterConnection<O>(options?: O): Promise<T> {
     return this.registerConnection(this.createConnection(this.buildConnectionOptions(options)));
   }
 
-  protected registerConnection(connection: T) {
+  protected async registerConnection(connection: T) {
     if (this._connections[connection.id]) {
       return connection;
     }
 
-    this._bindConnection(connection);
+    await this._bindConnection(connection);
 
     this._connections[connection.id] = connection;
-    // eslint-disable-next-line no-void
-    void this.emit('connection', connection);
+
+    await this.emit('connection', connection);
+    await this.emit('connect', connection);
 
     return connection;
   }
 
-  protected unregisterConnection(connection: T) {
+  protected async unregisterConnection(connection: T) {
     if (!this._connections[connection.id]) {
       return connection;
     }
@@ -90,12 +92,13 @@ export abstract class Server<
 
     this._unbindConnection(connection);
 
-    // eslint-disable-next-line no-void
-    void this.emit('connectionClose', connection);
+    await this.emit('connectionClose', connection);
+    await this.emit('disconnect', connection);
+
     return connection;
   }
 
-  private _bindConnection(connection: T) {
+  private async _bindConnection(connection: T) {
     if ((connection as any).__remly_unsubs__) {
       return;
     }
@@ -103,14 +106,14 @@ export abstract class Server<
     const unsubs: UnsubscribeFn[] = [];
 
     unsubs.push(
-      connection.on('error', (err: Error) => {
-        this.error(new ConnectionError(connection, err));
+      connection.on('error', async (err: Error) => {
+        await this.error(new ConnectionError(connection, err));
       }),
     );
 
     unsubs.push(
-      connection.on('close', () => {
-        this.unregisterConnection(connection);
+      connection.on('close', async () => {
+        await this.unregisterConnection(connection);
       }),
     );
 

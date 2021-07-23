@@ -1,5 +1,5 @@
 import {AsyncOrSyncType} from 'ts-essentials';
-import {Connection} from './connection';
+import {Connection} from './connections';
 
 export type Service = {
   [p: string]: (...args: any[]) => any;

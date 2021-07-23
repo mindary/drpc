@@ -1,10 +1,8 @@
 import {assert} from 'ts-essentials';
-import {AbstractConnection, ConnectionOptions} from './abstract';
-import {SignalHandler} from './types';
-import {Service} from './registry';
-import {TypedService} from './typed-service';
-
-export * from './abstract';
+import {AbstractConnection, ConnectionOptions} from './abstract.connection';
+import {SignalHandler} from '../types';
+import {Service} from '../registry';
+import {TypedService} from '../typed-service';
 
 /**
  * Connection
@@ -39,7 +37,7 @@ export abstract class Connection extends AbstractConnection {
   subscribe(signal: string, handler: SignalHandler) {
     assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
-    return this._ee.on(signal, handler);
+    return this.removeEmittery.on(signal, handler);
   }
 
   async signal(signal: string, data?: any) {

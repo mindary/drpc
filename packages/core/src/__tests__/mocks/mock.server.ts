@@ -1,7 +1,7 @@
 import {EventEmitter} from 'events';
 import {MockConnection} from './mock.connection';
 import {MockClient} from './mock.client';
-import {ConnectionOptions} from '../../abstract';
+import {ConnectionOptions} from '../../connections';
 import {DefaultRegistry, RegisterOptions, Registry} from '../../registry';
 import {Handler} from '../../method';
 
@@ -22,14 +22,12 @@ export class MockServer extends EventEmitter {
 
   protected registerConnection(connection: MockConnection) {
     this.connections[connection.id] = connection;
-    // eslint-disable-next-line no-void
-    void this.emit('connection', connection);
+    this.emit('connection', connection);
   }
 
   protected unregisterConnection(connection: MockConnection) {
     delete this.connections[connection.id];
-    // eslint-disable-next-line no-void
-    void this.emit('connectionClose', connection);
+    this.emit('connectionClose', connection);
   }
 
   protected buildConnectionOptions(options?: ConnectionOptions): ConnectionOptions {
@@ -58,7 +56,7 @@ export class MockServer extends EventEmitter {
     return this.bindConnection(this.createConnection(this.buildConnectionOptions(options)));
   }
 
-  accept(client: MockClient) {
+  async accept(client: MockClient) {
     const connection = this.createAndRegisterConnection();
     client.pipe(connection).pipe(client);
   }
