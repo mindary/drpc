@@ -1,7 +1,7 @@
 import {assert} from 'ts-essentials';
 import Emittery from 'emittery';
 import shortid from 'shortid';
-import {Defer} from '@loopx/defer';
+import aDefer, {DeferredPromise} from 'a-defer';
 import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
 import {Packet} from './packet';
@@ -65,7 +65,7 @@ const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
 export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   protected _id: string;
 
-  protected _ready: Defer<void>;
+  protected _ready: DeferredPromise<void>;
 
   protected _timer?: any;
   protected _challenge?: Buffer;
@@ -165,7 +165,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this._sequence = 0;
     this._connected = false;
     this._ended = false;
-    this._ready = new Defer<void>();
+    this._ready = aDefer<void>();
   }
 
   protected init() {
@@ -213,7 +213,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     if (!this._ready) {
-      this._ready = new Defer<void>();
+      this._ready = aDefer<void>();
     }
     return this._ready;
   }

@@ -1,5 +1,5 @@
 import {expect} from '@loopback/testlab';
-import {Defer} from '@loopx/defer';
+import aDefer from 'a-defer';
 import {Connection} from '@remly/core';
 import {Server} from '@remly/server';
 import {ConnProvider} from './types';
@@ -46,7 +46,7 @@ export namespace CommonTestSuite {
       });
 
       it('should be able to listen event', async () => {
-        const done = new Defer();
+        const done = aDefer();
         const results: any[] = [];
         conn.listen('echo-reply', (msg: string) => {
           results.push(msg);

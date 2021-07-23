@@ -1,10 +1,10 @@
 import {expect} from '@loopback/testlab';
-import {Defer} from '@loopx/defer';
+import aDefer from 'a-defer';
 import {Interval} from '../interval';
 
 describe('interval', function () {
   it('should work as an usual setInterval', async function () {
-    const done = new Defer();
+    const done = aDefer();
     const startTime = new Date().getTime();
     const interval = Interval.interval(function () {
       if (Math.abs(new Date().getTime() - startTime - 1000) <= 10) done.resolve();
@@ -16,7 +16,7 @@ describe('interval', function () {
   });
 
   it('should be able to clear an Interval', async function () {
-    const done = new Defer();
+    const done = aDefer();
     const interval = Interval.interval(function () {
       done.reject(new Error('Interval not cleared'));
     }, 200);
@@ -29,7 +29,7 @@ describe('interval', function () {
   });
 
   it('should be able to reschedule an Interval', async function () {
-    const done = new Defer();
+    const done = aDefer();
     const startTime = new Date().getTime();
 
     const interval = Interval.interval(function () {
@@ -47,7 +47,7 @@ describe('interval', function () {
   });
 
   it('should pass arguments to the handler', async function () {
-    const done = new Defer();
+    const done = aDefer();
     const interval = Interval.interval(
       function (arg) {
         expect(arg).equal(42);

@@ -27,7 +27,7 @@
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@loopback/metadata": "^3.3.1",
+    "@loopback/metadata": "^3.3.2",
     "@loopx/bufio": "^1.2.2",
     "@remly/schedule": "^0.4.1",
     "@remly/serializer": "^0.4.1",
@@ -39,12 +39,12 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@loopback/build": "^6.4.1",
-    "@loopback/eslint-config": "^10.2.1",
-    "@loopback/testlab": "^3.4.1",
-    "@loopx/defer": "^1.0.0",
-    "@types/micromatch": "^4.0.1",
-    "@types/node": "^16.0.0",
+    "@loopback/build": "^7.0.0",
+    "@loopback/eslint-config": "^11.0.0",
+    "@loopback/testlab": "^3.4.2",
+    "a-defer": "^0.1.0",
+    "@types/micromatch": "^4.0.2",
+    "@types/node": "^16.4.1",
     "@types/shortid": "^0.0.29",
     "delay": "^5.0.0",
     "get-port": "^5.1.1"

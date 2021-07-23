@@ -1,15 +1,7 @@
-import {
-  Connection,
-  ConnectionOptions,
-  DefaultRegistry,
-  EventName,
-  Handler,
-  RegisterOptions,
-  Registry,
-} from '@remly/core';
+import {Connection, ConnectionOptions, DefaultRegistry, Handler, RegisterOptions, Registry} from '@remly/core';
 import {ConnectionError} from './errors';
-import Emittery = require('emittery');
 import {UnsubscribeFn} from 'emittery';
+import Emittery = require('emittery');
 
 export interface ServerDataEvents<T> {
   error: Error;
@@ -29,16 +21,39 @@ export abstract class Server<
   protected options: ServerOptions;
   protected registry: Registry;
 
+  protected constructor(options?: ServerOptions) {
+    super();
+    this.options = options = options ?? {};
+    this.registry = options.registry ?? new DefaultRegistry();
+  }
+
   protected _connections: Record<string, T> = {};
 
   get connections(): Record<string, T> {
     return this._connections;
   }
 
-  protected constructor(options?: ServerOptions) {
-    super();
-    this.options = options = options ?? {};
-    this.registry = options.registry ?? new DefaultRegistry();
+  error(err: Error) {
+    // eslint-disable-next-line no-void
+    void this.emit('error', err);
+  }
+
+  register<S extends object>(service: S, opts?: RegisterOptions): void;
+
+  register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
+
+  register(name: string, handler: Handler, opts?: RegisterOptions): void;
+
+  register<S extends object>(
+    nameOrService: string | S,
+    handler?: Handler | string[] | RegisterOptions,
+    opts?: RegisterOptions,
+  ) {
+    return this.registry.register(<any>nameOrService, <any>handler, <any>opts);
+  }
+
+  unregister(pattern: string | string[]): string[] {
+    return this.registry.unregister(pattern);
   }
 
   protected abstract createConnection<O extends ConnectionOptions>(options?: O): T;
@@ -112,25 +127,5 @@ export abstract class Server<
 
     (connection as any).__remly_unsubs__.forEach((unsub: UnsubscribeFn) => unsub());
     delete (connection as any).__remly_unbind__;
-  }
-
-  error(err: Error) {
-    // eslint-disable-next-line no-void
-    void this.emit('error', err);
-  }
-
-  register<S extends object>(service: S, opts?: RegisterOptions): void;
-  register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
-  register(name: string, handler: Handler, opts?: RegisterOptions): void;
-  register<S extends object>(
-    nameOrService: string | S,
-    handler?: Handler | string[] | RegisterOptions,
-    opts?: RegisterOptions,
-  ) {
-    return this.registry.register(<any>nameOrService, <any>handler, <any>opts);
-  }
-
-  unregister(pattern: string | string[]): string[] {
-    return this.registry.unregister(pattern);
   }
 }

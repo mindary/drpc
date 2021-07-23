@@ -35,11 +35,11 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@loopback/build": "^6.4.1",
-    "@loopback/eslint-config": "^10.2.1",
-    "@loopback/testlab": "^3.4.1",
+    "@loopback/build": "^7.0.0",
+    "@loopback/eslint-config": "^11.0.0",
+    "@loopback/testlab": "^3.4.2",
     "@remly/transport-tests": "^0.4.1",
-    "@types/node": "^16.0.0"
+    "@types/node": "^16.4.1"
   },
   "files": [
     "README.md",

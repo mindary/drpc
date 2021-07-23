@@ -1,12 +1,12 @@
 import {expect} from '@loopback/testlab';
-import {Defer} from '@loopx/defer';
+import aDefer from 'a-defer';
 import delay from 'delay';
 import {Timeout} from '../timeout';
 import {assertNear} from './support';
 
 describe('timeout', function () {
   it('should schedule a handler', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const start = Date.now();
 
     Timeout.timeout(function () {
@@ -18,7 +18,7 @@ describe('timeout', function () {
   });
 
   it('should reschedule a handler', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const start = Date.now();
 
     const timer = Timeout.timeout(function () {
@@ -33,7 +33,7 @@ describe('timeout', function () {
   });
 
   it('should reschedule multiple times', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const start = Date.now();
 
     const timer = Timeout.timeout(function () {
@@ -49,7 +49,7 @@ describe('timeout', function () {
   });
 
   it('should clear a timer', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const timer = Timeout.timeout(function () {
       done.reject('the timer should never get called');
     }, 20);
@@ -63,7 +63,7 @@ describe('timeout', function () {
   });
 
   it('should clear a timer after a reschedule', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const timer = Timeout.timeout(function () {
       done.reject('the timer should never get called');
     }, 20);
@@ -79,7 +79,7 @@ describe('timeout', function () {
   });
 
   it('should return false if rescheduled too early', async () => {
-    const done = new Defer();
+    const done = aDefer();
     const start = Date.now();
 
     const timer = Timeout.timeout(function () {
@@ -94,7 +94,7 @@ describe('timeout', function () {
   });
 
   it('should pass arguments to the handler', async () => {
-    const done = new Defer();
+    const done = aDefer();
     Timeout.timeout(
       function (arg) {
         expect(arg).equal(42);
