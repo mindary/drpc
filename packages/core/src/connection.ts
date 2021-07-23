@@ -36,7 +36,7 @@ export abstract class Connection extends AbstractConnection {
     });
   }
 
-  listen(signal: string, handler: SignalHandler) {
+  subscribe(signal: string, handler: SignalHandler) {
     assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
     return this._ee.on(signal, handler);

@@ -8,8 +8,8 @@ import {MockServer} from './mocks/mock.server';
 import {MockClient} from './mocks/mock.client';
 import {peace} from './support';
 
-describe('connection', function () {
-  describe('call', function () {
+describe('connection', function() {
+  describe('call', function() {
     let server: MockServer;
     let client: MockClient;
 
@@ -22,19 +22,19 @@ describe('connection', function () {
       await client.end();
     });
 
-    it('should work in sync', async function () {
+    it('should work in sync', async function() {
       server.register('action', () => 10);
       const result = await client.call('action');
       expect(result).equal(10);
     });
 
-    it('should work in async', async function () {
+    it('should work in async', async function() {
       server.register('action', async () => 10);
       const result = await client.call('action');
       expect(result).equal(10);
     });
 
-    it('should transfer exception', async function () {
+    it('should transfer exception', async function() {
       server.register('action', async () => {
         await delay(15);
         throw new RemError({message: 'Boom', data: 10});
@@ -47,7 +47,7 @@ describe('connection', function () {
       });
     });
 
-    it('should transfer rejection', async function () {
+    it('should transfer rejection', async function() {
       server.register('action', async () => {
         await delay(15);
         return new Promise((_, reject) => reject(10));
@@ -60,16 +60,16 @@ describe('connection', function () {
       });
     });
 
-    it('should throw unimplemented error', async function () {
+    it('should throw unimplemented error', async function() {
       const [, err] = await peace(() => client.call('action'));
       expect(err).ok();
       expect(err.code).equal(ErrorCode.UNIMPLEMENTED);
     });
   });
 
-  describe('job timeout', function () {
-    describe('jobTimout', function () {
-      it('should throw timeout error if call timout', async function () {
+  describe('job timeout', function() {
+    describe('jobTimout', function() {
+      it('should throw timeout error if call timout', async function() {
         const server = new MockServer();
         server.register('action', async () => {
           await delay(300);
@@ -81,15 +81,15 @@ describe('connection', function () {
           requestTimeout: 200,
         });
 
-        const [_, err] = await peace(() => client.call('action'));
+        const [, err] = await peace(() => client.call('action'));
         expect(err).instanceOf(TimeoutError);
 
         await client.end();
       });
     });
 
-    describe('call with timeout parameter', function () {
-      it('should throw timeout error if call timout', async function () {
+    describe('call with timeout parameter', function() {
+      it('should throw timeout error if call timout', async function() {
         const server = new MockServer();
         server.register('action', async () => {
           await delay(300);
@@ -100,7 +100,7 @@ describe('connection', function () {
           interval: 50,
         });
 
-        const [_, err] = await peace(() => client.call('action', undefined, 200));
+        const [, err] = await peace(() => client.call('action', undefined, 200));
         expect(err).instanceOf(TimeoutError);
 
         await client.end();
@@ -108,8 +108,8 @@ describe('connection', function () {
     });
   });
 
-  describe('parallel calling', function () {
-    it('should work for parallel calling', async function () {
+  describe('parallel calling', function() {
+    it('should work for parallel calling', async function() {
       const server = new MockServer();
       server.register('action1', async (v: number) => {
         return v;
@@ -128,7 +128,7 @@ describe('connection', function () {
     });
   });
 
-  describe('listen and signal', function () {
+  describe('listen and signal', function() {
     let server: MockServer;
     let client: MockClient;
 
@@ -141,21 +141,21 @@ describe('connection', function () {
       await client.end();
     });
 
-    it('should receive event', async function () {
+    it('should receive event', async function() {
       const connection = client.target;
       let x = -1;
-      client.listen('action', (value: number) => (x = value));
+      client.subscribe('action', (value: number) => (x = value));
       await connection.signal('action', 5);
       await delay(100);
       expect(x).equal(5);
     });
 
-    it('should work for parallel firing', async function () {
+    it('should work for parallel firing', async function() {
       const connection = client.target;
       let x = -1;
       let y = -1;
-      client.listen('setx', (value: number) => (x = value));
-      client.listen('sety', (value: number) => (y = value));
+      client.subscribe('setx', (value: number) => (x = value));
+      client.subscribe('sety', (value: number) => (y = value));
 
       await connection.signal('setx', 5);
       await connection.signal('sety', 6);
@@ -165,22 +165,22 @@ describe('connection', function () {
       expect(y).equal(6);
     });
 
-    it('should bind multiple listeners to one event', async function () {
+    it('should bind multiple listeners to one event', async function() {
       const connection = client.target;
       let x = -1;
       let y = -1;
-      client.listen('action', (value: number) => (x = value));
-      client.listen('action', (value: number) => (y = value));
+      client.subscribe('action', (value: number) => (x = value));
+      client.subscribe('action', (value: number) => (y = value));
       await connection.signal('action', 5);
       await delay(100);
       expect(x).equal(5);
       expect(y).equal(5);
     });
 
-    it('should support unsubscribe', async function () {
+    it('should support unsubscribe', async function() {
       const connection = client.target;
       let x = -1;
-      const cancel = client.listen('action', (value: number) => (x = value));
+      const cancel = client.subscribe('action', (value: number) => (x = value));
       cancel();
       await connection.signal('action', 5);
       await delay(100);
@@ -188,7 +188,7 @@ describe('connection', function () {
     });
   });
 
-  describe('service', function () {
+  describe('service', function() {
     let server: MockServer;
     let client: MockClient;
 
@@ -201,7 +201,7 @@ describe('connection', function () {
       await client.end();
     });
 
-    it('should call with typed parameters', async function () {
+    it('should call with typed parameters', async function() {
       type MonsterService = PickProperties<Monster, Function>;
       server.register(monster);
       const service = client.service<MonsterService>();
