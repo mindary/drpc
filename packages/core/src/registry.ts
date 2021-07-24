@@ -11,10 +11,10 @@ export interface RegisterOptions {
   scope?: any;
 }
 
-export interface RegistryInvokeRequest<T extends Connection = Connection> {
-  connection: T;
+export interface ServiceInvokeRequest<T extends Connection = Connection> {
   name: string;
   params?: any;
+  connection: T;
 }
 
 export interface Registry {
@@ -25,7 +25,7 @@ export interface Registry {
   unregister(pattern: string | string[]): string[];
   clear(): void;
   get(name: string): Method;
-  invoke(name: string, params: any): Promise<any>;
+  invoke(request: ServiceInvokeRequest): Promise<any>;
 }
 
 export class DefaultRegistry implements Registry {
@@ -95,7 +95,8 @@ export class DefaultRegistry implements Registry {
     return method;
   }
 
-  async invoke(name: string, params: any) {
+  async invoke(request: ServiceInvokeRequest) {
+    const {name, params} = request;
     return this.get(name).invoke(params);
   }
 }

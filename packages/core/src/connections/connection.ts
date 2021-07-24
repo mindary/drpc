@@ -13,6 +13,9 @@ export class Connection extends AbstractConnection {
    */
   public data: Record<any, any> = {};
 
+  /**
+   * Server or Client service registry
+   */
   public registry?: Registry;
 
   constructor(options: ConnectionOptions = {}) {
@@ -21,9 +24,22 @@ export class Connection extends AbstractConnection {
     this.registry = options.registry;
 
     if (!this.invoke) {
+      // set default registry based invoke function
+      // can be set to other invoke mechanism
+      //
+      // e.g.
+      //
+      //  server.on('connection', connection => {
+      //    const context = new SomeContext(app);
+      //    connection.invoke = async (name, params, reply) => {
+      //      ...
+      //      await reply(invokeSomeThingWithContext(name, params, context));
+      //    }
+      //  });
+      //
       this.invoke = (name, params, reply) => {
         assert(this.registry, 'remote invoking is not supported for current connection');
-        return reply(this.registry.invoke(name, params));
+        return reply(this.registry.invoke({name, params, connection: this}));
       };
     }
   }
