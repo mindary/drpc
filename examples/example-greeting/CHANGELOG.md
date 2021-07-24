@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.5](https://gitr.net/mindary/remly/compare/@remly/example-greeting@0.4.4...@remly/example-greeting@0.4.5) (2021-07-24)
+
+**Note:** Version bump only for package @remly/example-greeting
+
+
+
+
+
 ## [0.4.4](https://gitr.net/mindary/remly/compare/@remly/example-greeting@0.4.3...@remly/example-greeting@0.4.4) (2021-07-23)
 
 **Note:** Version bump only for package @remly/example-greeting
