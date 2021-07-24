@@ -6,7 +6,6 @@ import {DefaultRegistry} from '../../registry';
 export class MockClient extends MockConnection {
   public target: Connection;
 
-
   constructor(options: ConnectionOptions = {}) {
     super(options);
     this.registry = this.registry ?? new DefaultRegistry();

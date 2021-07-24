@@ -116,28 +116,28 @@ describe('registry', function () {
     });
   });
 
-  describe('invoke', function () {
+  describe('call', function () {
     it('should work', async function () {
       const registry = new DefaultRegistry();
       registry.register(monster);
-      const result = await registry.invoke('add', [1, 2]);
+      const result = await registry.call('add', [1, 2]);
       expect(result).equal(3);
     });
 
-    it('should invoke with service as scope', async function () {
+    it('should call with service as scope', async function () {
       const registry = new DefaultRegistry();
       registry.register(monster);
-      const result = await registry.invoke('greet', 'Tom');
+      const result = await registry.call('greet', 'Tom');
       expect(result).equal('Hello Tom');
     });
 
-    it('should invoke with custom scope', async function () {
+    it('should call with custom scope', async function () {
       const scope = {
         prefix: '您好',
       };
       const registry = new DefaultRegistry();
       registry.register(monster, {scope});
-      const result = await registry.invoke('greet', 'Tom');
+      const result = await registry.call('greet', 'Tom');
       expect(result).equal('您好 Tom');
     });
   });

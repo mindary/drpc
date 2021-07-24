@@ -45,7 +45,7 @@
     "@types/micromatch": "^4.0.2",
     "@types/node": "^16.4.1",
     "@types/shortid": "^0.0.29",
-    "a-defer": "^0.1.0",
+    "a-defer": "^0.1.1",
     "delay": "^5.0.0",
     "get-port": "^5.1.1"
   },

@@ -14,7 +14,7 @@ export interface RegisterOptions {
 export interface ServiceInvokeRequest<T extends Connection = Connection> {
   name: string;
   params?: any;
-  connection: T;
+  connection?: T;
 }
 
 export interface Registry {
@@ -25,6 +25,7 @@ export interface Registry {
   unregister(pattern: string | string[]): string[];
   clear(): void;
   get(name: string): Method;
+  call(name: string, params: any): Promise<any>;
   invoke(request: ServiceInvokeRequest): Promise<any>;
 }
 
@@ -95,8 +96,12 @@ export class DefaultRegistry implements Registry {
     return method;
   }
 
+  call(name: string, params: any): Promise<any> {
+    return this.get(name).invoke(params);
+  }
+
   async invoke(request: ServiceInvokeRequest) {
     const {name, params} = request;
-    return this.get(name).invoke(params);
+    return this.call(name, params);
   }
 }

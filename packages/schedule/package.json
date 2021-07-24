@@ -27,7 +27,7 @@
     "verify": "npm pack && tar xf remly-schedule*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "a-defer": "^0.1.0",
+    "a-defer": "^0.1.1",
     "ts-essentials": "^7.0.2",
     "tslib": "^2.3.0"
   },
