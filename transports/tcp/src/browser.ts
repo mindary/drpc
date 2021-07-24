@@ -1,2 +1,2 @@
-export * from './connection';
-export * from './client';
+export * from './tcp.connection';
+export * from './tcp.client';

@@ -1,9 +1,16 @@
 import {Connection, ConnectionOptions} from '../../connections';
 import {MockServer} from './mock.server';
 import {MockConnection} from './mock.connection';
+import {DefaultRegistry} from '../../registry';
 
 export class MockClient extends MockConnection {
   public target: Connection;
+
+
+  constructor(options: ConnectionOptions = {}) {
+    super(options);
+    this.registry = this.registry ?? new DefaultRegistry();
+  }
 
   static connect(server: MockServer, options?: ConnectionOptions) {
     return new this(options).connect(server);

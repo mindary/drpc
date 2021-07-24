@@ -1,6 +1,7 @@
 import {Server} from '@remly/server';
+import {Connection} from '@remly/core';
 
-export async function waitForConnection(server: Server<any>) {
+export async function waitForConnection<C extends Connection = Connection>(server: Server<C>) {
   const [connection] = Object.values(server.connections);
   return connection ? connection : server.once('connection');
 }

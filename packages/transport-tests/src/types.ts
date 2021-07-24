@@ -7,4 +7,4 @@ export interface ServerAndClient<C extends Connection = Connection> {
   client: Connection;
 }
 export type ServerAndClientProvider<C extends Connection = Connection> = () => ServerAndClient<C>;
-export type ConnProvider<C extends Connection = Connection> = () => AsyncOrSync<C>;
+export type ConnectionFactory<C extends Connection = Connection> = () => AsyncOrSync<C>;

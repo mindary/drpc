@@ -21,7 +21,9 @@ export class MockConnection extends Connection {
   pipe<T extends Connection>(target: T): T {
     this.target = target;
     if (target) {
-      this.doConnected();
+      this.doConnected().catch(e => {
+        throw e;
+      });
     }
     return target;
   }

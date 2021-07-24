@@ -1,14 +1,14 @@
 import path from 'path';
 import {CommonTestSuite, waitForConnection} from '@remly/transport-tests';
-import {WorkerServer} from '../server';
+import {WorkerServer} from '../worker.server';
 
-describe('worker/common', function () {
+describe('WebWorker transport', function () {
   let server: WorkerServer;
 
   beforeEach(async () => {
     server = new WorkerServer();
     CommonTestSuite.setupServer(server);
-    server.open(path.resolve(__dirname, './common.worker.js'));
+    await server.open(path.resolve(__dirname, './common.worker.js'));
   });
 
   afterEach(async () => {

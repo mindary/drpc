@@ -1,7 +1,7 @@
 import {URL} from 'url';
 import {Server, ServerOptions} from '@remly/server';
 import {Worker, WorkerOptions} from './worker';
-import {WorkerConnection, WorkerConnectionOptions} from './connection';
+import {WorkerConnection, WorkerConnectionOptions} from './worker.connection';
 
 export class WorkerServer extends Server<WorkerConnection> {
   constructor(options?: ServerOptions) {
@@ -20,9 +20,9 @@ export class WorkerServer extends Server<WorkerConnection> {
   async close() {
     const connections = this.connections;
     await Promise.all(
-      Object.values(connections).map((c: WorkerConnection) => {
-        this.unregisterConnection(c);
-        return c.end();
+      Object.values(connections).map(async (c: WorkerConnection) => {
+        await this.unregisterConnection(c);
+        await c.end();
       }),
     );
   }

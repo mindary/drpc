@@ -40,7 +40,7 @@ import {Constructor} from './types';
  * As a workaround, use `@ts-ignore` to disable the error.
  *
  * ```ts
- * export function RegistryMixin<T extends MixinTarget<Registry>>(
+ * export function SomeMixin<T extends MixinTarget<Registry>>(
  *   superClass: T,
  * ) {
  *   return class extends superClass {
@@ -51,8 +51,11 @@ import {Constructor} from './types';
  * }
  * ```
  */
-export declare type MixinTarget<T extends object> = Constructor<
+export type MixinTarget<T extends object> = Constructor<
   {
+    // Enumerate only public members to avoid the following compiler error:
+    //   Property '(name)' of exported class expression
+    //   may not be private or protected.ts(4094)
     [P in keyof T]: T[P];
   }
 >;

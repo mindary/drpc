@@ -4,14 +4,17 @@ import {Handler, Method} from './method';
 import {UnimplementedError} from './error';
 import {ExposeMetadata} from './types';
 import {getAllExposeMetadata} from './decorders';
-
-export interface Service {
-  [name: string]: any;
-}
+import {Connection} from './connections';
 
 export interface RegisterOptions {
   namespace?: string;
   scope?: any;
+}
+
+export interface RegistryInvokeRequest<T extends Connection = Connection> {
+  connection: T;
+  name: string;
+  params?: any;
 }
 
 export interface Registry {
@@ -22,7 +25,7 @@ export interface Registry {
   unregister(pattern: string | string[]): string[];
   clear(): void;
   get(name: string): Method;
-  invoke(name: string, params?: any): Promise<any>;
+  invoke(name: string, params: any): Promise<any>;
 }
 
 export class DefaultRegistry implements Registry {
@@ -92,7 +95,7 @@ export class DefaultRegistry implements Registry {
     return method;
   }
 
-  async invoke(name: string, params?: any) {
+  async invoke(name: string, params: any) {
     return this.get(name).invoke(params);
   }
 }

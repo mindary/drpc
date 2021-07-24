@@ -1,4 +1,4 @@
-import {assert} from 'ts-essentials';
+import {assert, AsyncOrSync} from 'ts-essentials';
 import Emittery from 'emittery';
 import shortid from 'shortid';
 import aDefer, {DeferredPromise} from 'a-defer';
@@ -6,10 +6,11 @@ import {getTime} from '@remly/schedule';
 import {JsonSerializer, Raw, Serializer} from '@remly/serializer';
 import {Packet} from '../packet';
 import * as utils from '../utils';
-import {rawLength, readBinary, syncl} from '../utils';
+import {rawLength, readBinary} from '../utils';
 import {InvalidParamsError, makeRemError, RemError, TimeoutError, UnknownError} from '../error';
 import {DefaultParser, Parser} from '../parsers';
-import {DefaultRegistry, Registry} from '../registry';
+import {InvokeFn} from '../types';
+import {ConnectionOptions} from './types';
 
 const debug = require('debug')('remly:connection');
 const DUMMY = Buffer.alloc(0);
@@ -38,20 +39,6 @@ export type ConnectionEventData = {
   close: undefined;
 };
 
-export interface ConnectionOptions {
-  id?: string;
-
-  registry?: Registry;
-  parser?: Parser;
-  serializer?: Serializer;
-
-  interval?: number;
-  keepalive?: number;
-  requestTimeout?: number;
-  pingTimeout?: number;
-  connectTimeout?: number;
-}
-
 const DEFAULT_KEEPALIVE = 30 * 1000;
 const DEFAULT_STALL_INTERVAL = 5 * 1000;
 const DEFAULT_REQUEST_TIMEOUT = 10 * 1000;
@@ -62,12 +49,17 @@ const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
  * @constructor
  * @ignore
  */
-export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
+export class AbstractConnection extends Emittery<ConnectionEventData> {
+  public options: ConnectionOptions & Record<string, any>;
+  public invoke?: InvokeFn;
+
   public readonly parser: Parser;
   public readonly serializer: Serializer;
   public readonly interval: number;
   public readonly requestTimeout: number;
   public readonly connectTimeout: number;
+  protected readonly remoteEmittery: Emittery;
+
   protected _ready: DeferredPromise<void>;
   protected _timer?: any;
   protected _challenge?: Buffer;
@@ -76,12 +68,12 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   protected _start: number;
   protected _sequence: number;
   protected _aliveTimeout: number;
-  protected removeEmittery: Emittery;
 
-  protected constructor(options?: ConnectionOptions) {
+  constructor(options: ConnectionOptions = {}) {
     super();
+    this.options = options;
     this._id = options?.id ?? 'remly_' + shortid();
-    this._registry = options?.registry;
+    this.remoteEmittery = new Emittery();
 
     this.parser = options?.parser ?? new DefaultParser();
     this.serializer = options?.serializer ?? new JsonSerializer();
@@ -89,6 +81,8 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     this.interval = options?.interval ?? DEFAULT_STALL_INTERVAL;
     this.requestTimeout = options?.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT;
     this.connectTimeout = options?.connectTimeout ?? DEFAULT_CONNECT_TIMEOUT;
+
+    this.invoke = options?.invoke;
 
     this.setKeepAlive(options?.keepalive ?? DEFAULT_KEEPALIVE);
 
@@ -132,15 +126,6 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
 
   get keepalive() {
     return this._keepalive;
-  }
-
-  protected _registry?: Registry;
-
-  get registry() {
-    if (!this._registry) {
-      this._registry = new DefaultRegistry();
-    }
-    return this._registry;
   }
 
   setKeepAlive(keepalive: number) {
@@ -194,15 +179,21 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     await this.emit('close');
   }
 
-  protected abstract bind(): void;
+  protected bind(): void {
+    throw new Error('Not implemented');
+  }
 
-  protected abstract close(): Promise<any>;
+  protected close(): AsyncOrSync<any> {
+    throw new Error('Not implemented');
+  }
 
-  protected abstract send(packet: Packet): Promise<any>;
+  protected send(packet: Packet): AsyncOrSync<any> {
+    throw new Error('Not implemented');
+  }
 
   protected reset() {
+    this.remoteEmittery.clearListeners();
     this._jobs = {};
-    this.removeEmittery = new Emittery();
     this._start = 0;
     this._sequence = 0;
     this._connected = false;
@@ -221,22 +212,19 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
       await this.end();
     });
 
-    this.parser.on(
-      'message',
-      syncl<Packet>(async packet => {
+    this.parser.on('message', async packet => {
+      try {
+        await this.handleMessage(packet);
+      } catch (e) {
         try {
-          await this.handleMessage(packet);
-        } catch (e) {
-          try {
-            await this.sendError(packet.id, new UnknownError());
-          } catch (_) {
-            //
-          }
-          await this.error(e);
-          await this.end();
+          await this.sendError(packet.id, new UnknownError());
+        } catch (_) {
+          //
         }
-      }, this),
-    );
+        await this.error(e);
+        await this.end();
+      }
+    });
 
     this.startStall();
   }
@@ -266,10 +254,8 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   protected startStall() {
     debug('startStall');
     assert(this._timer == null, 'already start stall');
-    this._timer = setInterval(
-      syncl(() => this.maybeStall(), this),
-      this.interval,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this._timer = setInterval(async () => this.maybeStall(), this.interval);
   }
 
   protected stopStall() {
@@ -326,14 +312,12 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
   }
 
   protected async handleMessage(packet: Packet) {
-    let result;
-
     switch (packet.type) {
       case Packet.types.SIGNAL:
-        await this.handleEvent(packet.name, packet.payload);
+        await this.handleSignal(packet.name, packet.payload);
         break;
       case Packet.types.CALL:
-        result = await this.handleCall(packet.id, packet.name, packet.payload);
+        await this.handleCall(packet.id, packet.name, packet.payload);
         break;
       case Packet.types.ACK:
         await this.handleAck(packet.id, packet.payload);
@@ -352,15 +336,17 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     }
 
     this._lastActive = getTime();
-
-    return result;
   }
 
-  protected async handleEvent(event: string, data: Buffer) {
-    await this.removeEmittery.emit(event, this.deserialize(data));
+  protected async handleSignal(event: string, data: Buffer) {
+    await this.remoteEmittery.emit(event, this.deserialize(data));
   }
 
   protected async handleCall(id: number, name: string, data: Buffer) {
+    if (!this.invoke) {
+      throw new Error('"invoke" has not been set');
+    }
+
     const parseParams = (raw: Buffer) => {
       try {
         return this.deserialize(raw);
@@ -370,9 +356,7 @@ export abstract class AbstractConnection extends Emittery<ConnectionEventData> {
     };
 
     try {
-      const params = parseParams(data);
-      const result = await this.registry.invoke(name, params);
-      await this.sendAck(id, result);
+      await this.invoke(name, parseParams(data), async result => this.sendAck(id, await result));
     } catch (e) {
       await this.sendError(id, makeRemError(e));
     }

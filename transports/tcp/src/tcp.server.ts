@@ -1,8 +1,7 @@
 import * as net from 'net';
-import {DefaultRegistry, Registry} from '@remly/core';
-import {Server, ServerOptions} from '@remly/server';
-import {TCPConnection, TCPConnectionOptions} from './connection';
 import {AddressInfo, ListenOptions} from 'net';
+import {Server, ServerOptions} from '@remly/server';
+import {TCPConnection, TCPConnectionOptions} from './tcp.connection';
 
 export interface TCPServerOptions extends ServerOptions, ListenOptions {}
 
@@ -11,19 +10,15 @@ export interface ServerListener {
 }
 
 export class TCPServer extends Server<TCPConnection> {
-  public readonly registry: Registry = new DefaultRegistry();
   protected options: TCPServerOptions;
-  protected _server?: net.Server;
-
   private serverListeners: ServerListener;
 
-  static createServer(options?: TCPServerOptions) {
-    return new this(options);
+  constructor(options?: TCPServerOptions) {
+    super(options);
+    this.init();
   }
 
-  static attach(server: net.Server) {
-    return this.createServer().attach(server);
-  }
+  protected _server?: net.Server;
 
   get server(): net.Server | undefined {
     return this._server;
@@ -34,23 +29,12 @@ export class TCPServer extends Server<TCPConnection> {
     return addr == null ? undefined : addr;
   }
 
-  constructor(options?: TCPServerOptions) {
-    super(options);
-    this.init();
+  static createServer(options?: TCPServerOptions) {
+    return new this(options);
   }
 
-  protected init() {
-    this.serverListeners = {
-      connection: (socket: net.Socket) => {
-        if (socket.remoteAddress) {
-          this.createAndRegisterConnection({socket});
-        }
-      },
-    };
-  }
-
-  protected createConnection(options?: TCPConnectionOptions): TCPConnection {
-    return new TCPConnection(options);
+  static attach(server: net.Server) {
+    return this.createServer().attach(server);
   }
 
   attach(server: net.Server) {
@@ -76,5 +60,19 @@ export class TCPServer extends Server<TCPConnection> {
     await new Promise((resolve, reject) => this._server!.close(err => (err ? reject(err) : resolve(undefined))));
     this._server = undefined;
     return this;
+  }
+
+  protected init() {
+    this.serverListeners = {
+      connection: async (socket: net.Socket) => {
+        if (socket.remoteAddress) {
+          await this.createAndRegisterConnection({socket});
+        }
+      },
+    };
+  }
+
+  protected createConnection(options?: TCPConnectionOptions): TCPConnection {
+    return new TCPConnection(options);
   }
 }

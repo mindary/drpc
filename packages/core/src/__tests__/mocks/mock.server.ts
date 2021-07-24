@@ -13,7 +13,7 @@ export class MockServer extends EventEmitter {
   registry: Registry = new DefaultRegistry();
   options: MockServerOptions;
 
-  protected connections: Record<string, MockConnection> = {};
+  connections: Record<string, MockConnection> = {};
 
   constructor(options?: MockServerOptions) {
     super();
@@ -32,13 +32,13 @@ export class MockServer extends EventEmitter {
 
   protected buildConnectionOptions(options?: ConnectionOptions): ConnectionOptions {
     return {
+      registry: this.registry,
       ...this.options.connection,
       ...options,
-      registry: this.registry,
     };
   }
 
-  protected createConnection<O>(options?: O): MockConnection {
+  protected createConnection<O extends ConnectionOptions>(options?: O): MockConnection {
     return new MockConnection(options);
   }
 
@@ -52,7 +52,7 @@ export class MockServer extends EventEmitter {
     return connection;
   }
 
-  protected createAndRegisterConnection<O>(options?: O) {
+  protected createAndRegisterConnection<O extends ConnectionOptions>(options?: O) {
     return this.bindConnection(this.createConnection(this.buildConnectionOptions(options)));
   }
 

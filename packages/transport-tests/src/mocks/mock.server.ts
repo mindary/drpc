@@ -8,12 +8,12 @@ export interface MockServerOptions {
 }
 
 export class MockServer extends Server<MockConnection> {
-  registry: Registry = new DefaultRegistry();
   options: MockServerOptions;
 
   constructor(options?: MockServerOptions) {
     super();
     this.options = options ?? {};
+    this.registry = new DefaultRegistry();
   }
 
   async accept(client: MockClient) {

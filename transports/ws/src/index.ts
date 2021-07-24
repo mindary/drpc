@@ -1,3 +1,3 @@
-export * from './connection';
-export * from './client';
-export * from './server';
+export * from './websocket.connection';
+export * from './websocket.client';
+export * from './websocket.server';

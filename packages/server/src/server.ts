@@ -13,7 +13,7 @@ export interface ServerDataEvents<T> {
 
 export interface ServerOptions {
   registry?: Registry;
-  connection?: ConnectionOptions;
+  connection?: Partial<ConnectionOptions>;
 }
 
 export abstract class Server<
@@ -21,18 +21,29 @@ export abstract class Server<
   DataEvents extends ServerDataEvents<T> = ServerDataEvents<T>,
 > extends Emittery<DataEvents & ServerDataEvents<T>> {
   protected options: ServerOptions;
-  protected registry: Registry;
 
   protected constructor(options?: ServerOptions) {
     super();
     this.options = options = options ?? {};
-    this.registry = options.registry ?? new DefaultRegistry();
+    this._registry = options.registry;
   }
 
-  protected _connections: Record<string, T> = {};
+  protected _connections?: Record<string, T>;
 
   get connections(): Record<string, T> {
+    if (!this._connections) this._connections = {};
     return this._connections;
+  }
+
+  protected _registry?: Registry;
+
+  get registry(): Registry {
+    if (!this._registry) this._registry = new DefaultRegistry();
+    return this._registry;
+  }
+
+  set registry(registry: Registry | undefined) {
+    this._registry = registry;
   }
 
   async error(err: Error) {
@@ -56,11 +67,11 @@ export abstract class Server<
 
   protected abstract createConnection<O extends ConnectionOptions>(options?: O): T;
 
-  protected buildConnectionOptions(options?: ConnectionOptions): ConnectionOptions {
+  protected buildConnectionOptions(options?: Partial<ConnectionOptions>): ConnectionOptions {
     return {
+      registry: this.registry,
       ...this.options.connection,
       ...options,
-      registry: this.registry,
     };
   }
 
@@ -69,13 +80,13 @@ export abstract class Server<
   }
 
   protected async registerConnection(connection: T) {
-    if (this._connections[connection.id]) {
+    if (this.connections[connection.id]) {
       return connection;
     }
 
     await this._bindConnection(connection);
 
-    this._connections[connection.id] = connection;
+    this.connections[connection.id] = connection;
 
     await this.emit('connection', connection);
     await this.emit('connect', connection);
@@ -84,11 +95,11 @@ export abstract class Server<
   }
 
   protected async unregisterConnection(connection: T) {
-    if (!this._connections[connection.id]) {
+    if (!this.connections[connection.id]) {
       return connection;
     }
 
-    delete this._connections[connection.id];
+    delete this.connections[connection.id];
 
     this._unbindConnection(connection);
 

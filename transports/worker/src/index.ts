@@ -1,3 +1,3 @@
-export * from './connection';
-export * from './client';
-export * from './server';
+export * from './worker.connection';
+export * from './worker.client';
+export * from './worker.server';

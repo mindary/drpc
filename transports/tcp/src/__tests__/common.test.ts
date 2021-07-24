@@ -1,7 +1,7 @@
 import findAvailablePort from 'get-port';
 import {CommonTestSuite} from '@remly/transport-tests';
-import {TCPServer} from '../server';
-import {TCPClient} from '../client';
+import {TCPServer} from '../tcp.server';
+import {TCPClient} from '../tcp.client';
 
 describe('tcp', function () {
   let server: TCPServer;

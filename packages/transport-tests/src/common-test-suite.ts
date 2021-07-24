@@ -2,32 +2,34 @@ import {expect} from '@loopback/testlab';
 import aDefer from 'a-defer';
 import {Connection} from '@remly/core';
 import {Server} from '@remly/server';
-import {ConnProvider} from './types';
+import {ConnectionFactory} from './types';
 import {monster, MonsterService} from './mocks';
 
 export namespace CommonTestSuite {
-  export function setupConnection(conn: Connection, notRegister?: boolean) {
-    if (!notRegister) {
-      conn.registry.register(monster);
-    }
+  export function setupConnection(conn: Connection) {
     conn.subscribe('echo', async (msg: string) => {
       await conn.signal('echo-reply', 'Hello ' + msg);
     });
   }
 
-  export function setupServer(server: Server<any>) {
-    server.register(monster);
-    Object.values(server.connections).forEach(conn => setupConnection(conn, true));
-    server.on('connection', conn => setupConnection(conn, true));
-    server.on('error', (err: any) => console.log(err));
+  export function setupClientConnection(conn: Connection) {
+    conn.register(monster);
+    setupConnection(conn);
   }
 
-  export function suite<C extends Connection = Connection>(provider: ConnProvider) {
+  export function setupServer(server: Server<any>) {
+    server.register(monster);
+    Object.values(server.connections).forEach(conn => setupConnection(conn));
+    server.on('connection', conn => setupConnection(conn));
+    server.on('error', (err: any) => console.error(err));
+  }
+
+  export function suite<C extends Connection = Connection>(factory: ConnectionFactory) {
     describe('RPC common operations', () => {
       let conn: Connection;
 
       beforeEach(async () => {
-        conn = await provider();
+        conn = await factory();
       });
 
       afterEach(async () => {

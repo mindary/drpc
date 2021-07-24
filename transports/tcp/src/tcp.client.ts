@@ -1,8 +1,15 @@
 import net from 'net';
 import {assert} from 'ts-essentials';
-import {TCPConnection} from './connection';
+import {DefaultRegistry} from '@remly/core';
+import {TCPConnection, TCPConnectionOptions} from './tcp.connection';
 
 export class TCPClient extends TCPConnection {
+  constructor(options: TCPConnectionOptions = {}) {
+    super(options);
+    // enable client service
+    this.registry = this.registry ?? new DefaultRegistry();
+  }
+
   static connect(port: number, host?: string) {
     const c = new this();
     c.connect(port, host);

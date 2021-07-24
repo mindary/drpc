@@ -74,14 +74,14 @@ export function sync<F extends AnyFunction>(fn: (...args: Parameters<F>) => Asyn
  * @param fn
  * @param onerror
  */
-export function syncl(fn: () => AsyncOrSync<void>, onerror?: SyncOnError): () => void;
-export function syncl<P1 = any>(fn: (p1: P1) => AsyncOrSync<void>, onerror?: SyncOnError): (p1: P1) => void;
-export function syncl<P = any>(
-  fn: (...args: P[]) => AsyncOrSync<void>,
-  onerror?: Function | {emit: Function},
-): (...args: P[]) => void {
-  return sync<(...args: P[]) => void>(fn, onerror);
-}
+// export function syncl(fn: () => AsyncOrSync<void>, onerror?: SyncOnError): () => void;
+// export function syncl<P1 = any>(fn: (p1: P1) => AsyncOrSync<void>, onerror?: SyncOnError): (p1: P1) => void;
+// export function syncl<P = any>(
+//   fn: (...args: P[]) => AsyncOrSync<void>,
+//   onerror?: Function | {emit: Function},
+// ): (...args: P[]) => void {
+//   return sync<(...args: P[]) => void>(fn, onerror);
+// }
 
 function isObject(o: any) {
   return Object.prototype.toString.call(o) === '[object Object]';

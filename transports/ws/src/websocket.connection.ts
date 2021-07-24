@@ -1,25 +1,26 @@
 import Url from 'url-parse';
-import {Connection, ConnectionOptions, Packet, syncl} from '@remly/core';
-import WebSocket from './ws';
+import {Connection, ConnectionOptions, Packet} from '@remly/core';
+import WebSocket from './websocket';
 
-export interface WSConnectionOptions extends ConnectionOptions {
+export interface WebSocketConnectionOptions extends ConnectionOptions {
   socket?: WebSocket;
 }
 
-export class WSConnection extends Connection {
-  protected socket?: WebSocket;
+export class WebSocketConnection extends Connection {
   public host: string;
   public port: number;
   public binaryType: string;
+  protected socket?: WebSocket;
 
-  constructor(options?: WSConnectionOptions) {
+  constructor(options?: WebSocketConnectionOptions) {
     super(options);
     this.socket = options?.socket;
     if (this.socket) {
       this.init();
       // socket already connected
       if (this.socket.readyState === this.socket.OPEN && !this.connected) {
-        this.doConnected();
+        // eslint-disable-next-line no-void
+        void this.doConnected();
       }
     }
   }
@@ -35,24 +36,24 @@ export class WSConnection extends Connection {
 
     this.binaryType = 'arraybuffer';
 
-    socket.onopen = () => {
-      this.doConnected();
+    socket.onopen = async () => {
+      await this.doConnected();
     };
 
-    socket.onmessage = syncl(async (event: WebSocket.MessageEvent) => {
+    socket.onmessage = async (event: WebSocket.MessageEvent) => {
       await this.feed(event.data);
-    }, this);
-
-    socket.onerror = event => {
-      this.error(new Error(event.message));
     };
 
-    socket.onclose = syncl(async (event: WebSocket.CloseEvent) => {
+    socket.onerror = async event => {
+      await this.error(new Error(event.message));
+    };
+
+    socket.onclose = async (event: WebSocket.CloseEvent) => {
       if (event.code >= 1002 && event.code !== 1005 /* no status: ignore */) {
-        this.error(new Error(`WebSocket closed code: ${event.code}, reason: ${event.reason ?? '[empty]'}`));
+        await this.error(new Error(`WebSocket closed code: ${event.code}, reason: ${event.reason ?? '[empty]'}`));
       }
       await this.end();
-    }, this);
+    };
   }
 
   protected async close() {

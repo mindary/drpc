@@ -52,6 +52,6 @@
   ],
   "browser": {
     "./dist/index.js": "./dist/browser.js",
-    "./dist/ws.js": "./dist/ws-browser.js"
+    "./dist/websocket.js": "./dist/websocket-browser.js"
   }
 }

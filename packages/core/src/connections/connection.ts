@@ -1,17 +1,43 @@
 import {assert} from 'ts-essentials';
-import {AbstractConnection, ConnectionOptions} from './abstract.connection';
-import {SignalHandler} from '../types';
-import {Service} from '../registry';
+import {UnsubscribeFn} from 'emittery';
+import {AbstractConnection} from './abstract.connection';
+import {Service, SignalHandler} from '../types';
 import {TypedService} from '../typed-service';
+import {ConnectionOptions} from './types';
+import {RegisterOptions, Registry} from '../registry';
+import {Handler} from '../method';
 
-/**
- * Connection
- * @constructor
- * @ignore
- */
-export abstract class Connection extends AbstractConnection {
-  protected constructor(options?: ConnectionOptions) {
+export class Connection extends AbstractConnection {
+  /**
+   * Additional information that can be attached to the Connection instance
+   */
+  public data: Record<any, any> = {};
+
+  public registry?: Registry;
+
+  constructor(options: ConnectionOptions = {}) {
     super(options);
+
+    this.registry = options.registry;
+
+    if (!this.invoke) {
+      this.invoke = (name, params, reply) => {
+        assert(this.registry, 'remote invoking is not supported for current connection');
+        return reply(this.registry.invoke(name, params));
+      };
+    }
+  }
+
+  register<S extends object>(service: S, opts?: RegisterOptions): void;
+  register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
+  register(name: string, handler: Handler, opts?: RegisterOptions): void;
+  register<S extends object>(
+    nameOrService: string | S,
+    handler?: Handler | string[] | RegisterOptions,
+    opts?: RegisterOptions,
+  ) {
+    assert(this.registry, 'register is not supported for current connection');
+    return this.registry.register(<any>nameOrService, <any>handler, <any>opts);
   }
 
   service<S extends Service>(namespace?: string): TypedService<S> {
@@ -34,10 +60,10 @@ export abstract class Connection extends AbstractConnection {
     });
   }
 
-  subscribe(signal: string, handler: SignalHandler) {
+  subscribe(signal: string, handler: SignalHandler): UnsubscribeFn {
     assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
-    return this.removeEmittery.on(signal, handler);
+    return this.remoteEmittery.on(signal, handler);
   }
 
   async signal(signal: string, data?: any) {
