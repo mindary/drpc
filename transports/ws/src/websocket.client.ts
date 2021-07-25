@@ -1,13 +1,13 @@
 import {WebSocketConnection, WebSocketConnectionOptions} from './websocket.connection';
 import {assert} from 'ts-essentials';
 import WebSocket from './websocket';
-import {DefaultRegistry} from '@remly/core';
+import {ConnectionWithRegistryOptions, RegistryMixin} from '@remly/core';
 
-export class WebSocketClient extends WebSocketConnection {
-  constructor(options: WebSocketConnectionOptions = {}) {
+export interface WebSocketClientOptions extends WebSocketConnectionOptions, ConnectionWithRegistryOptions {}
+
+export class WebSocketClient extends RegistryMixin(WebSocketConnection) {
+  constructor(options: WebSocketClientOptions = {}) {
     super(options);
-    // enable client service
-    this.registry = this.registry ?? new DefaultRegistry();
   }
 
   static connect(port: number, host?: string, wss?: boolean) {

@@ -1,7 +1,15 @@
-import {Connection, ConnectionOptions, DefaultRegistry, Handler, RegisterOptions, Registry} from '@remly/core';
+import {
+  Connection,
+  ConnectionOptions,
+  DefaultRegistry,
+  Handler,
+  InvokeReply,
+  RegisterOptions,
+  Registry,
+} from '@remly/core';
 import {ConnectionError} from './errors';
-import {UnsubscribeFn} from 'emittery';
-import Emittery = require('emittery');
+import {UnsubscribeFn} from '@mindary/emittery';
+import {Emittery} from '@mindary/emittery';
 
 export interface ServerDataEvents<T> {
   error: Error;
@@ -69,9 +77,9 @@ export abstract class Server<
 
   protected buildConnectionOptions(options?: Partial<ConnectionOptions>): ConnectionOptions {
     return {
-      registry: this.registry,
       ...this.options.connection,
       ...options,
+      invoke: (name: string, params: any, reply: InvokeReply) => reply(this.registry.invoke({name, params})),
     };
   }
 

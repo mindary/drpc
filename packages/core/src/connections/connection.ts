@@ -1,60 +1,14 @@
 import {assert} from 'ts-essentials';
-import {UnsubscribeFn} from 'emittery';
+import {UnsubscribeFn} from '@mindary/emittery';
 import {AbstractConnection} from './abstract.connection';
 import {Service, SignalHandler} from '../types';
 import {TypedService} from '../typed-service';
-import {ConnectionOptions} from './types';
-import {RegisterOptions, Registry} from '../registry';
-import {Handler} from '../method';
 
 export class Connection extends AbstractConnection {
   /**
    * Additional information that can be attached to the Connection instance
    */
   public data: Record<any, any> = {};
-
-  /**
-   * Server or Client service registry
-   */
-  public registry?: Registry;
-
-  constructor(options: ConnectionOptions = {}) {
-    super(options);
-
-    this.registry = options.registry;
-
-    if (!this.invoke) {
-      // set default registry based invoke function
-      // can be set to other invoke mechanism
-      //
-      // e.g.
-      //
-      //  server.on('connection', connection => {
-      //    const context = new SomeContext(app);
-      //    connection.invoke = async (name, params, reply) => {
-      //      ...
-      //      await reply(invokeSomeThingWithContext(name, params, context));
-      //    }
-      //  });
-      //
-      this.invoke = (name, params, reply) => {
-        assert(this.registry, 'remote invoking is not supported for current connection');
-        return reply(this.registry.invoke({name, params, connection: this}));
-      };
-    }
-  }
-
-  register<S extends object>(service: S, opts?: RegisterOptions): void;
-  register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
-  register(name: string, handler: Handler, opts?: RegisterOptions): void;
-  register<S extends object>(
-    nameOrService: string | S,
-    handler?: Handler | string[] | RegisterOptions,
-    opts?: RegisterOptions,
-  ) {
-    assert(this.registry, 'register is not supported for current connection');
-    return this.registry.register(<any>nameOrService, <any>handler, <any>opts);
-  }
 
   service<S extends Service>(namespace?: string): TypedService<S> {
     return new TypedService<Service>(this, namespace);

@@ -2,8 +2,9 @@ import {Connection, ConnectionOptions} from '../../connections';
 import {MockServer} from './mock.server';
 import {MockConnection} from './mock.connection';
 import {DefaultRegistry} from '../../registry';
+import {RegistryMixin} from '../../mixins';
 
-export class MockClient extends MockConnection {
+export class MockClient extends RegistryMixin(MockConnection) {
   public target: Connection;
 
   constructor(options: ConnectionOptions = {}) {

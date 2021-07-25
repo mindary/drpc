@@ -16,5 +16,8 @@ export interface ConnectionOptions {
   connectTimeout?: number;
 
   invoke?: InvokeFn;
+}
+
+export interface ConnectionWithRegistryOptions extends ConnectionOptions {
   registry?: Registry;
 }

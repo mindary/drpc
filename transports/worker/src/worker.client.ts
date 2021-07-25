@@ -1,17 +1,15 @@
 import {MessagePort} from 'worker_threads';
-import {Connection, ConnectionOptions, DefaultRegistry, Packet} from '@remly/core';
+import {Connection, ConnectionWithRegistryOptions, Packet, RegistryMixin} from '@remly/core';
 
-export interface WorkerClientOptions extends ConnectionOptions {
+export interface WorkerClientOptions extends ConnectionWithRegistryOptions {
   port: MessagePort;
 }
 
-export class WorkerClient extends Connection {
+export class WorkerClient extends RegistryMixin(Connection) {
   protected port: MessagePort;
 
   constructor(options: WorkerClientOptions) {
     super(options);
-    // enable client service
-    this.registry = this.registry ?? new DefaultRegistry();
     this.port = options.port;
     if (this.port) {
       this.init();

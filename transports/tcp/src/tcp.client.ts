@@ -1,13 +1,13 @@
 import net from 'net';
 import {assert} from 'ts-essentials';
-import {DefaultRegistry} from '@remly/core';
+import {ConnectionWithRegistryOptions, RegistryMixin} from '@remly/core';
 import {TCPConnection, TCPConnectionOptions} from './tcp.connection';
 
-export class TCPClient extends TCPConnection {
-  constructor(options: TCPConnectionOptions = {}) {
+export interface TCPClientOptions extends TCPConnectionOptions, ConnectionWithRegistryOptions {}
+
+export class TCPClient extends RegistryMixin(TCPConnection) {
+  constructor(options: TCPClientOptions = {}) {
     super(options);
-    // enable client service
-    this.registry = this.registry ?? new DefaultRegistry();
   }
 
   static connect(port: number, host?: string) {

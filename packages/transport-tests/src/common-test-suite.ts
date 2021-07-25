@@ -1,6 +1,6 @@
 import {expect} from '@loopback/testlab';
 import aDefer from 'a-defer';
-import {Connection} from '@remly/core';
+import {Connection, Registrable} from '@remly/core';
 import {Server} from '@remly/server';
 import {ConnectionFactory} from './types';
 import {monster, MonsterService} from './mocks';
@@ -12,7 +12,7 @@ export namespace CommonTestSuite {
     });
   }
 
-  export function setupClientConnection(conn: Connection) {
+  export function setupClientConnection(conn: Connection & Registrable) {
     conn.register(monster);
     setupConnection(conn);
   }

@@ -1,5 +1,5 @@
 import {assert, AsyncOrSync} from 'ts-essentials';
-import Emittery from 'emittery';
+import {Emittery} from '@mindary/emittery';
 import shortid from 'shortid';
 import aDefer, {DeferredPromise} from 'a-defer';
 import {getTime} from '@remly/schedule';

@@ -223,21 +223,11 @@ describe('connection', function () {
       await client.end();
     });
 
-    it('server connection use server registry', async function () {
-      const [connection] = Object.values(server.connections);
-      expect(server.registry).equal(connection.registry);
-    });
-
     it('can register client service', function () {
       expect(client.registry).ok();
       expect(Object.keys(client.registry!.methods)).empty();
       client.register(monster);
       expect(Object.keys(client.registry!.methods)).not.empty();
-    });
-
-    it('can not register client service without registry', function () {
-      client.registry = undefined;
-      expect(() => client.register(monster)).throw(/register is not supported/);
     });
 
     it('call client service', async () => {

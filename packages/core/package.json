@@ -27,12 +27,12 @@
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
+    "@mindary/emittery": "^0.10.0",
     "@loopback/metadata": "^3.3.2",
     "@loopx/bufio": "^1.2.2",
     "@remly/schedule": "^0.4.3",
     "@remly/serializer": "^0.4.3",
     "debug": "^4.3.2",
-    "emittery": "^0.9.2",
     "micromatch": "^4.0.4",
     "shortid": "^2.2.16",
     "ts-essentials": "^7.0.2",
@@ -43,7 +43,7 @@
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@types/micromatch": "^4.0.2",
-    "@types/node": "^16.4.1",
+    "@types/node": "^16.4.2",
     "@types/shortid": "^0.0.29",
     "a-defer": "^0.1.1",
     "delay": "^5.0.0",

@@ -17,12 +17,15 @@ export interface ServiceInvokeRequest<T extends Connection = Connection> {
   connection?: T;
 }
 
-export interface Registry {
-  readonly methods: Record<string, Method>;
+export interface Registrable {
   register<T extends object>(service: T, opts?: RegisterOptions): void;
   register<T extends object, K extends keyof T>(service: T, names: (K | string)[], opts?: RegisterOptions): void;
   register(name: string, handler: Handler, opts?: RegisterOptions): void;
   unregister(pattern: string | string[]): string[];
+}
+
+export interface Registry extends Registrable {
+  readonly methods: Record<string, Method>;
   clear(): void;
   get(name: string): Method;
   call(name: string, params: any): Promise<any>;

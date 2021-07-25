@@ -1,4 +1,4 @@
-import Emittery from 'emittery';
+import {Emittery} from '@mindary/emittery';
 import {Packet} from '../packet';
 
 export abstract class Parser extends Emittery<{
