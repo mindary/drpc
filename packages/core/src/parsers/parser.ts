@@ -1,5 +1,6 @@
 import {Emittery} from '@mindary/emittery';
 import {Packet} from '../packet';
+import {AsyncOrSync} from 'ts-essentials';
 
 export abstract class Parser extends Emittery<{
   error: Error;
@@ -28,5 +29,5 @@ export abstract class Parser extends Emittery<{
     await this.emit('message', packet);
   }
 
-  abstract feed(data: Buffer): void;
+  abstract feed(data: Buffer): AsyncOrSync<void>;
 }

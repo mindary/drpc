@@ -33,7 +33,7 @@ export class Connection extends AbstractConnection {
   subscribe(signal: string, handler: SignalHandler): UnsubscribeFn {
     assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
-    return this.remoteEmittery.on(signal, handler);
+    return this.ree.on(signal, handler);
   }
 
   async signal(signal: string, data?: any) {

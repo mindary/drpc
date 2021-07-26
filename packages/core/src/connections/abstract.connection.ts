@@ -44,6 +44,8 @@ const DEFAULT_STALL_INTERVAL = 5 * 1000;
 const DEFAULT_REQUEST_TIMEOUT = 10 * 1000;
 const DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
 
+const DEFAULT_SERIALIZER = new JsonSerializer();
+
 /**
  * Connection
  * @constructor
@@ -58,7 +60,11 @@ export class AbstractConnection extends Emittery<ConnectionEventData> {
   public readonly interval: number;
   public readonly requestTimeout: number;
   public readonly connectTimeout: number;
-  protected readonly remoteEmittery: Emittery;
+  /**
+   * Remote EventEmitter
+   * @protected
+   */
+  protected readonly ree: Emittery;
 
   protected _ready: DeferredPromise<void>;
   protected _timer?: any;
@@ -73,10 +79,10 @@ export class AbstractConnection extends Emittery<ConnectionEventData> {
     super();
     this.options = options;
     this._id = options?.id ?? 'remly_' + shortid();
-    this.remoteEmittery = new Emittery();
+    this.ree = new Emittery();
 
     this.parser = options?.parser ?? new DefaultParser();
-    this.serializer = options?.serializer ?? new JsonSerializer();
+    this.serializer = options?.serializer ?? DEFAULT_SERIALIZER;
 
     this.interval = options?.interval ?? DEFAULT_STALL_INTERVAL;
     this.requestTimeout = options?.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT;
@@ -192,7 +198,7 @@ export class AbstractConnection extends Emittery<ConnectionEventData> {
   }
 
   protected reset() {
-    this.remoteEmittery.clearListeners();
+    this.ree.clearListeners();
     this._jobs = {};
     this._start = 0;
     this._sequence = 0;
@@ -339,7 +345,7 @@ export class AbstractConnection extends Emittery<ConnectionEventData> {
   }
 
   protected async handleSignal(event: string, data: Buffer) {
-    await this.remoteEmittery.emit(event, this.deserialize(data));
+    await this.ree.emit(event, this.deserialize(data));
   }
 
   protected async handleCall(id: number, name: string, data: Buffer) {
