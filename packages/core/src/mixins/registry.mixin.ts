@@ -2,19 +2,21 @@ import {assert} from 'ts-essentials';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, RegisterOptions, Registrable, Registry} from '../registry';
 import {Handler} from '../method';
-import {Connection} from '../connections';
+import {RpcInvoke} from '../types';
 
-export function RegistryMixin<T extends MixinTarget<Connection>>(superClass: T) {
+export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClass: T) {
   return class extends superClass implements Registrable {
     /**
      * Server or Client service registry
      */
     public registry: Registry;
 
+    public invoke: RpcInvoke;
+
     constructor(...args: any[]) {
       super(...args);
 
-      this.registry = this.options.registry ?? new DefaultRegistry();
+      this.registry = this.options?.registry ?? new DefaultRegistry();
 
       if (!this.invoke) {
         // set default registry based invoke function
@@ -30,9 +32,9 @@ export function RegistryMixin<T extends MixinTarget<Connection>>(superClass: T) 
         //    }
         //  });
         //
-        this.invoke = (name, params, reply) => {
+        this.invoke = (name, params) => {
           assert(this.registry, 'remote invoking is not supported for current connection');
-          return reply(this.registry.invoke({name, params, connection: this as any}));
+          return this.registry.invoke({name, params});
         };
       }
     }

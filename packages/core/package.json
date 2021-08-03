@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tikrbits/remly"
+    "url": "https://github.com/mindary/remly"
   },
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
@@ -27,23 +27,26 @@
     "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@mindary/emittery": "^0.10.0",
+    "@libit/bufio": "^0.4.2",
+    "@libit/emittery": "^0.10.1",
+    "@libit/error": "^0.3.4",
+    "@libit/timer": "^0.2.6",
     "@loopback/metadata": "^3.3.2",
-    "@loopx/bufio": "^1.2.2",
-    "@remly/schedule": "^0.4.3",
     "@remly/serializer": "^0.4.3",
+    "@remly/types": "^0.1.0",
+    "clean-stack": "^4.1.0",
     "debug": "^4.3.2",
     "micromatch": "^4.0.4",
     "shortid": "^2.2.16",
-    "ts-essentials": "^7.0.2",
-    "tslib": "^2.3.0"
+    "ts-essentials": "^7.0.3"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
+    "@types/debug": "^4.1.7",
     "@types/micromatch": "^4.0.2",
-    "@types/node": "^16.4.2",
+    "@types/node": "^16.4.10",
     "@types/shortid": "^0.0.29",
     "a-defer": "^0.1.1",
     "delay": "^5.0.0",

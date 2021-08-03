@@ -1,19 +1,19 @@
-import {AsyncOrSync} from 'ts-essentials';
-
-export type Constructor<T> = new (...args: any[]) => T;
+import {ValueOrPromise} from '@remly/types';
 
 export type SignalName = string | symbol;
-
-export type SignalHandler = (...args: any[]) => AsyncOrSync<any>;
 
 export type ExposeMetadata = {
   alias?: string;
 };
 
-export type InvokeReply = (result?: any) => AsyncOrSync<void>;
-
-export type InvokeFn = (name: string, params: any, reply: InvokeReply) => AsyncOrSync<void>;
-
 export interface Service {
   [name: string]: any;
 }
+
+export interface Callable {
+  call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
+}
+
+export type RpcInvoke = (name: string, params: any) => ValueOrPromise<any>;
+
+export type SignalHandler = (data: any) => ValueOrPromise<void>;

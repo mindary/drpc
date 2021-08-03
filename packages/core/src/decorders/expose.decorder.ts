@@ -1,7 +1,8 @@
-import {Constructor, ExposeMetadata} from '../types';
+import {MetadataMap} from '@loopback/metadata';
 import {MetadataInspector, MethodDecoratorFactory} from '@loopback/metadata';
+import {Constructor} from '@remly/types';
+import {ExposeMetadata} from '../types';
 import {EXPOSE_METADATA_LEY} from '../keys';
-import {MetadataMap} from '@loopback/metadata/src/types';
 
 export function expose(metadata?: ExposeMetadata | string) {
   if (typeof metadata === 'string') {

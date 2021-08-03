@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.4.5](https://github.com/tikrbits/remly/compare/@remly/core@0.4.4...@remly/core@0.4.5) (2021-07-24)
+## [0.4.5](https://github.com/mindary/remly/compare/@remly/core@0.4.4...@remly/core@0.4.5) (2021-07-24)
 
 **Note:** Version bump only for package @remly/core
 
@@ -11,7 +11,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [0.4.4](https://github.com/tikrbits/remly/compare/@remly/core@0.4.3...@remly/core@0.4.4) (2021-07-23)
+## [0.4.4](https://github.com/mindary/remly/compare/@remly/core@0.4.3...@remly/core@0.4.4) (2021-07-23)
 
 **Note:** Version bump only for package @remly/core
 
@@ -19,7 +19,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [0.4.3](https://github.com/tikrbits/remly/compare/@remly/core@0.4.2...@remly/core@0.4.3) (2021-07-23)
+## [0.4.3](https://github.com/mindary/remly/compare/@remly/core@0.4.2...@remly/core@0.4.3) (2021-07-23)
 
 **Note:** Version bump only for package @remly/core
 
@@ -27,7 +27,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [0.4.2](https://github.com/tikrbits/remly/compare/@remly/core@0.4.1...@remly/core@0.4.2) (2021-07-23)
+## [0.4.2](https://github.com/mindary/remly/compare/@remly/core@0.4.1...@remly/core@0.4.2) (2021-07-23)
 
 **Note:** Version bump only for package @remly/core
 
@@ -35,7 +35,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [0.4.1](https://github.com/tikrbits/remly/compare/@remly/core@0.4.0...@remly/core@0.4.1) (2021-07-05)
+## [0.4.1](https://github.com/mindary/remly/compare/@remly/core@0.4.0...@remly/core@0.4.1) (2021-07-05)
 
 **Note:** Version bump only for package @remly/core
 
@@ -43,12 +43,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-# [0.4.0](https://github.com/tikrbits/remly/compare/@remly/core@0.3.1...@remly/core@0.4.0) (2021-03-12)
+# [0.4.0](https://github.com/mindary/remly/compare/@remly/core@0.3.1...@remly/core@0.4.0) (2021-03-12)
 
 
 ### Features
 
-* upgrade dependencies ([de661db](https://github.com/tikrbits/remly/commit/de661dba31d91f1de566974e2b9c1f246b4ff682))
+* upgrade dependencies ([de661db](https://github.com/mindary/remly/commit/de661dba31d91f1de566974e2b9c1f246b4ff682))
 
 
 

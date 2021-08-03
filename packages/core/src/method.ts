@@ -1,4 +1,4 @@
-import {AsyncOrSync} from 'ts-essentials';
+import {ValueOrPromise} from '@remly/types';
 
 export type Handler = (...args: any[]) => any;
 

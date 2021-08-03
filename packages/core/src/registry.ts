@@ -1,20 +1,19 @@
 import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
 import {Handler, Method} from './method';
-import {UnimplementedError} from './error';
+import {UnimplementedError} from './errors';
 import {ExposeMetadata} from './types';
 import {getAllExposeMetadata} from './decorders';
-import {Connection} from './connections';
 
 export interface RegisterOptions {
   namespace?: string;
   scope?: any;
 }
 
-export interface ServiceInvokeRequest<T extends Connection = Connection> {
+export interface ServiceInvokeRequest {
   name: string;
   params?: any;
-  connection?: T;
+  // connection?: T;
 }
 
 export interface Registrable {

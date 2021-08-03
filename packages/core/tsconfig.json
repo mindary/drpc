@@ -11,10 +11,10 @@
   ],
   "references": [
     {
-      "path": "../schedule/tsconfig.json"
+      "path": "../serializer/tsconfig.json"
     },
     {
-      "path": "../serializer/tsconfig.json"
+      "path": "../types/tsconfig.json"
     }
   ]
 }

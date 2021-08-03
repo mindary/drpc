@@ -5,16 +5,13 @@
   },
   "references": [
     {
-      "path": "examples/example-greeting/tsconfig.json"
-    },
-    {
-      "path": "extensions/serializer-msgpack/tsconfig.json"
+      "path": "packages/client/tsconfig.json"
     },
     {
       "path": "packages/core/tsconfig.json"
     },
     {
-      "path": "packages/schedule/tsconfig.json"
+      "path": "packages/serializer-msgpack/tsconfig.json"
     },
     {
       "path": "packages/serializer/tsconfig.json"
@@ -23,16 +20,10 @@
       "path": "packages/server/tsconfig.json"
     },
     {
-      "path": "packages/transport-tests/tsconfig.json"
+      "path": "packages/testlab/tsconfig.json"
     },
     {
-      "path": "transports/tcp/tsconfig.json"
-    },
-    {
-      "path": "transports/worker/tsconfig.json"
-    },
-    {
-      "path": "transports/ws/tsconfig.json"
+      "path": "packages/types/tsconfig.json"
     }
   ],
   "files": []

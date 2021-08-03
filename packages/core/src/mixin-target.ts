@@ -1,4 +1,4 @@
-import {Constructor} from './types';
+import {Constructor} from '@remly/types';
 
 /**
  * A replacement for `typeof Target` to be used in mixin class definitions.
