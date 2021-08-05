@@ -1,8 +1,8 @@
 import {ValueOrPromise} from '@remly/types';
 import debugFactory from 'debug';
 import {Exception} from '@libit/error/exception';
-import {ConnectMessage, HeartbeatMessage, OpenMessage, Packet, Transport} from '..';
 import {Socket, SocketOptions} from './socket';
+import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 
 const debug = debugFactory('remly:core:socket:client');
 
@@ -16,9 +16,9 @@ export interface ClientSocketOptions extends SocketOptions {
 export class ClientSocket extends Socket {
   public auth?: Auth;
 
-  constructor(transport: Transport, options?: Partial<ClientSocketOptions>) {
+  constructor(options?: Partial<ClientSocketOptions>) {
     options = options ?? {};
-    super(transport, options);
+    super(options);
     this.auth = options.auth;
   }
 

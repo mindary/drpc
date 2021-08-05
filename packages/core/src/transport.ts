@@ -1,19 +1,29 @@
 import debugFactory from 'debug';
 import {ValueOrPromise} from '@remly/types';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
+import {ErrorLike} from '@libit/error/types';
 import {ChainedError} from '@libit/error/chained';
 import {Decoder, StandardDecoder} from './decoders';
 import {Packet} from './packet';
 
-const debug = debugFactory('remly:transport');
+const debug = debugFactory('remly:core:transport');
 
 export type TransportState = 'open' | 'closing' | 'closed';
 
-export class TransportError extends ChainedError {}
+export class TransportError extends ChainedError {
+  constructor(public readonly transport: Transport, cause: ErrorLike) {
+    super(cause);
+  }
+}
+
+export interface TransportHandler {
+  handle(transport: Transport): void;
+}
 
 export interface TransportEvents {
+  open: undefined;
   close: string | Error;
-  error: Error;
+  error: TransportError;
   packet: Packet;
 }
 
@@ -23,20 +33,25 @@ export interface TransportOptions {
 
 export abstract class Transport extends Emittery<TransportEvents> {
   public sid: string;
-  public state: TransportState;
+  public state?: TransportState;
   public decoder: Decoder;
   private unsubs: UnsubscribeFn[] = [];
 
   protected constructor(options?: TransportOptions) {
     super();
     options = options ?? {};
-    this.state = 'open';
     this.decoder = options.decoder ?? new StandardDecoder();
     this.setup();
   }
 
   isOpen() {
     return this.state === 'open';
+  }
+
+  async ready() {
+    if (!this.isOpen()) {
+      return this.once('open');
+    }
   }
 
   async close(reason?: string | Error) {
@@ -48,23 +63,30 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   async send(data: Buffer) {
+    await this.ready();
     return this.doSend(data);
   }
 
   protected setup() {
     this.unsubs.push(
-      this.decoder.on('packet', this.handlePacket.bind(this)),
-      this.decoder.on('error', this.handleError.bind(this)),
+      this.decoder.on('packet', this.onPacket.bind(this)),
+      this.decoder.on('error', this.onError.bind(this)),
     );
   }
 
-  protected async handlePacket(packet: Packet) {
+  protected open() {
+    this.state = 'open';
+    // eslint-disable-next-line no-void
+    void this.emit('open');
+  }
+
+  protected async onPacket(packet: Packet) {
     return this.emit('packet', packet);
   }
 
-  protected async handleError(err: string | Error) {
+  protected async onError(err: string | Error) {
     if (this.listenerCount('error')) {
-      const error = new TransportError(err);
+      const error = new TransportError(this, err);
       await this.emit('error', error);
     } else {
       const message = typeof err === 'string' ? err : err.message;
@@ -72,7 +94,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
     }
   }
 
-  protected handleData(data: Buffer): ValueOrPromise<void> {
+  protected onData(data: Buffer): ValueOrPromise<void> {
     if (this.isOpen()) {
       return this.decoder.feed(data);
     }

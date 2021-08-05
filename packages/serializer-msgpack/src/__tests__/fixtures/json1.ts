@@ -20,4 +20,5 @@ export const json1 = {
       },
     },
   },
+  greeting: Buffer.from('Hello World'),
 };

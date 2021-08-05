@@ -23,6 +23,7 @@ import {
 } from '../messages';
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType} from '../packet-type';
+import {RemoteService, Service} from '../remote-service';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -44,6 +45,7 @@ export interface SocketOptions {
   connectTimeout: number;
   requestTimeout: number;
   invoke?: RpcInvoke;
+  transport?: Transport;
 }
 
 interface SocketEvents {
@@ -68,10 +70,9 @@ const DEFAULT_OPTIONS: SocketOptions = {
   requestTimeout: 10 * 1000,
 };
 
-/**
- * Socket class (abstract).
- */
-export abstract class Socket extends Emittery<SocketEvents> {
+export class SocketEmittery extends Emittery<SocketEvents> {}
+
+export abstract class Socket extends SocketEmittery {
   public id?: string;
   public transport: Transport;
   public state: SocketState;
@@ -91,7 +92,7 @@ export abstract class Socket extends Emittery<SocketEvents> {
   protected requests: RequestRegistry = new RequestRegistry();
   protected alive: Alive;
 
-  protected constructor(transport: Transport, options: Partial<SocketOptions> = {}) {
+  protected constructor(options: Partial<SocketOptions> = {}) {
     super();
 
     this.options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -104,8 +105,9 @@ export abstract class Socket extends Emittery<SocketEvents> {
     this.serializer = options.serializer ?? new JsonSerializer();
     this.invoke = options.invoke;
 
-    this.setTransport(transport);
-    this.setup();
+    if (this.options.transport) {
+      this.setTransport(this.options.transport);
+    }
   }
 
   isOpen() {
@@ -117,6 +119,10 @@ export abstract class Socket extends Emittery<SocketEvents> {
   }
 
   setTransport(transport: Transport) {
+    if (this.transport?.isOpen()) {
+      throw new Error('current transport is active. can not re-set transport on a active socket');
+    }
+    assert(transport, 'Must pass a transport');
     this.transport = transport;
 
     this.unsubs.push(
@@ -124,6 +130,9 @@ export abstract class Socket extends Emittery<SocketEvents> {
       this.transport.on('close', this.doClose.bind(this)),
       this.transport.on('packet', this.handlePacket.bind(this)),
     );
+
+    this.setup();
+    return this;
   }
 
   async close() {
@@ -131,17 +140,17 @@ export abstract class Socket extends Emittery<SocketEvents> {
     await this.closeTransport();
   }
 
+  get lastActive(): number {
+    return this.alive.lastActive;
+  }
+
+  service<S extends Service>(namespace?: string): RemoteService<S> {
+    return new RemoteService<Service>(this, namespace);
+  }
+
   async call(method: string, params?: any, timeout?: number) {
     assert(typeof method === 'string', 'Event must be a string.');
-
-    if (!this.isConnected()) {
-      if (this.isOpen()) {
-        await this.once('connected');
-      } else {
-        throw new Error('connection is not active');
-      }
-    }
-
+    await this.assertOrWaitConnected();
     const req = this.requests.acquire(timeout ?? this.requestTimeout);
     await this.send('call', {id: req.id, name: method, payload: params});
     return req.promise;
@@ -155,17 +164,13 @@ export abstract class Socket extends Emittery<SocketEvents> {
 
   async signal(signal: string, data?: any) {
     assert(typeof signal === 'string', 'Event must be a string.');
-    if (this.isOpen() && !this.isConnected()) {
-      await this.once('connected');
-    } else {
-      throw new Error('connection is not active');
-    }
-
+    await this.assertOrWaitConnected();
     await this.send('signal', {name: signal, payload: data});
   }
 
   async doError(error: any) {
-    debug('transport error', error);
+    debug('transport error =>', error);
+    await this.emit('error', error);
     await this.doClose('transport error');
   }
 
@@ -235,9 +240,10 @@ export abstract class Socket extends Emittery<SocketEvents> {
   async send<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {
     if (this.isOpen()) {
       debug('sending packet "%s" (%j)', type, message);
+      const payload = message.payload == null ? DUMMY : message.payload;
       message = {
         ...message,
-        payload: message.payload == null ? DUMMY : this.serializer.serialize(message.payload),
+        payload: this.serializer.serialize(payload),
       };
 
       const packet = Packet.create(type, message);
@@ -247,6 +253,16 @@ export abstract class Socket extends Emittery<SocketEvents> {
       } catch (e) {
         // TODO why no exception throw up and terminate the process
         console.error(e);
+      }
+    }
+  }
+
+  protected async assertOrWaitConnected() {
+    if (!this.isConnected()) {
+      if (this.isOpen()) {
+        await this.once('connected');
+      } else {
+        throw new Error('connection is not active');
       }
     }
   }
@@ -380,6 +396,7 @@ export abstract class Socket extends Emittery<SocketEvents> {
   protected setup() {
     this.state = 'open';
 
+    this.connectTimer?.cancel();
     this.connectTimer = new TimeoutTimer(async () => {
       debug('connect timeout, close the client');
       await this.emit('connect_error', new ConnectTimeoutError('Timed out waiting for connection'));

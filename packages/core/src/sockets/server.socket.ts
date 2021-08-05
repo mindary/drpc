@@ -14,7 +14,7 @@ export class ServerSocket extends Socket {
 
   constructor(id: string, transport: Transport, options?: Partial<ServerSocketOptions>) {
     options = options ?? {};
-    super(transport, {...options, id});
+    super({...options, id, transport});
     this.handshake = {} as any;
     this.connect = options.connect ?? noop;
     process.nextTick(() => this.open());

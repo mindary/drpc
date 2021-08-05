@@ -1,0 +1,44 @@
+{
+  "name": "@remly/threads-worker",
+  "description": "The remly worker threads worker library",
+  "version": "0.1.0",
+  "keywords": [],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=14"
+  },
+  "author": "Yuan Tao",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "lb-tsc",
+    "clean": "lb-clean remly-threads-worker*.tgz dist *.tsbuildinfo package",
+    "pretest": "npm run clean && npm run build",
+    "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
+    "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
+    "verify": "npm pack && tar xf remly-threads-worker*.tgz && tree package && npm run clean"
+  },
+  "dependencies": {
+    "@remly/client": "^0.1.0",
+    "@remly/core": "^0.4.5"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.0",
+    "@loopback/eslint-config": "^11.0.0",
+    "@loopback/testlab": "^3.4.2",
+    "@types/node": "^16.4.12"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ],
+  "browser": {
+    "./dist/port.js": "./dist/port-browser.js"
+  }
+}

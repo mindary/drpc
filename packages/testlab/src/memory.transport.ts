@@ -11,6 +11,7 @@ export class MemoryTransport extends Transport {
   constructor(options: MemoryTransportOptions = {}) {
     super(options);
     this.closeSensitive = options.closeSensitive;
+    this.open();
   }
 
   pipe(dest: MemoryTransport) {
@@ -26,7 +27,7 @@ export class MemoryTransport extends Transport {
   }
 
   protected doSend(data: Buffer) {
-    return this.dest.handleData(data);
+    return this.dest.onData(data);
   }
 }
 

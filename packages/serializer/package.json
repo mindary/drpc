@@ -27,13 +27,12 @@
     "verify": "npm pack && tar xf remly-serializer*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.4.10"
+    "@types/node": "^16.4.12"
   },
   "files": [
     "README.md",

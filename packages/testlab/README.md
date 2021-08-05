@@ -1,3 +1,3 @@
-# @remly/transport-tests
+# @remly/testlab
 
-> The test suites for remly common testings
+> A collection of test utilities we use to write remly tests

@@ -8,7 +8,7 @@ import {generateId} from './utils';
 
 const debug = debugFactory('remly:server:app');
 
-export interface ServerDataEvents {
+export interface ApplicationEvents {
   error: Error;
   connect: Connection;
   connection: Connection;
@@ -16,7 +16,7 @@ export interface ServerDataEvents {
   connectionClose: Connection;
 }
 
-export interface ServerOptions {
+export interface ApplicationOptions {
   registry?: Registry;
   serializer?: Serializer;
   invoke?: RpcInvoke;
@@ -24,12 +24,12 @@ export interface ServerOptions {
   requestTimeout: number;
 }
 
-export const DEFAULT_APP_OPTIONS: ServerOptions = {
+export const DEFAULT_APPLICATION_OPTIONS: ApplicationOptions = {
   connectTimeout: 45000,
   requestTimeout: 10000,
 };
 
-export class ApplicationEmittery extends Emittery<ServerDataEvents> {
+export class ApplicationEmittery extends Emittery<ApplicationEvents> {
   //
 }
 
@@ -37,13 +37,13 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   public readonly serializer: Serializer;
   public readonly connections: Map<string, Connection> = new Map();
 
-  protected options: ServerOptions;
+  protected options: ApplicationOptions;
   protected middlewares: MiddlewareInterceptor[] = [];
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  constructor(options: Partial<ServerOptions> = {}) {
+  constructor(options: Partial<ApplicationOptions> = {}) {
     super();
-    this.options = Object.assign({}, DEFAULT_APP_OPTIONS, options);
+    this.options = Object.assign({}, DEFAULT_APPLICATION_OPTIONS, options);
     this.connectTimeout = this.options.connectTimeout;
     this.serializer = this.options.serializer ?? new JsonSerializer();
   }
@@ -55,7 +55,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   }
 
   set connectTimeout(timeout: number | undefined) {
-    this._connectTimeout = timeout ? timeout : DEFAULT_APP_OPTIONS.connectTimeout;
+    this._connectTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.connectTimeout;
   }
 
   private _requestTimeout: number;
@@ -65,7 +65,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   }
 
   set requestTimeout(timeout: number | undefined) {
-    this._requestTimeout = timeout ? timeout : DEFAULT_APP_OPTIONS.requestTimeout;
+    this._requestTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.requestTimeout;
   }
 
   use(fn: MiddlewareInterceptor): this {

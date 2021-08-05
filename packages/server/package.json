@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@libit/emittery": "^0.10.1",
-    "@libit/error": "^0.3.4",
+    "@libit/error": "^0.3.6",
     "@libit/interceptor": "^0.2.1",
-    "@libit/timer": "^0.2.6",
+    "@libit/timer": "^0.2.8",
     "@remly/core": "^0.4.5",
     "@remly/types": "^0.1.0",
     "debug": "^4.3.2",
@@ -44,7 +44,7 @@
     "@remly/client": "^0.1.0",
     "@remly/testlab": "^0.4.5",
     "@types/debug": "^4.1.7",
-    "@types/node": "^16.4.10",
+    "@types/node": "^16.4.12",
     "@types/uniqid": "^5.3.1"
   },
   "files": [

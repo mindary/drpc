@@ -1,8 +1,8 @@
 import {givenMemoryTransportPair, MonsterService, monster} from '@remly/testlab';
+import {expect} from '@loopback/testlab';
 import {Transport} from '@remly/core';
 import {Client} from '@remly/client';
 import {Application} from '../../application';
-import {expect} from '@loopback/testlab';
 
 describe('Application', function () {
   it('should work', async () => {
@@ -34,7 +34,7 @@ describe('Application', function () {
 
   function givenConnectionPair(): [Client, Transport] {
     const [t1, t2] = givenMemoryTransportPair();
-    const client = new Client(t1);
+    const client = new Client().setTransport(t1);
     return [client, t2];
   }
 });

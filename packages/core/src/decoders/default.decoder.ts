@@ -3,7 +3,7 @@ import {Header, Packet} from '../packet';
 import {crc32} from '../crc32';
 
 export class DefaultDecoder extends Decoder {
-  async feed(data: Buffer): Promise<void> {
+  protected async doFeed(data: Buffer): Promise<void> {
     let header, packet;
 
     try {
@@ -25,9 +25,5 @@ export class DefaultDecoder extends Decoder {
     }
 
     await this.packet(packet);
-  }
-
-  dispose(): void {
-    // no-op
   }
 }

@@ -6,7 +6,7 @@ import {ConnectTimeoutError} from '../../errors';
 import {Packet} from '../../packet';
 import {PacketTypeMap} from '../../packet-type';
 
-describe('Connect', function () {
+describe('Core - Connect', function () {
   describe('connect handshake', function () {
     it('should emit correct sequential events', async () => {
       const [serverSocket, clientSocket] = givenSocketPair('test');

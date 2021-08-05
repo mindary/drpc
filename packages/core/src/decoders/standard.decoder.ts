@@ -22,14 +22,14 @@ export class StandardDecoder extends Decoder {
     this.header = undefined;
   }
 
-  /**
-   * Feed data to the parser.
-   * @param {Buffer} data
-   */
+  dispose(): void {
+    this.reset();
+  }
 
-  feed(data: Buffer) {
+  protected async doFeed(data: Buffer): Promise<void> {
+    const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
     this.total += data.length;
-    this.pending.push(data);
+    this.pending.push(buf);
 
     while (this.total >= this.waiting) {
       let off = 0,
@@ -89,9 +89,5 @@ export class StandardDecoder extends Decoder {
     }
 
     this.packet(packet);
-  }
-
-  dispose(): void {
-    this.reset();
   }
 }

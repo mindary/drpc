@@ -15,6 +15,14 @@ export abstract class Decoder extends Emittery<{
     return (this.constructor as any).MAX_MESSAGE;
   }
 
+  feed(data: Buffer | Uint8Array | string): ValueOrPromise<void> {
+    return this.doFeed(Buffer.isBuffer(data) ? data : Buffer.from(data));
+  }
+
+  dispose(): void {
+    //
+  }
+
   /**
    * Emit an error.
    * @private
@@ -29,6 +37,5 @@ export abstract class Decoder extends Emittery<{
     await this.emit('packet', packet);
   }
 
-  abstract feed(data: Buffer): ValueOrPromise<void>;
-  abstract dispose(): void;
+  protected abstract doFeed(data: Buffer): ValueOrPromise<void>;
 }

@@ -60,6 +60,10 @@ export class Alive extends Emittery<AliveEvents> {
     this._timeout = keepalive * 1.5;
   }
 
+  get lastActive(): number {
+    return this._lastActive;
+  }
+
   touch() {
     this._lastActive = Date.now();
   }

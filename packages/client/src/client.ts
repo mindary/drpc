@@ -1,3 +1,9 @@
-import {ClientSocket, RegistryMixin, RemoveServiceMixin} from '@remly/core';
+import {ClientSocket, ClientSocketOptions, RegistryMixin} from '@remly/core';
 
-export class Client extends RegistryMixin(RemoveServiceMixin(ClientSocket)) {}
+export interface ClientOptions extends ClientSocketOptions {}
+
+export class Client extends RegistryMixin(ClientSocket) {
+  constructor(options?: Partial<ClientOptions>) {
+    super(options);
+  }
+}
