@@ -23,7 +23,7 @@ import {TCPClient} from '@remly/tcp-client';
   remapp.on('connection', async connection => {
     await connection.signal('message', 'Welcome');
   });
-  
+
   // setup server (tcp, websocket or worker)
   const server = new TCPServer(remapp, {
     port: 3000,

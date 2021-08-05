@@ -9,7 +9,7 @@ const serializers = [
   new MsgpackSerializer(),
 ];
 
-describe('RCore - PC', function() {
+describe('RCore - PC', function () {
   for (const serializer of serializers) {
     const serializerName = serializer.constructor.name;
     const options = {server: {serializer}, client: {serializer}};
@@ -30,12 +30,12 @@ describe('RCore - PC', function() {
         clock.restore();
       });
 
-      it('should have correct serializer', function() {
+      it('should have correct serializer', function () {
         expect(serverSocket.serializer).equal(serializer);
         expect(clientSocket.serializer).equal(serializer);
       });
 
-      describe(`call`, function() {
+      describe(`call`, function () {
         it('call and return with ack', async () => {
           serverSocket.invoke = (name, params) => params;
           const result = await clientSocket.call('echo', 'hello');
@@ -57,7 +57,7 @@ describe('RCore - PC', function() {
         });
       });
 
-      describe(`subscribe and signal`, function() {
+      describe(`subscribe and signal`, function () {
         it('should work', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
           const result = new Promise(resolve => clientSocket.subscribe('message', resolve));

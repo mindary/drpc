@@ -65,6 +65,7 @@ Payload size is implied by the body size sent in the header.
 ## Messages
 
 ### `OPEN(10)` packet
+
 ```c
 typedef struct {
   packet_header_t header;
@@ -77,6 +78,7 @@ typedef struct {
 The `OPEN` message is sent from server to client to notify that client should begin handshake.
 
 ### `COONECT(11)` packet
+
 ```c
 typedef struct {
   packet_header_t header;
@@ -84,13 +86,15 @@ typedef struct {
 } connect_packet_t;
 ```
 
-The `CONNECT` message has two stages. 
-1. First is sent from client after client received `OPEN` message from server to request to connect with authentication 
-information payload.
-2. Second is sent from server after server received first `CONNECT` message from client to response handshake information 
-if successful.
+The `CONNECT` message has two stages.
+
+1. First is sent from client after client received `OPEN` message from server to request to connect with authentication
+   information payload.
+2. Second is sent from server after server received first `CONNECT` message from client to response handshake
+   information if successful.
 
 ### `CONNECT_ERROR(12)` packet
+
 ```c
 typedef struct {
   packet_header_t header;
@@ -113,9 +117,9 @@ typedef struct {
 } signal_packet_t;
 ```
 
-The SIGNAL message is sent to a remote node without any expectation of a response. Signal names are
-serialized as strings within the message itself, prefixed by a 1 byte size. If an unknown signal is received, the client
-SHOULD ignore the message without disconnecting.
+The SIGNAL message is sent to a remote node without any expectation of a response. Signal names are serialized as
+strings within the message itself, prefixed by a 1 byte size. If an unknown signal is received, the client SHOULD ignore
+the message without disconnecting.
 
 ### `CALL(30)` packet
 
@@ -129,10 +133,10 @@ typedef struct {
 } call_packet_t;
 ```
 
-The CALL message is similar to the SIGNAL message with one difference: it expects a response in a
-reasonable amount of time, in the form of an ACK message. Each CALL message includes a 4 byte `id`, which will be used
-to correlate an incoming ACK message. If no ACK with a corresponding `id` is received within a preset timeout, the
-client SHOULD ignore any future ACKs.
+The CALL message is similar to the SIGNAL message with one difference: it expects a response in a reasonable amount of
+time, in the form of an ACK message. Each CALL message includes a 4 byte `id`, which will be used to correlate an
+incoming ACK message. If no ACK with a corresponding `id` is received within a preset timeout, the client SHOULD ignore
+any future ACKs.
 
 ### `ACK(31)` packet
 
@@ -144,8 +148,8 @@ typedef struct {
 } ack_packet_t;
 ```
 
-The ACK message is sent in response to a CALL message in the signal of a successful call. The
-payload represents the result of the call. The corresponding CALL `id` field must be reserialized in the ACK message.
+The ACK message is sent in response to a CALL message in the signal of a successful call. The payload represents the
+result of the call. The corresponding CALL `id` field must be reserialized in the ACK message.
 
 If an ACK message is received without a corresponding `id` internally, the receiving node SHOULD ignore the message
 without disconnection.
@@ -162,9 +166,8 @@ typedef struct {
 } error_packet_t;
 ```
 
-The ERROR message is sent in response to a CALL message in the signal of a unsuccessful call. The
-body includes the corresponding CALL `id` as well as an error `code` and `msg` string. The `code` shall be interpreted
-by the client.
+The ERROR message is sent in response to a CALL message in the signal of a unsuccessful call. The body includes the
+corresponding CALL `id` as well as an error `code` and `msg` string. The `code` shall be interpreted by the client.
 
 If an ERROR message is received without a corresponding `id` internally, the receiving node SHOULD ignore the message
 without disconnection.
@@ -178,8 +181,8 @@ typedef struct {
 } ping_packet_t;
 ```
 
-The PING message is used for connection keep alive and stall recognition. Each PING is serialized
-with an 8 byte nonce. This nonce is to be sent back in a corresponding PONG message.
+The PING message is used for connection keep alive and stall recognition. Each PING is serialized with an 8 byte nonce.
+This nonce is to be sent back in a corresponding PONG message.
 
 If a corresponding PONG is not received within 30 seconds, the sending client SHOULD invoke stall behavior.
 
@@ -192,8 +195,8 @@ typedef struct {
 } pong_packet_t;
 ```
 
-The PONG message is sent in response to a PING message. It includes the same 8 byte nonce from the
-originating PING message.
+The PONG message is sent in response to a PING message. It includes the same 8 byte nonce from the originating PING
+message.
 
 ## Stall Behavior and Misbehavior
 
