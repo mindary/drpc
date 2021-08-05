@@ -7,7 +7,7 @@ A binary-only RPC protocol for multiple transports such as TCP, WebSocket, Worke
 ### TCPServer and TCPClient
 
 ```js
-import {Application} from '@remly/core';
+import {Application} from '@remly/server';
 import {TCPServer} from '@remly/tcp';
 import {TCPClient} from '@remly/tcp-client';
 

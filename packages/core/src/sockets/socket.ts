@@ -70,8 +70,7 @@ const DEFAULT_OPTIONS: SocketOptions = {
   requestTimeout: 10 * 1000,
 };
 
-export class SocketEmittery extends Emittery<SocketEvents> {
-}
+export class SocketEmittery extends Emittery<SocketEvents> {}
 
 export abstract class Socket extends SocketEmittery {
   public id?: string;
@@ -353,7 +352,7 @@ export abstract class Socket extends SocketEmittery {
     }
 
     // silence further transport errors and prevent uncaught exceptions
-    this.transport.on('error', function() {
+    this.transport.on('error', function () {
       debug('error triggered by discarded transport');
     });
 
