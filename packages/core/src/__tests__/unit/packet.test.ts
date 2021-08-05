@@ -1,5 +1,5 @@
 import {expect} from '@loopback/testlab';
-import {PacketTypeType} from '../../packet-type';
+import {PacketTypeType} from '../../packet-types';
 import {PacketMessages} from '../../messages';
 import {Packet} from '../../packet';
 

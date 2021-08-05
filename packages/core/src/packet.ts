@@ -2,7 +2,7 @@ import {BufferReader, StaticWriter, Writer} from '@libit/bufio';
 import {crc32} from './crc32';
 import {Packers} from './packers';
 import {PacketMessages} from './messages';
-import {PacketType, PacketTypeKeyType, PacketTypeType, PacketTypeValueType} from './packet-type';
+import {PacketType, PacketTypeKeyType, PacketTypeType, PacketTypeValueType} from './packet-types';
 
 export interface HeaderProps {
   type: PacketTypeValueType;

@@ -2,15 +2,15 @@ import {ValueOf} from 'ts-essentials';
 import {ReverseMap} from '@remly/types';
 
 export const PacketType = {
-  open: 11,
-  connect: 12,
-  connect_error: 13,
-  ping: 14,
-  pong: 15,
-  call: 21,
-  ack: 22,
-  error: 23,
-  signal: 30,
+  open: 10,
+  connect: 11,
+  connect_error: 12,
+  signal: 20,
+  call: 30,
+  ack: 31,
+  error: 32,
+  ping: 40,
+  pong: 41,
 };
 
 export type PacketTypeType = typeof PacketType;

@@ -1,7 +1,7 @@
 import {BufferReader, Writer} from '@libit/bufio';
 import {Packer} from './types';
 import {PacketMessages} from '../messages';
-import {PacketType, ReversedPacketTypeType} from '../packet-type';
+import {PacketType, ReversedPacketTypeType} from '../packet-types';
 import {open} from './open';
 import {ping} from './ping';
 import {pong} from './pong';

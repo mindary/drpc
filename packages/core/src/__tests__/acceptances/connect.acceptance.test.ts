@@ -4,7 +4,7 @@ import {givenSocketPair, onceConnected} from '../support';
 import {ClientSocket, ServerSocket} from '../../sockets';
 import {ConnectTimeoutError} from '../../errors';
 import {Packet} from '../../packet';
-import {PacketTypeMap} from '../../packet-type';
+import {PacketTypeMap} from '../../packet-types';
 
 describe('Core - Connect', function () {
   describe('connect handshake', function () {

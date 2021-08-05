@@ -7,23 +7,38 @@ A binary-only RPC protocol for multiple transports such as TCP, WebSocket, Worke
 ### TCPServer and TCPClient
 
 ```js
-const {TCPServer, TCPClient} = require('@remly/tcp');
+import {Application} from '@remly/core';
+import {TCPServer} from '@remly/tcp';
+import {TCPClient} from '@remly/tcp-client';
 
 (async () => {
-  const server = TCPServer.createServer({
-    port: 3000,
+  // *******************
+  // Setup Server
+  // *******************
+  // prepare applicaiton
+  const remapp = new Application();
+  // register a server method
+  remapp.register('greet', name => `Hello, ${name}!`);
+  // signal every client on connected
+  remapp.on('connection', async connection => {
+    await connection.signal('message', 'Welcome');
   });
-  server.register('greet', name => `Hello, ${name}!`);
-  server.on('connection', connection => {
-    // eslint-disable-next-line no-void
-    void connection.signal('message', 'Welcome');
+  
+  // setup server (tcp, websocket or worker)
+  const server = new TCPServer(remapp, {
+    port: 3000,
   });
   await server.start();
 
+  // *******************
+  // Setup Client
+  // *******************
   const client = TCPClient.connect(3000);
-  client.listen('message', message => {
-    console.log(message);
+  // subscribe "message" signal
+  client.subscribe('message', message => {
+    console.log(message); // => Welcome
   });
+  // call remote server method
   const result = await client.call('greet', ['Tom']);
   console.log(result);
 

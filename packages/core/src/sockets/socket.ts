@@ -22,7 +22,7 @@ import {
   SignalMessage,
 } from '../messages';
 import {Packet} from '../packet';
-import {PacketType, PacketTypeKeyType} from '../packet-type';
+import {PacketType, PacketTypeKeyType} from '../packet-types';
 import {RemoteService, Service} from '../remote-service';
 
 const debug = debugFactory('remly:core:socket');

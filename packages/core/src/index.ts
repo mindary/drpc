@@ -2,7 +2,7 @@ export * from './types';
 export * from './errors';
 export * from './alive';
 export * from './messages';
-export * from './packet-type';
+export * from './packet-types';
 export * from './packers';
 export * from './packet';
 export * from './utils';
