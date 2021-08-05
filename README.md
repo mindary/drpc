@@ -1,6 +1,6 @@
 # remly
 
-A binary-only RPC protocol for multiple transports such as TCP, WebSocket, Worker and so on.
+An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker and so on.
 
 ## Usage
 
@@ -60,8 +60,8 @@ inefficient.
 Furthermore, most event-based abstractions on top of websockets introduce an enormous amount of bloat due to the
 inclusion of fallback transports (xhr, long-polling, etc) as well as even higher level abstractions (channels).
 
-Remly works only with binary data and gives you a simple event based interface without anything else. No channels, no
-fallback, no complicated handshakes or feature testing over HTTP.
+Remly works with efficient msgpack serializers or your custom serializers and gives you a simple event based interface
+without anything else. No channels, no fallback, no complicated handshakes or feature testing over HTTP.
 
 ## Specification
 
