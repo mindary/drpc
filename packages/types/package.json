@@ -1,9 +1,8 @@
 {
   "name": "@remly/types",
   "description": "Common types shared in remly packages",
-  "version": "0.1.0",
-  "keywords": [
-  ],
+  "version": "0.2.0",
+  "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
@@ -19,8 +18,6 @@
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
     "verify": "npm pack && tar xf remly-types*.tgz && tree package && npm run clean"
-  },
-  "dependencies": {
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",

@@ -1,7 +1,7 @@
 {
   "name": "@remly/serializer",
   "description": "The serialization framework for remly",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,8 +25,6 @@
     "test": "lb-mocha \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
     "verify": "npm pack && tar xf remly-serializer*.tgz && tree package && npm run clean"
-  },
-  "dependencies": {
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
