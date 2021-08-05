@@ -1,7 +1,7 @@
 {
   "name": "@remly/tcp",
   "description": "The remly TCP server library",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,7 @@
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.5.1",
-    "@remly/testsuite": "^0.2.1",
+    "@remly/testsuite": "^0.2.2",
     "@remly/threads-worker": "^0.2.1",
     "@types/node": "^16.4.12",
     "get-port": "^5.1.1"

@@ -1,7 +1,7 @@
 {
   "name": "@remly/testsuite",
   "description": "The test suite for remly transports",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
