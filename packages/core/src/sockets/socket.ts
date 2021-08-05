@@ -4,7 +4,7 @@ import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
-import {JsonSerializer, Serializer} from '@remly/serializer';
+import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {RequestRegistry} from '../reqreg';
@@ -24,6 +24,7 @@ import {
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType} from '../packet-types';
 import {RemoteService, Service} from '../remote-service';
+import {MsgpackSerializer} from '@remly/serializer-msgpack';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -39,7 +40,7 @@ export type Connect = (handshake: Handshake) => ValueOrPromise<any>;
 
 export interface SocketOptions {
   id?: string;
-  serializer: Serializer;
+  serializer?: Serializer;
   interval: number;
   keepalive: number;
   connectTimeout: number;
@@ -63,14 +64,14 @@ interface SocketEvents {
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
-  serializer: new JsonSerializer(),
   interval: 5 * 1000,
   keepalive: 10 * 1000,
   connectTimeout: 20 * 1000,
   requestTimeout: 10 * 1000,
 };
 
-export class SocketEmittery extends Emittery<SocketEvents> {}
+export class SocketEmittery extends Emittery<SocketEvents> {
+}
 
 export abstract class Socket extends SocketEmittery {
   public id?: string;
@@ -102,12 +103,16 @@ export abstract class Socket extends SocketEmittery {
     this.connectTimeout = this.options.connectTimeout;
     this.requestTimeout = this.options.requestTimeout;
 
-    this.serializer = options.serializer ?? new JsonSerializer();
+    this.serializer = options.serializer ?? new MsgpackSerializer();
     this.invoke = options.invoke;
 
     if (this.options.transport) {
       this.setTransport(this.options.transport);
     }
+  }
+
+  get lastActive(): number {
+    return this.alive.lastActive;
   }
 
   isOpen() {
@@ -138,10 +143,6 @@ export abstract class Socket extends SocketEmittery {
   async close() {
     if (!this.isOpen()) return;
     await this.closeTransport();
-  }
-
-  get lastActive(): number {
-    return this.alive.lastActive;
   }
 
   service<S extends Service>(namespace?: string): RemoteService<S> {
@@ -352,7 +353,7 @@ export abstract class Socket extends SocketEmittery {
     }
 
     // silence further transport errors and prevent uncaught exceptions
-    this.transport.on('error', function () {
+    this.transport.on('error', function() {
       debug('error triggered by discarded transport');
     });
 

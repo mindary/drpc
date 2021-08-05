@@ -1,10 +1,11 @@
 import debugFactory from 'debug';
-import {JsonSerializer, Registry, RegistryMixin, RpcInvoke, Serializer, Transport} from '@remly/core';
+import {Registry, RegistryMixin, RpcInvoke, Serializer, Transport} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {GenericInterceptorChain} from '@libit/interceptor';
 import {Connection} from './connection';
 import {MiddlewareInterceptor} from './types';
 import {generateId} from './utils';
+import {MsgpackSerializer} from '../../serializer-msgpack';
 
 const debug = debugFactory('remly:server:app');
 
@@ -45,7 +46,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
     super();
     this.options = Object.assign({}, DEFAULT_APPLICATION_OPTIONS, options);
     this.connectTimeout = this.options.connectTimeout;
-    this.serializer = this.options.serializer ?? new JsonSerializer();
+    this.serializer = this.options.serializer ?? new MsgpackSerializer();
   }
 
   private _connectTimeout: number;
@@ -75,6 +76,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
 
   handle(transport: Transport) {
     const connection: Connection = new Connection(generateId(), transport, {
+      serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
       invoke: this.invoke,
