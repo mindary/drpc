@@ -1,7 +1,7 @@
 {
   "name": "@remly/threads-worker",
   "description": "The remly worker threads worker library",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,8 +23,8 @@
     "verify": "npm pack && tar xf remly-threads-worker*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.3.0",
-    "@remly/core": "^0.6.0"
+    "@remly/client": "^0.3.1",
+    "@remly/core": "^0.6.1"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",

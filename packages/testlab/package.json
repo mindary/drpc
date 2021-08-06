@@ -1,7 +1,7 @@
 {
   "name": "@remly/testlab",
   "description": "A collection of test utilities we use to write remly tests",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,8 +27,8 @@
     "verify": "npm pack && tar xf remly-tests*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.6.0",
-    "@remly/types": "^0.3.0",
+    "@remly/core": "^0.6.1",
+    "@remly/types": "^0.3.1",
     "delay": "^4.0.0",
     "ts-essentials": "^7.0.3"
   },
