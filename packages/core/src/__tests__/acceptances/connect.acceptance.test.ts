@@ -67,7 +67,8 @@ describe('Core - Connect', function () {
     it('should allow', async () => {
       const AUTH = {token: 'hello'};
       clientSocket.auth = AUTH;
-      serverSocket.connect = ({auth}) => {
+      serverSocket.connect = socket => {
+        const {auth} = socket.handshake;
         if (auth.token !== AUTH.token) {
           throw new Error('Unauthorized');
         }

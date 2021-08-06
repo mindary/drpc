@@ -1,7 +1,17 @@
 import {noop} from 'ts-essentials';
 import {ValueOrPromise} from '@remly/types';
-import {ConnectMessage, Handshake, HeartbeatMessage, OpenMessage, Transport} from '..';
-import {Connect, Socket, SocketOptions} from './socket';
+import {Socket, SocketOptions} from './socket';
+import {Transport} from '../transport';
+import {nonce} from '../utils';
+import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
+import {AuthData} from '../types';
+
+export interface Handshake {
+  auth: AuthData;
+  challenge: Buffer;
+}
+
+export type Connect<T extends ServerSocket = ServerSocket> = (socket: T) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   connect?: Connect;
@@ -22,11 +32,12 @@ export class ServerSocket extends Socket {
 
   protected async open() {
     this.transport.sid = this.id;
-
+    this.handshake.challenge = nonce();
     // sends an `open` packet
     await this.send('open', {
       sid: this.id,
       keepalive: this.keepalive,
+      challenge: this.handshake.challenge,
     });
 
     await this.emit('open');
@@ -37,10 +48,10 @@ export class ServerSocket extends Socket {
   }
 
   protected async handleConnect(message: ConnectMessage) {
-    const auth = (this.handshake.auth = message.payload);
+    this.handshake.auth = message.payload;
 
     try {
-      await this.connect({auth});
+      await this.connect(this);
       await this.send('connect', {payload: {sid: this.id}});
       await this.doConnected();
     } catch (e) {
@@ -48,8 +59,8 @@ export class ServerSocket extends Socket {
     }
   }
 
-  protected async handleAliveExpired(nonce: Buffer) {
-    await this.send('ping', {payload: nonce});
+  protected async handleAliveExpired(challenge: Buffer) {
+    await this.send('ping', {payload: challenge});
   }
 
   protected handlePing(message: HeartbeatMessage): ValueOrPromise<void> {

@@ -8,6 +8,7 @@ export class OpenPacker implements Packer<OpenMessage> {
     size += 4;
     size += 1;
     size += message.sid.length;
+    size += 8;
     return size;
   }
 
@@ -16,6 +17,7 @@ export class OpenPacker implements Packer<OpenMessage> {
     const size = br.readU8();
     message.sid = br.readString(size, 'ascii');
     message.keepalive = br.readU32();
+    message.challenge = br.readBytes(8);
     return message;
   }
 
@@ -23,6 +25,7 @@ export class OpenPacker implements Packer<OpenMessage> {
     bw.writeU8(message.sid.length);
     bw.writeString(message.sid, 'ascii');
     bw.writeU32(message.keepalive);
+    bw.writeBytes(message.challenge);
   }
 }
 

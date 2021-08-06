@@ -45,7 +45,7 @@
     "@remly/client": "^0.2.2",
     "@remly/testlab": "^0.5.2",
     "@types/debug": "^4.1.7",
-    "@types/node": "^16.4.12",
+    "@types/node": "^16.4.13",
     "@types/uniqid": "^5.3.1"
   },
   "files": [

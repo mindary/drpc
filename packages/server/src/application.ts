@@ -21,11 +21,11 @@ export interface ApplicationOptions {
   registry?: Registry;
   serializer?: Serializer;
   invoke?: RpcInvoke;
-  connectTimeout: number;
-  requestTimeout: number;
+  connectTimeout?: number;
+  requestTimeout?: number;
 }
 
-export const DEFAULT_APPLICATION_OPTIONS: ApplicationOptions = {
+export const DEFAULT_APPLICATION_OPTIONS = {
   connectTimeout: 45000,
   requestTimeout: 10000,
 };

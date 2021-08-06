@@ -7,7 +7,7 @@ export const MAX_SAFE_INTEGER = 9007199254740991;
  * @returns {Buffer}
  */
 export function nonce() {
-  const n = new Buffer(8);
+  const n = Buffer.allocUnsafe(8);
   const a = (Math.random() * 0x100000000) >>> 0;
   const b = (Math.random() * 0x100000000) >>> 0;
 

@@ -72,6 +72,7 @@ typedef struct {
   uint8_t sid_str_size;
   char sid[sid_str_size];
   uint32_t keepalive;
+  uint64_t challenge;
 } open_packet_t;
 ```
 

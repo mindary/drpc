@@ -1,5 +1,5 @@
 import {ValueOrPromise} from '@remly/types';
-import {RemoteService} from './remote-service';
+import * as Buffer from 'buffer';
 
 export type SignalName = string | symbol;
 
@@ -15,10 +15,13 @@ export interface Callable {
   call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export interface WithRemoteService {
-  service<S extends Service>(namespace?: string): RemoteService<S>;
-}
-
 export type RpcInvoke = (name: string, params: any) => ValueOrPromise<any>;
 
 export type SignalHandler = (data: any) => ValueOrPromise<void>;
+
+export interface AuthData {
+  sid?: string; // ecdsa public key as sid
+  tok?: string | Buffer; // token
+  sig?: Buffer; // packed josa signature
+  [key: string]: any;
+}

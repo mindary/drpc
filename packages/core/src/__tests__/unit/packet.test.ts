@@ -2,6 +2,7 @@ import {expect} from '@loopback/testlab';
 import {PacketTypeType} from '../../packet-types';
 import {PacketMessages} from '../../messages';
 import {Packet} from '../../packet';
+import {nonce} from '../../utils';
 
 const CASES: {
   [p in keyof PacketTypeType]: PacketMessages[p];
@@ -9,6 +10,7 @@ const CASES: {
   open: {
     sid: 'abcdef',
     keepalive: 10 * 1000,
+    challenge: nonce(),
   },
   ping: {
     payload: Buffer.from('12345678'),

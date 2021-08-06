@@ -5,6 +5,9 @@
   },
   "references": [
     {
+      "path": "examples/ecdsa-id/tsconfig.json"
+    },
+    {
       "path": "packages/client/tsconfig.json"
     },
     {

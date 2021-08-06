@@ -6,6 +6,7 @@ import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
 import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
+import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {RequestRegistry} from '../reqreg';
 import {Transport, TransportState} from '../transport';
@@ -24,7 +25,6 @@ import {
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType} from '../packet-types';
 import {RemoteService, Service} from '../remote-service';
-import {MsgpackSerializer} from '@remly/serializer-msgpack';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -32,19 +32,13 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export interface Handshake {
-  auth: {[key: string]: any};
-}
-
-export type Connect = (handshake: Handshake) => ValueOrPromise<any>;
-
 export interface SocketOptions {
   id?: string;
   serializer?: Serializer;
-  interval: number;
-  keepalive: number;
-  connectTimeout: number;
-  requestTimeout: number;
+  interval?: number;
+  keepalive?: number;
+  connectTimeout?: number;
+  requestTimeout?: number;
   invoke?: RpcInvoke;
   transport?: Transport;
 }
@@ -97,10 +91,10 @@ export abstract class Socket extends SocketEmittery {
 
     this.options = Object.assign({}, DEFAULT_OPTIONS, options);
     this.id = this.options.id;
-    this.interval = this.options.interval;
-    this.keepalive = this.options.keepalive;
-    this.connectTimeout = this.options.connectTimeout;
-    this.requestTimeout = this.options.requestTimeout;
+    this.interval = this.options.interval!;
+    this.keepalive = this.options.keepalive!;
+    this.connectTimeout = this.options.connectTimeout!;
+    this.requestTimeout = this.options.requestTimeout!;
 
     this.serializer = options.serializer ?? new MsgpackSerializer();
     this.invoke = options.invoke;
@@ -120,6 +114,14 @@ export abstract class Socket extends SocketEmittery {
 
   isConnected() {
     return this.state === 'connected';
+  }
+
+  async ready() {
+    if (this.isConnected()) return;
+    if (this.state === 'closing' || this.state === 'closed') {
+      throw new Error('socket is closing or closed');
+    }
+    return this.once('connected');
   }
 
   setTransport(transport: Transport) {
@@ -239,7 +241,7 @@ export abstract class Socket extends SocketEmittery {
 
   async send<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {
     if (this.isOpen()) {
-      debug('sending packet "%s" (%j)', type, message);
+      debug('sending packet "%s"', type, message);
       const payload = message.payload == null ? DUMMY : message.payload;
       message = {
         ...message,

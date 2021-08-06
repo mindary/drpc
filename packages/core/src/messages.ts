@@ -7,6 +7,7 @@ export interface Message {
 export interface OpenMessage extends Message {
   sid: string;
   keepalive: number;
+  challenge: Buffer;
 }
 
 export interface ConnectMessage extends Message {}

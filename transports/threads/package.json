@@ -34,7 +34,7 @@
     "@remly/testlab": "^0.5.2",
     "@remly/testsuite": "^0.2.3",
     "@remly/threads-worker": "^0.2.2",
-    "@types/node": "^16.4.12"
+    "@types/node": "^16.4.13"
   },
   "files": [
     "README.md",

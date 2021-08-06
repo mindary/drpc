@@ -11,19 +11,16 @@
   ],
   "references": [
     {
-      "path": "../client/tsconfig.json"
+      "path": "../../packages/core/tsconfig.json"
     },
     {
-      "path": "../core/tsconfig.json"
+      "path": "../../packages/server/tsconfig.json"
     },
     {
-      "path": "../serializer-msgpack/tsconfig.json"
+      "path": "../../transports/tcp-client/tsconfig.json"
     },
     {
-      "path": "../testlab/tsconfig.json"
-    },
-    {
-      "path": "../types/tsconfig.json"
+      "path": "../../transports/tcp/tsconfig.json"
     }
   ]
 }

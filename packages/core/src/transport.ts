@@ -49,9 +49,11 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   async ready() {
-    if (!this.isOpen()) {
-      return this.once('open');
+    if (this.isOpen()) return;
+    if (this.state === 'closing' || this.state === 'closed') {
+      throw new Error('transport is closing or closed');
     }
+    return this.once('open');
   }
 
   async close(reason?: string | Error) {
@@ -63,8 +65,12 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   async send(data: Buffer) {
-    await this.ready();
-    return this.doSend(data);
+    if (this.isOpen()) {
+      await this.ready();
+      return this.doSend(data);
+    } else if (debug.enabled) {
+      debug('send denied for transport is closing or closed', data);
+    }
   }
 
   protected setup() {

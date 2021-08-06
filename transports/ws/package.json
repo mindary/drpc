@@ -35,8 +35,8 @@
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.5.2",
     "@remly/testsuite": "^0.2.3",
-    "@remly/ws-client": "^0.1.0",
-    "@types/node": "^16.4.12"
+    "@remly/ws-client": "^0.2.2",
+    "@types/node": "^16.4.13"
   },
   "files": [
     "README.md",

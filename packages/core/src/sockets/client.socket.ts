@@ -3,11 +3,17 @@ import debugFactory from 'debug';
 import {Exception} from '@libit/error/exception';
 import {Socket, SocketOptions} from './socket';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
+import {AuthData} from '../types';
 
-const debug = debugFactory('remly:core:socket:client');
+const debug = debugFactory('remly:core:client-socket');
 
-export type AuthFn = (fn: (data: object) => ValueOrPromise<void>) => ValueOrPromise<void>;
-export type Auth = object | AuthFn;
+export interface OpenContext {
+  socket: ClientSocket;
+  challenge: Buffer;
+}
+
+export type AuthFn = (context: OpenContext) => ValueOrPromise<AuthData>;
+export type Auth = AuthData | AuthFn;
 
 export interface ClientSocketOptions extends SocketOptions {
   auth: Auth;
@@ -25,13 +31,9 @@ export class ClientSocket extends Socket {
   protected async handleOpen(message: OpenMessage) {
     debug('transport is open - connecting');
     this.keepalive = message.keepalive;
-    if (typeof this.auth === 'function') {
-      await this.auth(async data => {
-        await this.send('connect', {payload: data});
-      });
-    } else {
-      await this.send('connect', {payload: this.auth});
-    }
+    const {challenge} = message;
+    const payload = typeof this.auth === 'function' ? await this.auth({socket: this, challenge}) : this.auth;
+    await this.send('connect', {payload});
   }
 
   protected async handleConnect(message: ConnectMessage) {
