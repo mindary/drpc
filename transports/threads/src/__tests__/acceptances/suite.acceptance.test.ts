@@ -7,7 +7,8 @@ RPCSuite.run(
   async () => {
     const app = RPCSuite.givenApplication();
     const main = new ThreadMain(app);
-    main.open(fixturePath('monster.worker.js'));
+
+    await main.open(fixturePath('monster.worker.js'));
     const connection = await app.once('connection');
     const close = async () => main.close();
     return {app, serverSocket: connection, clientSocket: null as any, close};

@@ -6,6 +6,7 @@ import {Connection} from './connection';
 import {MiddlewareInterceptor} from './types';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
+import {Server} from './server';
 
 const debug = debugFactory('remly:server:app');
 
@@ -42,11 +43,14 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   protected middlewares: MiddlewareInterceptor[] = [];
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
+  protected onTransport: (transport: Transport) => void;
+
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
     this.options = Object.assign({}, DEFAULT_APPLICATION_OPTIONS, options);
     this.connectTimeout = this.options.connectTimeout;
     this.serializer = this.options.serializer ?? new MsgpackSerializer();
+    this.onTransport = transport => this.handle(transport);
   }
 
   private _connectTimeout: number;
@@ -67,6 +71,16 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
 
   set requestTimeout(timeout: number | undefined) {
     this._requestTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.requestTimeout;
+  }
+
+  bind(server: Server<any, any>) {
+    server.on('transport', this.onTransport);
+    return this;
+  }
+
+  unbind(server: Server<any, any>) {
+    server.off('transport', this.onTransport);
+    return this;
   }
 
   use(fn: MiddlewareInterceptor): this {

@@ -1,28 +1,38 @@
-import {Emittery, UnsubscribeFn} from '@libit/emittery';
-import {TransportError, TransportHandler} from '@remly/core';
+import {UnsubscribeFn} from '@libit/emittery';
+import {TransportError} from '@remly/core';
 import {URL, Worker, WorkerOptions} from './worker';
 import {WorkerTransport} from './transport';
+import {Application, Server, ServerEvents} from '@remly/server';
 
-export interface TreadMainEvents {
+export interface TreadMainEvents extends ServerEvents {
   transportError: TransportError;
 }
 
-export class ThreadMain extends Emittery<TreadMainEvents> {
+export class ThreadMain extends Server<{}, TreadMainEvents> {
   public readonly transports: Set<WorkerTransport> = new Set();
   protected transportsUnsubs: Map<WorkerTransport, UnsubscribeFn[]> = new Map();
 
-  constructor(public handler: TransportHandler) {
-    super();
+  constructor(app?: Application) {
+    super(app);
   }
 
-  open(file: string | URL, options?: WorkerOptions) {
-    this.handler.handle(this.createTransport(new Worker(file, options)));
+  async open(file: string | URL, options?: WorkerOptions) {
+    const transport = this.createTransport(new Worker(file, options));
+    await this.emit('transport', transport);
   }
 
   async close() {
     for (const transport of this.transports) {
       await transport.close('force close');
     }
+  }
+
+  start() {
+    //
+  }
+
+  async stop() {
+    await this.close();
   }
 
   protected createTransport(worker: Worker) {

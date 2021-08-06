@@ -1,20 +1,23 @@
-import net, {AddressInfo, createServer, ListenOptions, Server, ServerOpts, Socket} from 'net';
-import {TransportHandler} from '@remly/core';
-import {TCPServerTransport} from './transport';
+import net, {AddressInfo, createServer, ListenOptions, ServerOpts, Socket} from 'net';
+import {Transport} from '@remly/core';
+import {Application, Server} from '@remly/server';
 import {assert} from 'ts-essentials';
+import {TCPServerTransport} from './transport';
 
 export interface TCPServerOptions extends ServerOpts, ListenOptions {}
 
-export class TCPServer {
-  public readonly options: TCPServerOptions;
-  public _server?: Server;
+export class TCPServer extends Server<TCPServerOptions> {
+  public transports: Set<Transport> = new Set();
   protected onConnectionListener: (socket: Socket) => void;
 
-  constructor(public handler: TransportHandler, options?: TCPServerOptions) {
-    this.options = options ?? {};
-
+  constructor(options?: TCPServerOptions);
+  constructor(app?: Application, options?: TCPServerOptions);
+  constructor(appOrOptions?: any, options?: any) {
+    super(appOrOptions, options);
     this.onConnectionListener = socket => this.onConnection(socket);
   }
+
+  protected _server?: net.Server;
 
   get server(): net.Server | undefined {
     return this._server;
@@ -25,12 +28,12 @@ export class TCPServer {
     return addr == null ? undefined : addr;
   }
 
-  attach(server: Server) {
+  attach(server: net.Server) {
     server.on('connection', this.onConnectionListener);
     return this;
   }
 
-  detach(server: Server) {
+  detach(server: net.Server) {
     server.off('connection', this.onConnectionListener);
     return this;
   }
@@ -55,15 +58,17 @@ export class TCPServer {
     return this;
   }
 
-  protected onConnection(socket: Socket) {
+  protected async onConnection(socket: Socket) {
     if (socket.remoteAddress) {
-      this.add(socket);
+      await this.add(socket);
     }
   }
 
-  protected add(socket: Socket) {
+  protected async add(socket: Socket) {
     const transport = new TCPServerTransport(socket);
-    this.handler.handle(transport);
-    return transport;
+    this.transports.add(transport);
+    // eslint-disable-next-line no-void
+    void transport.once('close').then(() => this.transports.delete(transport));
+    await this.emit('transport', transport);
   }
 }

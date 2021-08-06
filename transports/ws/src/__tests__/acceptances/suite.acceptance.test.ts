@@ -1,4 +1,3 @@
-import http from 'http';
 import getPort from 'get-port';
 import {RPCSuite} from '@remly/testsuite';
 import {WebSocketClient} from '@remly/ws-client';
@@ -7,9 +6,8 @@ import {WebSocketServer} from '../../server';
 RPCSuite.run('TCP', async () => {
   const app = RPCSuite.givenApplication();
   const port = await getPort();
-  const httpServer = http.createServer();
-  WebSocketServer.attach(app, httpServer);
-  httpServer.listen(port);
+  const server = new WebSocketServer(app, {port});
+  await server.start();
 
   const connection = app.once('connect');
   const clientSocket = WebSocketClient.connect('ws://localhost:' + port);
@@ -19,7 +17,7 @@ RPCSuite.run('TCP', async () => {
   const close = async () => {
     await serverSocket.close();
     await clientSocket.close();
-    httpServer.close();
+    await server.stop();
   };
   return {app, serverSocket, clientSocket, close};
 });

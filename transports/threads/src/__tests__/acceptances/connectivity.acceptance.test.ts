@@ -9,7 +9,7 @@ describe('Threads - Connectivity', () => {
       const app = new Application();
       const main = new ThreadMain(app);
 
-      main.open(fixturePath('client.worker.js'));
+      await main.open(fixturePath('client.worker.js'));
       const connection = await app.once('connection');
 
       expect(main.transports.size).equal(1);
@@ -23,7 +23,7 @@ describe('Threads - Connectivity', () => {
       const app = new Application();
       const main = new ThreadMain(app);
 
-      main.open(fixturePath('client.worker.js'));
+      await main.open(fixturePath('client.worker.js'));
       const connection = await app.once('connection');
 
       expect(main.transports.size).equal(1);
@@ -37,7 +37,7 @@ describe('Threads - Connectivity', () => {
       const app = new Application();
       const main = new ThreadMain(app);
 
-      main.open(fixturePath('close-after-connect.worker.js'));
+      await main.open(fixturePath('close-after-connect.worker.js'));
       const connection = await app.once('connection');
       expect(connection.isConnected()).true();
       // worker should close immediately after connect

@@ -27,6 +27,7 @@
     "@remly/server": "^0.6.0",
     "@remly/ws-client": "^0.3.0",
     "@types/ws": "^7.4.7",
+    "tily": "^2.8.3",
     "ws": "^8.0.0"
   },
   "devDependencies": {
@@ -35,7 +36,7 @@
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.6.0",
     "@remly/testsuite": "^0.3.0",
-    "@remly/ws-client": "^0.2.2",
+    "@remly/ws-client": "^0.3.0",
     "@types/node": "^16.4.13"
   },
   "files": [

@@ -16,10 +16,6 @@ export class TransportError extends ChainedError {
   }
 }
 
-export interface TransportHandler {
-  handle(transport: Transport): void;
-}
-
 export interface TransportEvents {
   open: undefined;
   close: string | Error;
