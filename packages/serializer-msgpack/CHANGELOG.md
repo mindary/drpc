@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://gitr.net/mindary/remly/compare/@remly/serializer-msgpack@0.5.0...@remly/serializer-msgpack@0.6.0) (2021-08-06)
+
+
+### Features
+
+* support ecdsa public key as socket id ([493d98b](https://gitr.net/mindary/remly/commits/493d98b2f924ae1c5dbf25ef5603082c3f35f928))
+
+
+
+
+
 # [0.5.0](https://gitr.net/mindary/remly/compare/@remly/serializer-msgpack@0.4.3...@remly/serializer-msgpack@0.5.0) (2021-08-05)
 
 
