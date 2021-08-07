@@ -3,7 +3,7 @@ import {Registry, RegistryMixin, RpcInvoke, Serializer, Transport} from '@remly/
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {GenericInterceptorChain} from '@libit/interceptor';
 import {Connection} from './connection';
-import {MiddlewareInterceptor} from './types';
+import {ConnectHandler} from './types';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
 import {Server} from './server';
@@ -40,7 +40,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   public readonly connections: Map<string, Connection> = new Map();
 
   protected options: ApplicationOptions;
-  protected middlewares: MiddlewareInterceptor[] = [];
+  protected middlewares: ConnectHandler[] = [];
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
   protected onTransport: (transport: Transport) => void;
@@ -83,7 +83,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
     return this;
   }
 
-  use(fn: MiddlewareInterceptor): this {
+  use(fn: ConnectHandler): this {
     this.middlewares.push(fn);
     return this;
   }
@@ -134,7 +134,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   }
 
   protected async invokeMiddlewares(connection: Connection) {
-    const chain = new GenericInterceptorChain({connection}, this.middlewares);
+    const chain = new GenericInterceptorChain(connection, this.middlewares);
     return chain.invokeInterceptors();
   }
 }
