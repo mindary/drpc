@@ -8,7 +8,7 @@ export * from './packet';
 export * from './utils';
 export * from './registry';
 export * from './decoders';
-export * from './decorders';
+export * from './decorators';
 export * from './method';
 export * from './mixins';
 export * from './transport';

@@ -3,7 +3,7 @@ import micromatch from 'micromatch';
 import {Handler, Method} from './method';
 import {UnimplementedError} from './errors';
 import {ExposeMetadata} from './types';
-import {getAllExposeMetadata} from './decorders';
+import {getAllExposeMetadata} from './decorators';
 
 export interface RegisterOptions {
   namespace?: string;

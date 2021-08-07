@@ -1,5 +1,4 @@
-import {MetadataMap} from '@loopback/metadata';
-import {MetadataInspector, MethodDecoratorFactory} from '@loopback/metadata';
+import {MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
 import {Constructor} from '@remly/types';
 import {ExposeMetadata} from '../types';
 import {EXPOSE_METADATA_LEY} from '../keys';

@@ -2,7 +2,7 @@ import delay from 'delay';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
-import {expose} from '../../decorders';
+import {expose} from '../../decorators';
 import {PickProperties} from 'ts-essentials';
 
 export class Monster {
