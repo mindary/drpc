@@ -1,5 +1,5 @@
-import {listenPort, MessagePort} from './port';
 import {Transport, ValueOrPromise} from '@remly/core';
+import {listenPort, MessagePort} from './port';
 
 export class WorkerTransport extends Transport {
   protected unbind: () => void;
