@@ -40,7 +40,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   public readonly connections: Map<string, Connection> = new Map();
 
   protected options: ApplicationOptions;
-  protected middlewares: ConnectHandler[] = [];
+  protected connectHandlers: ConnectHandler[] = [];
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
   protected onTransport: (transport: Transport) => void;
@@ -84,7 +84,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   }
 
   use(fn: ConnectHandler): this {
-    this.middlewares.push(fn);
+    this.connectHandlers.push(fn);
     return this;
   }
 
@@ -101,7 +101,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
   protected async doConnect(connection: Connection) {
     debug('adding connection', connection.id);
 
-    await this.invokeMiddlewares(connection);
+    await this.invokeConnectHandlers(connection);
 
     if (connection.state !== 'open') {
       return debug('next called after connection was closed - ignoring socket');
@@ -133,8 +133,8 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
     }
   }
 
-  protected async invokeMiddlewares(connection: Connection) {
-    const chain = new GenericInterceptorChain(connection, this.middlewares);
+  protected async invokeConnectHandlers(connection: Connection) {
+    const chain = new GenericInterceptorChain(connection, this.connectHandlers);
     return chain.invokeInterceptors();
   }
 }
