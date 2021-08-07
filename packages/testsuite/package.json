@@ -1,7 +1,7 @@
 {
   "name": "@remly/testsuite",
   "description": "The test suite for remly transports",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
   "dependencies": {
     "@remly/client": "^0.3.2",
     "@remly/core": "^0.6.2",
-    "@remly/server": "^0.6.2",
+    "@remly/server": "^0.6.3",
     "@remly/testlab": "^0.6.2",
     "@remly/types": "^0.3.1",
     "delay": "^5.0.0",

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://gitr.net/mindary/remly/compare/@remly/ws@0.5.0...@remly/ws@0.5.1) (2021-08-07)
+
+**Note:** Version bump only for package @remly/ws
+
+
+
+
+
 # [0.5.0](https://gitr.net/mindary/remly/compare/@remly/ws@0.2.3...@remly/ws@0.5.0) (2021-08-07)
 
 

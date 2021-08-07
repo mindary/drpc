@@ -1,7 +1,7 @@
 {
   "name": "@remly/ws",
   "description": "The remly websocket server library",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@remly/core": "^0.6.2",
-    "@remly/server": "^0.6.2",
+    "@remly/server": "^0.6.3",
     "@remly/ws-client": "^0.3.2",
     "@types/ws": "^7.4.7",
     "tily": "^2.8.3",
@@ -35,7 +35,7 @@
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.6.2",
-    "@remly/testsuite": "^0.3.2",
+    "@remly/testsuite": "^0.3.3",
     "@remly/ws-client": "^0.3.2",
     "@types/node": "^16.4.13"
   },
