@@ -1,8 +1,8 @@
 import getPort from 'get-port';
 import {Application} from '@remly/server';
+import {WebSocketClient} from '@remly/ws-client';
 import {ConnectivitySuite} from '@remly/testsuite';
 import {WebSocketServer} from '../../server';
-import {WebSocketClient} from '@remly/ws-client';
 
 ConnectivitySuite.run('WebSocket', async () => {
   const app = new Application();

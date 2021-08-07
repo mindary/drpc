@@ -25,3 +25,11 @@ export interface AuthData {
   sig?: Buffer; // packed josa signature
   [key: string]: any;
 }
+
+export interface NetAddress {
+  readonly localAddress: string;
+  readonly localPort: number;
+  readonly remoteFamily?: string;
+  readonly remoteAddress?: string;
+  readonly remotePort?: number;
+}

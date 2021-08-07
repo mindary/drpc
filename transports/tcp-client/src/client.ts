@@ -1,6 +1,6 @@
 import net from 'net';
 import {Client, ClientOptions} from '@remly/client';
-import {TCPClientTransport} from './transport';
+import {TCPTransport} from './transport';
 import {assert} from 'ts-essentials';
 
 export class TCPClient extends Client {
@@ -21,6 +21,6 @@ export class TCPClient extends Client {
   connect(port: number, host?: string) {
     assert(typeof port === 'number', 'Must pass a port.');
     const socket = net.connect(port, host);
-    socket.once('connect', () => this.setTransport(new TCPClientTransport(socket)));
+    socket.once('connect', () => this.setTransport(new TCPTransport(socket)));
   }
 }

@@ -30,6 +30,28 @@ export namespace ConnectivitySuite {
           await assertCloseBy(clientSocket, serverSocket);
         });
       });
+
+      describe('net address', function () {
+        it('should have address info if transport has socket', function () {
+          const serverTransport = serverSocket.transport;
+          const clientTransport = clientSocket.transport;
+          if (!serverTransport.socket || !clientTransport.socket) {
+            // eslint-disable-next-line @typescript-eslint/no-invalid-this
+            return this.skip();
+          }
+          expect(serverTransport.address.localAddress).ok();
+          expect(serverTransport.address.remoteAddress).ok();
+
+          expect(clientTransport.address.localAddress).ok();
+          expect(clientTransport.address.remoteAddress).ok();
+
+          expect(serverTransport.address.remotePort).ok();
+          expect(serverTransport.address.remotePort).equal(clientTransport.address.localPort);
+
+          expect(clientTransport.address.remotePort).ok();
+          expect(clientTransport.address.remotePort).equal(serverTransport.address.localPort);
+        });
+      });
     });
 
     async function assertCloseBy(activeSocket: Socket, passiveSocket: Socket) {

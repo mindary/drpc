@@ -2,8 +2,8 @@ import * as net from 'net';
 import * as http from 'http';
 import WebSocket, {ServerOptions} from 'ws';
 import {Application, Server} from '@remly/server';
-import {WebSocketTransport} from '@remly/ws-client';
 import omit from 'tily/object/omit';
+import {WebSocketServerTransport} from './transport';
 
 export interface WebSocketServerOptions extends Omit<ServerOptions, 'server' | 'noServer'> {}
 
@@ -70,7 +70,7 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
   }
 
   protected async add(socket: WebSocket) {
-    const transport = new WebSocketTransport(socket);
+    const transport = new WebSocketServerTransport(socket);
     await this.emit('transport', transport);
   }
 }

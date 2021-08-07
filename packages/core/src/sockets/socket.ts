@@ -10,7 +10,7 @@ import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {RequestRegistry} from '../reqreg';
 import {Transport, TransportState} from '../transport';
-import {RpcInvoke, SignalHandler} from '../types';
+import {NetAddress, RpcInvoke, SignalHandler} from '../types';
 import {Alive} from '../alive';
 import {
   AckMessage,
@@ -102,6 +102,10 @@ export abstract class Socket extends SocketEmittery {
     if (this.options.transport) {
       this.setTransport(this.options.transport);
     }
+  }
+
+  get address(): NetAddress {
+    return this.transport?.address;
   }
 
   get lastActive(): number {

@@ -5,6 +5,7 @@ import {ErrorLike} from '@libit/error/types';
 import {ChainedError} from '@libit/error/chained';
 import {Decoder, StandardDecoder} from './decoders';
 import {Packet} from './packet';
+import {NetAddress} from './types';
 
 const debug = debugFactory('remly:core:transport');
 
@@ -31,6 +32,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
   public sid: string;
   public state?: TransportState;
   public decoder: Decoder;
+  public socket?: any;
   private unsubs: UnsubscribeFn[] = [];
 
   protected constructor(options?: TransportOptions) {
@@ -38,6 +40,13 @@ export abstract class Transport extends Emittery<TransportEvents> {
     options = options ?? {};
     this.decoder = options.decoder ?? new StandardDecoder();
     this.setup();
+  }
+
+  get address(): NetAddress {
+    return {
+      localAddress: '',
+      localPort: 0,
+    };
   }
 
   isOpen() {

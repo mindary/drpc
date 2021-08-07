@@ -1,5 +1,7 @@
-import {Transport, TransportOptions} from '@remly/core';
+import {NetAddress, Transport, TransportOptions} from '@remly/core';
+import pick from 'tily/object/pick';
 import WebSocket from './websocket';
+import {assert} from 'ts-essentials';
 
 export class WebSocketTransport extends Transport {
   protected unbind: () => void;
@@ -10,6 +12,14 @@ export class WebSocketTransport extends Transport {
     if (this.socket.readyState === WebSocket.OPEN) {
       this.open();
     }
+  }
+
+  get address(): NetAddress {
+    assert((this.socket as any)._socket, 'websocket lacks "_socket" property');
+    return pick(
+      ['localAddress', 'localPort', 'remoteAddress', 'remotePort', 'remoteFamily'],
+      (this.socket as any)._socket as NetAddress,
+    );
   }
 
   protected bind() {

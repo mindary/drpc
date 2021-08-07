@@ -1,3 +1,3 @@
-import {TCPClientTransport} from '@remly/tcp-client';
+import {TCPTransport} from '@remly/tcp-client';
 
-export class TCPServerTransport extends TCPClientTransport {}
+export class TCPServerTransport extends TCPTransport {}

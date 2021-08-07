@@ -1,10 +1,12 @@
-import net from 'net';
-import {Transport, TransportOptions} from '@remly/core';
+import * as net from 'net';
+import * as tls from 'tls';
+import {NetAddress, Transport, TransportOptions} from '@remly/core';
+import pick from 'tily/object/pick';
 
-export class TCPClientTransport extends Transport {
+export class TCPTransport extends Transport {
   protected unbind: () => void;
 
-  constructor(public readonly socket: net.Socket, options?: TransportOptions) {
+  constructor(public readonly socket: net.Socket | tls.TLSSocket, options?: TransportOptions) {
     super(options);
     this.bind();
     if (socket.readable && socket.writable) {
@@ -13,12 +15,8 @@ export class TCPClientTransport extends Transport {
     }
   }
 
-  get host() {
-    return this.socket.remoteAddress;
-  }
-
-  get port() {
-    return this.socket.remotePort;
+  get address(): NetAddress {
+    return pick(['localAddress', 'localPort', 'remoteAddress', 'remotePort', 'remoteFamily'], this.socket);
   }
 
   protected bind() {
