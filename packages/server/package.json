@@ -1,7 +1,7 @@
 {
   "name": "@remly/server",
   "description": "The remly abstract server",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,7 +31,7 @@
     "@libit/error": "^0.3.6",
     "@libit/interceptor": "^0.2.1",
     "@libit/timer": "^0.2.8",
-    "@remly/core": "^0.6.3",
+    "@remly/core": "^0.6.4",
     "@remly/serializer-msgpack": "^0.6.1",
     "@remly/types": "^0.3.1",
     "debug": "^4.3.2",
@@ -42,8 +42,8 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/client": "^0.3.3",
-    "@remly/testlab": "^0.6.3",
+    "@remly/client": "^0.3.4",
+    "@remly/testlab": "^0.6.4",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.4.13",
     "@types/uniqid": "^5.3.1"

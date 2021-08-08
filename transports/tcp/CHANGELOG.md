@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.3](https://gitr.net/mindary/remly/compare/@remly/tcp@0.5.2...@remly/tcp@0.5.3) (2021-08-08)
+
+**Note:** Version bump only for package @remly/tcp
+
+
+
+
+
 ## [0.5.2](https://gitr.net/mindary/remly/compare/@remly/tcp@0.5.1...@remly/tcp@0.5.2) (2021-08-07)
 
 **Note:** Version bump only for package @remly/tcp

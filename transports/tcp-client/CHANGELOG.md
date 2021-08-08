@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.4](https://gitr.net/mindary/remly/compare/@remly/tcp-client@0.3.3...@remly/tcp-client@0.3.4) (2021-08-08)
+
+**Note:** Version bump only for package @remly/tcp-client
+
+
+
+
+
 ## [0.3.3](https://gitr.net/mindary/remly/compare/@remly/tcp-client@0.3.2...@remly/tcp-client@0.3.3) (2021-08-07)
 
 **Note:** Version bump only for package @remly/tcp-client

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/mindary/remly/compare/@remly/core@0.6.3...@remly/core@0.6.4) (2021-08-08)
+
+**Note:** Version bump only for package @remly/core
+
+
+
+
+
 ## [0.6.3](https://github.com/mindary/remly/compare/@remly/core@0.6.2...@remly/core@0.6.3) (2021-08-07)
 
 **Note:** Version bump only for package @remly/core
