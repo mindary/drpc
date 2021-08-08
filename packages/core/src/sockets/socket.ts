@@ -10,7 +10,7 @@ import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {RequestRegistry} from '../reqreg';
 import {Transport, TransportState} from '../transport';
-import {NetAddress, RpcInvoke, SignalHandler} from '../types';
+import {AnySignalHandler, NetAddress, RpcInvoke, SignalHandler} from '../types';
 import {Alive} from '../alive';
 import {
   AckMessage,
@@ -120,6 +120,12 @@ export abstract class Socket extends SocketEmittery {
     return this.state === 'connected';
   }
 
+  /**
+   * Return a promise for connected state.
+   *
+   * - resolve if state is 'connected' or changed from 'open' to 'connected'.
+   * - reject if state is 'closing' or 'closed'
+   */
   async ready() {
     if (this.isConnected()) return;
     if (this.state === 'closing' || this.state === 'closed') {
@@ -166,6 +172,11 @@ export abstract class Socket extends SocketEmittery {
     assert(typeof signal === 'string', 'Signal must be a string.');
     assert(typeof handler === 'function', 'Handler must be a function.');
     return this.ee.on(signal, handler);
+  }
+
+  subscribeAny(handler: AnySignalHandler): UnsubscribeFn {
+    assert(typeof handler === 'function', 'Handler must be a function.');
+    return this.ee.onAny(handler);
   }
 
   async signal(signal: string, data?: any) {

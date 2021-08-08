@@ -58,11 +58,17 @@ describe('RCore - PC', function () {
       });
 
       describe(`subscribe and signal`, function () {
-        it('should work', async () => {
+        it('subscribe', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
           const result = new Promise(resolve => clientSocket.subscribe('message', resolve));
           await serverSocket.signal('message', message);
           expect(await result).eql(message);
+        });
+        it('subscribeAny', async () => {
+          const message = {from: 'foo', to: 'bar', content: 'hello world'};
+          const result = new Promise(resolve => clientSocket.subscribeAny((event, data) => resolve({event, data})));
+          await serverSocket.signal('message', message);
+          expect(await result).eql({event: 'message', data: message});
         });
       });
     });
