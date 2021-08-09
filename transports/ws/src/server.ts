@@ -31,7 +31,7 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
     return new this(options).attach(httpServer);
   }
 
-  address() {
+  get address() {
     if (!this.server) return null;
     return this.server.address();
   }

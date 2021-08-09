@@ -16,6 +16,10 @@ export class ThreadMain extends Server<{}, TreadMainEvents> {
     super(app);
   }
 
+  get address() {
+    return undefined;
+  }
+
   async open(file: string | URL, options?: WorkerOptions) {
     const transport = this.createTransport(new Worker(file, options));
     await this.emit('transport', transport);

@@ -2,6 +2,7 @@ import {ValueOrPromise} from '@remly/types';
 import {Emittery} from '@libit/emittery';
 import {Transport} from '@remly/core';
 import {Application} from './application';
+import {AddressInfo} from 'net';
 
 export interface ServerEvents {
   transport: Transport;
@@ -31,6 +32,8 @@ export abstract class Server<O extends object = {}, EVENTS = ServerEvents> exten
   get options(): Readonly<Required<O>> {
     return this._options;
   }
+
+  abstract get address(): AddressInfo | string | null | undefined;
 
   /**
    * Set an options object by merging the new partial and existing options
