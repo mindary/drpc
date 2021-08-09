@@ -1,7 +1,7 @@
 {
   "name": "@remly/client",
   "description": "The remly abstract client",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,7 @@
     "verify": "npm pack && tar xf remly-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.6.4"
+    "@remly/core": "^0.6.5"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",

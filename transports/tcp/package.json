@@ -1,7 +1,7 @@
 {
   "name": "@remly/tcp",
   "description": "The remly TCP server library",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,18 +24,18 @@
   },
   "dependencies": {
     "@libit/emittery": "^0.10.1",
-    "@remly/core": "^0.6.4",
-    "@remly/server": "^0.6.5",
-    "@remly/tcp-client": "^0.3.4",
+    "@remly/core": "^0.6.5",
+    "@remly/server": "^0.6.6",
+    "@remly/tcp-client": "^0.3.5",
     "ts-essentials": "^7.0.3"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/testlab": "^0.6.4",
-    "@remly/testsuite": "^0.3.5",
-    "@remly/threads-worker": "^0.3.4",
+    "@remly/testlab": "^0.6.5",
+    "@remly/testsuite": "^0.3.6",
+    "@remly/threads-worker": "^0.3.5",
     "@types/node": "^16.4.13",
     "get-port": "^5.1.1"
   },
