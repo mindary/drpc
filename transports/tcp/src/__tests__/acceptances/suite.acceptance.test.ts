@@ -15,8 +15,6 @@ RPCSuite.run('TCP', async () => {
   const serverSocket = await connection;
 
   const close = async () => {
-    await serverSocket.close();
-    await clientSocket.close();
     await server.stop();
   };
   return {app, serverSocket, clientSocket, close};

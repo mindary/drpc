@@ -14,8 +14,6 @@ ConnectivitySuite.run('WebSocket', async () => {
   const clientSocket = WebSocketClient.connect('ws://localhost:' + port);
   const serverSocket = await connection;
   const close = async () => {
-    await clientSocket.close();
-    await serverSocket.close();
     await server.stop();
   };
   return {app, serverSocket, clientSocket, close};

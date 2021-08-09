@@ -1,6 +1,7 @@
 import * as net from 'net';
 import * as http from 'http';
 import WebSocket, {ServerOptions} from 'ws';
+import {Transport} from '@remly/core';
 import {Application, Server} from '@remly/server';
 import omit from 'tily/object/omit';
 import {WebSocketServerTransport} from './transport';
@@ -10,6 +11,7 @@ export interface WebSocketServerOptions extends Omit<ServerOptions, 'server' | '
 export class WebSocketServer extends Server<WebSocketServerOptions> {
   public wss: WebSocket.Server;
   public server?: http.Server;
+  private transports: Set<Transport> = new Set();
   protected onUpgradeListener: (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => void;
   protected onConnection: (socket: WebSocket) => void;
 
@@ -58,6 +60,9 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
 
   async stop() {
     if (!this.server) return;
+    for (const t of this.transports) {
+      await t.close('stop');
+    }
     return new Promise((resolve, reject) => {
       this.server!.close(error => (error ? reject(error) : resolve(undefined)));
     }).then(() => (this.server = undefined));
@@ -71,6 +76,9 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
 
   protected async add(socket: WebSocket) {
     const transport = new WebSocketServerTransport(socket);
+    this.transports.add(transport);
+    // eslint-disable-next-line no-void
+    void transport.once('close').then(() => this.transports.delete(transport));
     await this.emit('transport', transport);
   }
 }

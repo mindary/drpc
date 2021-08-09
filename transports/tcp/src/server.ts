@@ -50,6 +50,9 @@ export class TCPServer extends Server<TCPServerOptions> {
 
   async stop() {
     if (this.server) {
+      for (const t of this.transports) {
+        await t.close('stop');
+      }
       await new Promise((resolve, reject) => {
         this.server!.close(error => (error ? reject(error) : resolve(null)));
       });
