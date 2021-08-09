@@ -298,6 +298,8 @@ export abstract class Socket extends SocketEmittery {
       await this.clearTransport(reason);
 
       this.state = 'closed';
+      // notify ee disconnected
+      await this.ee.emit('disconnect');
       await this.emit('close', reason);
     }
   }
