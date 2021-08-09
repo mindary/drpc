@@ -1,7 +1,7 @@
 {
   "name": "@remly/server",
   "description": "The remly abstract server",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
