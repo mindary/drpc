@@ -2,18 +2,23 @@ import {UnsubscribeFn} from '@libit/emittery';
 import {TransportError} from '@remly/core';
 import {URL, Worker, WorkerOptions} from './worker';
 import {WorkerTransport} from './transport';
-import {Application, Server, ServerEvents} from '@remly/server';
+import {Application, Server, ServerChannelOptions, ServerEvents} from '@remly/server';
+
+export interface ThreadMainOptions extends ServerChannelOptions {}
 
 export interface TreadMainEvents extends ServerEvents {
   transportError: TransportError;
 }
 
-export class ThreadMain extends Server<{}, TreadMainEvents> {
+export class ThreadMain extends Server<ThreadMainOptions, TreadMainEvents> {
+  public name = 'thread';
   public readonly transports: Set<WorkerTransport> = new Set();
   protected transportsUnsubs: Map<WorkerTransport, UnsubscribeFn[]> = new Map();
 
-  constructor(app?: Application) {
-    super(app);
+  constructor(options?: ThreadMainOptions);
+  constructor(app?: Application, options?: ThreadMainOptions);
+  constructor(app?: Application | ThreadMainOptions, options?: ThreadMainOptions) {
+    super(app as any, options);
   }
 
   get address() {

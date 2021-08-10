@@ -2,13 +2,14 @@ import * as net from 'net';
 import * as http from 'http';
 import WebSocket, {ServerOptions} from 'ws';
 import {Transport} from '@remly/core';
-import {Application, Server} from '@remly/server';
+import {Application, Server, ServerChannelOptions} from '@remly/server';
 import omit from 'tily/object/omit';
 import {WebSocketServerTransport} from './transport';
 
-export interface WebSocketServerOptions extends Omit<ServerOptions, 'server' | 'noServer'> {}
+export interface WebSocketServerOptions extends ServerChannelOptions, Omit<ServerOptions, 'server' | 'noServer'> {}
 
 export class WebSocketServer extends Server<WebSocketServerOptions> {
+  public name = 'ws';
   public wss: WebSocket.Server;
   public server?: http.Server;
   private transports: Set<Transport> = new Set();

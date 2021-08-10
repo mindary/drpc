@@ -1,12 +1,13 @@
 import net, {AddressInfo, createServer, ListenOptions, ServerOpts, Socket} from 'net';
 import {Transport} from '@remly/core';
-import {Application, Server} from '@remly/server';
+import {Application, Server, ServerChannelOptions} from '@remly/server';
 import {assert} from 'ts-essentials';
 import {TCPServerTransport} from './transport';
 
-export interface TCPServerOptions extends ServerOpts, ListenOptions {}
+export interface TCPServerOptions extends ServerChannelOptions, ServerOpts, ListenOptions {}
 
 export class TCPServer extends Server<TCPServerOptions> {
+  public name = 'tcp';
   public transports: Set<Transport> = new Set();
   protected onConnectionListener: (socket: Socket) => void;
 

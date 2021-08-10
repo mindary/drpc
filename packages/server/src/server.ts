@@ -1,4 +1,4 @@
-import {ValueOrPromise} from '@remly/types';
+import {Constructor, ValueOrPromise} from '@remly/types';
 import {Emittery} from '@libit/emittery';
 import {Transport} from '@remly/core';
 import {Application} from './application';
@@ -8,7 +8,15 @@ export interface ServerEvents {
   transport: Transport;
 }
 
-export abstract class Server<O extends object = {}, EVENTS = ServerEvents> extends Emittery<EVENTS & ServerEvents> {
+export interface ServerChannelOptions {
+  name?: string;
+}
+
+export abstract class Server<
+  O extends ServerChannelOptions = ServerChannelOptions,
+  EVENTS = ServerEvents,
+> extends Emittery<EVENTS & ServerEvents> {
+  public name: string;
   protected _options: Readonly<Required<O>>;
 
   protected constructor(options?: O);
@@ -23,6 +31,9 @@ export abstract class Server<O extends object = {}, EVENTS = ServerEvents> exten
     }
 
     this._options = this.configure(options);
+    if (this.options.name) {
+      this.name = this.options.name;
+    }
   }
 
   get defaultOptions(): Partial<O> {
@@ -53,3 +64,5 @@ export abstract class Server<O extends object = {}, EVENTS = ServerEvents> exten
 
   abstract stop(): ValueOrPromise<any>;
 }
+
+export type ServerClass<T extends Server = Server> = Constructor<T>;
