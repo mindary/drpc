@@ -11,6 +11,12 @@
   ],
   "references": [
     {
+      "path": "../../channels/tcp/tsconfig.json"
+    },
+    {
+      "path": "../../channels/ws/tsconfig.json"
+    },
+    {
       "path": "../server/tsconfig.json"
     }
   ]

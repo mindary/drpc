@@ -5,6 +5,24 @@
   },
   "references": [
     {
+      "path": "channels/tcp-client/tsconfig.json"
+    },
+    {
+      "path": "channels/tcp/tsconfig.json"
+    },
+    {
+      "path": "channels/threads-worker/tsconfig.json"
+    },
+    {
+      "path": "channels/threads/tsconfig.json"
+    },
+    {
+      "path": "channels/ws-client/tsconfig.json"
+    },
+    {
+      "path": "channels/ws/tsconfig.json"
+    },
+    {
       "path": "examples/ecdsa-id/tsconfig.json"
     },
     {

@@ -2,7 +2,7 @@
   "packages": [
     "packages/*",
     "extensions/*",
-    "transports/*",
+    "channels/*",
     "examples/*"
   ],
   "command": {

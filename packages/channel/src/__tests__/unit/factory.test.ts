@@ -37,16 +37,16 @@ describe('channel factory', () => {
     ).throw(/expected test error/);
   });
 
-  // /**
-  //  * createServerChannel(dsName, settings) without settings.name
-  //  */
-  // it('should retain the name assigned to it', function () {
-  //   const server = createServerChannel('myServerChannel', {
-  //     channel: 'tcp',
-  //   });
-  //
-  //   expect(server.name).equal('myServerChannel');
-  // });
+  /**
+   * createServerChannel(dsName, settings) without settings.name
+   */
+  it('should retain the name assigned to it', function () {
+    const server = createServerChannel('myServerChannel', {
+      channel: 'tcp',
+    });
+
+    expect(server.name).equal('myServerChannel');
+  });
 
   // /**
   //  * createServerChannel(dsName, settings)
