@@ -37,7 +37,7 @@
     "prettier:cli": "lb-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
     "prettier:check": "npm run prettier:cli -- --check",
     "prettier:fix": "npm run prettier:cli -- --write",
-    "clean": "lerna run clean && lb-clean \"packages/*/dist\" \"extensions/*/dist\" \"transports/*/dist\" \"examples/*/dist\"",
+    "clean": "lerna run clean && lb-clean \\\"packages/*/dist\\\" \\\"extensions/*/dist\\\" \\\"channels/*/dist\\\" \\\"examples/*/dist\\\"",
     "clean:lerna": "lerna clean",
     "prebuild": "npm run prettier:fix",
     "build": "lb-tsc -b",
@@ -45,8 +45,8 @@
     "pretest": "npm run clean && npm run build",
     "test": "lb-nyc npm run mocha",
     "test:ci": "lb-nyc npm run mocha:ci",
-    "mocha": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
-    "mocha:ci": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\"",
+    "mocha": "lb-mocha --lang en_US.UTF-8 \\\"packages/*/dist/__tests__/**/*.test.js\\\" \\\"channels/*/dist/__tests__/**/*.test.js\\\" \\\"examples/*/dist/__tests__/**/*.test.js\\\"",
+    "mocha:ci": "lb-mocha --lang en_US.UTF-8 \\\"packages/*/dist/__tests__/**/*.test.js\\\" \\\"channels/*/dist/__tests__/**/*.test.js\\\"",
     "posttest": "npm run lint"
   },
   "devDependencies": {

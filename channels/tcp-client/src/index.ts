@@ -1,4 +1,4 @@
-import { TCPClient } from './client';
+import {TCPClient} from './client';
 
 export default TCPClient;
 

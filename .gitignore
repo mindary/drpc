@@ -8,7 +8,7 @@ coverage
 **/*.tgz
 packages/*/dist
 extensions/*/dist
-transports/*/dist
+channels/*/dist
 examples/*/dist
 **/package
 .sandbox

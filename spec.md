@@ -1,6 +1,6 @@
 # Remly Specification
 
-The Remly protocol is a _simple_ RPC protocol designed to be used over some form of bidirectional communication (e.g.
+The Remly protocol is a _efficient_ RPC protocol designed to be used over some form of bidirectional communication (e.g.
 tcp sockets or web sockets).
 
 ## Message Serialization

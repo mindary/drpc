@@ -15,12 +15,6 @@
     },
     {
       "path": "../../packages/server/tsconfig.json"
-    },
-    {
-      "path": "../../transports/tcp-client/tsconfig.json"
-    },
-    {
-      "path": "../../transports/tcp/tsconfig.json"
     }
   ]
 }

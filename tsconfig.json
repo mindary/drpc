@@ -30,24 +30,6 @@
     },
     {
       "path": "packages/types/tsconfig.json"
-    },
-    {
-      "path": "transports/tcp-client/tsconfig.json"
-    },
-    {
-      "path": "transports/tcp/tsconfig.json"
-    },
-    {
-      "path": "transports/threads-worker/tsconfig.json"
-    },
-    {
-      "path": "transports/threads/tsconfig.json"
-    },
-    {
-      "path": "transports/ws-client/tsconfig.json"
-    },
-    {
-      "path": "transports/ws/tsconfig.json"
     }
   ],
   "files": []
