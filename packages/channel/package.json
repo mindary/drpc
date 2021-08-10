@@ -1,7 +1,7 @@
 {
   "name": "@remly/channel",
   "description": "A channel resolver and factory library",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
