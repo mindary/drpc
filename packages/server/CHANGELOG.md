@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.8](https://github.com/mindary/remly/compare/@remly/server@0.6.7...@remly/server@0.6.8) (2021-08-10)
+
+**Note:** Version bump only for package @remly/server
+
+
+
+
+
 ## [0.6.7](https://github.com/mindary/remly/compare/@remly/server@0.6.6...@remly/server@0.6.7) (2021-08-09)
 
 **Note:** Version bump only for package @remly/server

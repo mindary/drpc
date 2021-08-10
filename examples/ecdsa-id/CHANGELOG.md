@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://gitr.net/mindary/remly/compare/@remly/example-ecdsa-id@0.2.8...@remly/example-ecdsa-id@0.2.9) (2021-08-10)
+
+**Note:** Version bump only for package @remly/example-ecdsa-id
+
+
+
+
+
 ## [0.2.8](https://gitr.net/mindary/remly/compare/@remly/example-ecdsa-id@0.2.7...@remly/example-ecdsa-id@0.2.8) (2021-08-09)
 
 **Note:** Version bump only for package @remly/example-ecdsa-id

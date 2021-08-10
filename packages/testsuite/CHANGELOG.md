@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.8](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.3.7...@remly/testsuite@0.3.8) (2021-08-10)
+
+**Note:** Version bump only for package @remly/testsuite
+
+
+
+
+
 ## [0.3.7](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.3.6...@remly/testsuite@0.3.7) (2021-08-09)
 
 **Note:** Version bump only for package @remly/testsuite
