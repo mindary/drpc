@@ -6,7 +6,7 @@ export class BaseServer extends Server {
   }
 
   get address() {
-    return undefined;
+    return null;
   }
 
   start() {

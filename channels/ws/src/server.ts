@@ -9,12 +9,11 @@ import {WebSocketServerTransport} from './transport';
 export interface WebSocketServerOptions extends ServerChannelOptions, Omit<ServerOptions, 'server' | 'noServer'> {}
 
 export class WebSocketServer extends Server<WebSocketServerOptions> {
-  public name = 'ws';
   public wss: WebSocket.Server;
   public server?: http.Server;
-  private transports: Set<Transport> = new Set();
   protected onUpgradeListener: (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => void;
   protected onConnection: (socket: WebSocket) => void;
+  private transports: Set<Transport> = new Set();
 
   constructor(options?: WebSocketServerOptions);
   constructor(app?: Application, options?: WebSocketServerOptions);
@@ -28,13 +27,17 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
     this.wss.on('connection', socket => this.onConnection(socket));
   }
 
-  static attach(httpServer: http.Server, options?: WebSocketServerOptions) {
-    return new this(options).attach(httpServer);
+  get defaultOptions() {
+    return {name: 'ws'};
   }
 
   get address() {
     if (!this.server) return null;
     return this.server.address();
+  }
+
+  static attach(httpServer: http.Server, options?: WebSocketServerOptions) {
+    return new this(options).attach(httpServer);
   }
 
   attach(server: http.Server) {

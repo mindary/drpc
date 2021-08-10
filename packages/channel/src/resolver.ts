@@ -1,7 +1,7 @@
 import debugFactory from 'debug';
 import * as util from 'util';
 
-const debug = debugFactory('remly:datasource');
+const debug = debugFactory('remly:channel:resolver');
 
 export type Loader = (name: string) => any;
 

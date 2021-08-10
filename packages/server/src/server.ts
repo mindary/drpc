@@ -44,7 +44,7 @@ export abstract class Server<
     return this._options;
   }
 
-  abstract get address(): AddressInfo | string | null | undefined;
+  abstract get address(): AddressInfo | string | null;
 
   /**
    * Set an options object by merging the new partial and existing options

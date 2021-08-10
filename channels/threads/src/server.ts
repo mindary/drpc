@@ -11,7 +11,6 @@ export interface TreadMainEvents extends ServerEvents {
 }
 
 export class ThreadMain extends Server<ThreadMainOptions, TreadMainEvents> {
-  public name = 'thread';
   public readonly transports: Set<WorkerTransport> = new Set();
   protected transportsUnsubs: Map<WorkerTransport, UnsubscribeFn[]> = new Map();
 
@@ -21,8 +20,12 @@ export class ThreadMain extends Server<ThreadMainOptions, TreadMainEvents> {
     super(app as any, options);
   }
 
+  get defaultOptions() {
+    return {name: 'thread'};
+  }
+
   get address() {
-    return undefined;
+    return null;
   }
 
   async open(file: string | URL, options?: WorkerOptions) {

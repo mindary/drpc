@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "@remly/channel",
   "description": "A channel resolver and factory library",
   "version": "0.1.1",

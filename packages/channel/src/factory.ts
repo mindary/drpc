@@ -30,26 +30,30 @@ export interface ServerChannelSettings {
  */
 
 export function createServerChannel<T extends Server = Server>(
-  name: string | ServerClass,
+  name?: string | ServerClass,
   settings?: ServerChannelSettings,
 ): T;
 export function createServerChannel<T extends Server = Server>(settings: ServerChannelSettings): T;
 export function createServerChannel<T extends Server = Server>(
-  nameOrSettings: string | ServerClass | ServerChannelSettings,
+  nameOrSettings?: string | ServerClass | ServerChannelSettings,
   settings?: ServerChannelSettings,
 ) {
-  assert(nameOrSettings, 'first argument is required');
-
   let name: string | undefined;
   let channel: string | ServerClass | undefined;
   let ServerChannel: ServerClass | undefined;
 
-  if (typeof nameOrSettings === 'object') {
-    settings = nameOrSettings;
-    name = undefined;
-  } else if (typeof nameOrSettings === 'function') {
-    channel = nameOrSettings;
-    name = undefined;
+  if (nameOrSettings) {
+    if (typeof nameOrSettings === 'object') {
+      settings = nameOrSettings;
+      name = undefined;
+    } else if (typeof nameOrSettings === 'function') {
+      channel = nameOrSettings;
+      name = undefined;
+    } else {
+      name = nameOrSettings;
+    }
+  } else {
+    assert(settings, 'settings is required if name is empty');
   }
 
   if (typeof name !== 'string') {
@@ -74,7 +78,7 @@ export function createServerChannel<T extends Server = Server>(
     typeof name === 'string' &&
     name !== settings.name
   ) {
-    // setup('myChannel', {channel: 'anotherChannel'});
+    // createServerChannel('myChannel', {channel: 'anotherChannel'});
     // channel -> 'myChannel' and a warning will be issued
     console.warn(
       'A server channel is created with type %s, which is different from the type in settings (%s). ' +

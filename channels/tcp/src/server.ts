@@ -1,4 +1,4 @@
-import net, {AddressInfo, createServer, ListenOptions, ServerOpts, Socket} from 'net';
+import net, {createServer, ListenOptions, ServerOpts, Socket} from 'net';
 import {Transport} from '@remly/core';
 import {Application, Server, ServerChannelOptions} from '@remly/server';
 import {assert} from 'ts-essentials';
@@ -7,7 +7,6 @@ import {TCPServerTransport} from './transport';
 export interface TCPServerOptions extends ServerChannelOptions, ServerOpts, ListenOptions {}
 
 export class TCPServer extends Server<TCPServerOptions> {
-  public name = 'tcp';
   public transports: Set<Transport> = new Set();
   protected onConnectionListener: (socket: Socket) => void;
 
@@ -18,15 +17,18 @@ export class TCPServer extends Server<TCPServerOptions> {
     this.onConnectionListener = socket => this.onConnection(socket);
   }
 
+  get defaultOptions() {
+    return {name: 'tcp'};
+  }
+
   protected _server?: net.Server;
 
   get server(): net.Server | undefined {
     return this._server;
   }
 
-  get address(): AddressInfo | string | undefined {
-    const addr = this._server?.address();
-    return addr == null ? undefined : addr;
+  get address() {
+    return this._server?.address() ?? null;
   }
 
   attach(server: net.Server) {
