@@ -1,7 +1,7 @@
 {
   "name": "@remly/threads",
   "description": "The remly worker threads main library",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,14 +25,14 @@
   "dependencies": {
     "@libit/emittery": "^0.10.1",
     "@remly/core": "^0.6.5",
-    "@remly/server": "^0.6.7"
+    "@remly/server": "^0.6.9"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.6.5",
-    "@remly/testsuite": "^0.3.7",
+    "@remly/testsuite": "^0.3.9",
     "@remly/threads-worker": "^0.3.5",
     "@types/node": "^16.4.13"
   },
