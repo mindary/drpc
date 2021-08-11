@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.3.10...@remly/testsuite@0.4.0) (2021-08-11)
+
+
+### Features
+
+* introduce remote instance to handle RPC requests ([7e43a2c](https://gitr.net/mindary/remly/commits/7e43a2c18a8d56c9a9bbf67745df891bef397363))
+
+
+
+
+
 ## [0.3.10](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.3.9...@remly/testsuite@0.3.10) (2021-08-11)
 
 **Note:** Version bump only for package @remly/testsuite

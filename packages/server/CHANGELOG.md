@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/mindary/remly/compare/@remly/server@0.6.10...@remly/server@0.7.0) (2021-08-11)
+
+
+### Features
+
+* introduce remote instance to handle RPC requests ([7e43a2c](https://github.com/mindary/remly/commit/7e43a2c18a8d56c9a9bbf67745df891bef397363))
+
+
+
+
+
 ## [0.6.10](https://github.com/mindary/remly/compare/@remly/server@0.6.9...@remly/server@0.6.10) (2021-08-11)
 
 **Note:** Version bump only for package @remly/server
