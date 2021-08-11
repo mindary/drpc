@@ -1,7 +1,7 @@
 {
   "name": "@remly/ws-client",
   "description": "The remly websocket client library",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,8 +23,8 @@
     "verify": "npm pack && tar xf remly-ws-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.4.1",
-    "@remly/core": "^0.7.1",
+    "@remly/client": "^0.4.2",
+    "@remly/core": "^0.7.2",
     "tily": "^2.8.3",
     "ts-essentials": "^7.0.3",
     "ws": "^8.0.0"
