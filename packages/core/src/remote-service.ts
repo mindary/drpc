@@ -1,9 +1,8 @@
 import {ValueOrPromise} from '@remly/types';
 import {Callable} from './types';
 
-export type Service = {
-  [p: string]: (...args: any[]) => any;
-};
+export type ServiceMethod = (...args: any[]) => ValueOrPromise<any>;
+export type Service = Record<string, ServiceMethod>;
 
 export class RemoteService<S extends Service = Service> {
   constructor(protected readonly callable: Callable, protected readonly namespace?: string) {}

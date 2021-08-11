@@ -53,8 +53,8 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     return this.socket.ready();
   }
 
-  service<SERVICE extends Service>(namespace?: string): RemoteService<SERVICE> {
-    return new RemoteService<Service>(this, namespace);
+  service<SERVICE extends Service = Service>(namespace?: string): RemoteService<SERVICE> {
+    return new RemoteService<SERVICE>(this, namespace);
   }
 
   /**

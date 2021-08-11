@@ -3,30 +3,47 @@ import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
 import {expose} from '../../decorators';
-import {PickProperties} from 'ts-essentials';
 
-export class Monster {
+export interface MonsterService {
+  greet(msg: string): string;
+
+  error(): void;
+
+  exception(): void;
+
+  incrementCounterBy(counter: Counter, value: any): Counter;
+
+  add(a: number, b: number): number;
+
+  addSlow(a: number, b: number, isSlow?: boolean): Promise<number>;
+
+  sleep(ms: number): Promise<number>;
+
+  empty(): void;
+
+  noArgs(): boolean;
+
+  invalidError(): InvalidError;
+}
+
+export class Monster implements MonsterService {
   foo = 'bar';
 
   prefix = 'Hello';
 
-  @expose()
-  greet(msg: string) {
+  @expose() greet(msg: string) {
     return this.prefix + ' ' + msg;
   }
 
-  @expose()
-  error() {
+  @expose() error() {
     throw new RemoteError(-1000, 'An error message');
   }
 
-  @expose()
-  exception() {
+  @expose() exception() {
     throw new Error('An exception message');
   }
 
-  @expose()
-  incrementCounterBy(counter: Counter, value: any) {
+  @expose() incrementCounterBy(counter: Counter, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError(-1000, 'Argument not an instance of Counter');
     }
@@ -34,8 +51,7 @@ export class Monster {
     return counter;
   }
 
-  @expose()
-  add(a: number, b: number) {
+  @expose() add(a: number, b: number) {
     return a + b;
   }
 
@@ -52,19 +68,15 @@ export class Monster {
     return ms;
   }
 
-  @expose()
-  empty() {}
+  @expose() empty() {}
 
-  @expose()
-  noArgs(): boolean {
+  @expose() noArgs(): boolean {
     return true;
   }
 
-  @expose()
-  invalidError() {
+  @expose() invalidError() {
     return new InvalidError();
   }
 }
 
-export type MonsterService = PickProperties<Monster, Function>;
 export const monster = new Monster();
