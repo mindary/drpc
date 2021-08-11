@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://gitr.net/mindary/remly/compare/@remly/threads-worker@0.3.5...@remly/threads-worker@0.3.6) (2021-08-11)
+
+**Note:** Version bump only for package @remly/threads-worker
+
+
+
+
+
 ## [0.3.5](https://gitr.net/mindary/remly/compare/@remly/threads-worker@0.3.4...@remly/threads-worker@0.3.5) (2021-08-09)
 
 **Note:** Version bump only for package @remly/threads-worker
