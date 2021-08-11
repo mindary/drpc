@@ -1,7 +1,7 @@
 {
   "name": "@remly/tcp",
   "description": "The remly TCP server library",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
