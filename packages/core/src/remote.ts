@@ -25,26 +25,6 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     this.bind();
   }
 
-  bind() {
-    if (!this.unsubs.length) {
-      this.unsubs.push(
-        this.socket.on('close', () => this.emitter.emit('disconnect')),
-        this.socket.on('tick', () => this.requests.tick()),
-        this.socket.on('request', packet => this.handleRequest(packet)),
-      );
-    }
-  }
-
-  unbind() {
-    while (this.unsubs.length) {
-      this.unsubs.shift()?.();
-    }
-  }
-
-  dispose() {
-    this.unbind();
-  }
-
   get address() {
     return this.socket.address;
   }
@@ -63,6 +43,10 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
 
   get isConnected() {
     return this.socket.isConnected();
+  }
+
+  dispose() {
+    this.unbind();
   }
 
   ready() {
@@ -98,6 +82,25 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     assert(typeof event === 'string', 'Event must be a string.');
     await this.assertOrWaitConnected();
     await this.socket.send('signal', {name: event, payload: data});
+  }
+
+  protected bind() {
+    if (!this.unsubs.length) {
+      this.unsubs.push(
+        this.socket.on('close', async () => {
+          await this.emitter.emit('disconnect');
+          this.dispose();
+        }),
+        this.socket.on('tick', () => this.requests.tick()),
+        this.socket.on('request', packet => this.handleRequest(packet)),
+      );
+    }
+  }
+
+  protected unbind() {
+    while (this.unsubs.length) {
+      this.unsubs.shift()?.();
+    }
   }
 
   protected async handleRequest(packet: Packet) {
