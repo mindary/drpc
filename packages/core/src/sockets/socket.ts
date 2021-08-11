@@ -23,7 +23,7 @@ import {
   SignalMessage,
 } from '../messages';
 import {Packet} from '../packet';
-import {PacketType, PacketTypeKeyType} from '../packet-types';
+import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
 import {RemoteService, Service} from '../remote-service';
 
 const debug = debugFactory('remly:core:socket');
@@ -203,14 +203,18 @@ export abstract class Socket extends SocketEmittery {
       try {
         message.payload = this.serializer.deserialize(message.payload);
       } catch (e) {
-        debug(`deserialize error for packet ${type}`, e);
+        if (debug.enabled) {
+          debug(`deserialize error for packet "${PacketTypeMap[type] ?? 'unknown'}"`, e);
+        }
         await this.send('connect_error', new InvalidPayloadError(e.message));
         return;
       }
     }
 
     // export packet event
-    debug(`received packet ${type}`);
+    if (debug.enabled) {
+      debug(`received packet "${PacketTypeMap[type] ?? 'unknown'}"`);
+    }
     await this.emit('packet', packet);
 
     // Socket is live - any packet counts
