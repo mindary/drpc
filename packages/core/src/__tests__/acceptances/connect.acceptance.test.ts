@@ -152,8 +152,8 @@ describe('Core - Connect', function () {
 
       expect(serverSocket.isConnected()).true();
       expect(clientSocket.isConnected()).true();
-      expect(serverEvents).deepEqual(['packet_create', 'packet', 'heartbeat']);
-      expect(clientEvents).deepEqual(['packet', 'heartbeat', 'packet_create']);
+      expect(serverEvents).containEql('heartbeat');
+      expect(clientEvents).containEql('heartbeat');
     });
 
     it('should close if keepalive timeout', async () => {

@@ -5,6 +5,7 @@ import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {AuthData} from '../types';
+import {Remote} from '../remote';
 
 export interface Handshake {
   auth: AuthData;
@@ -19,6 +20,7 @@ export interface ServerSocketOptions extends SocketOptions {
 
 export class ServerSocket extends Socket {
   public id: string;
+  public remote: Remote<ServerSocket>;
   public connect: Connect;
   public handshake: Handshake;
 

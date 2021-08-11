@@ -7,30 +7,35 @@ import {toError} from '@libit/error/utils';
 import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
-import {RequestRegistry} from '../reqreg';
+import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {AnySignalHandler, NetAddress, RpcInvoke, SignalHandler} from '../types';
+import {NetAddress, RpcInvoke} from '../types';
 import {Alive} from '../alive';
-import {
-  AckMessage,
-  CallMessage,
-  ConnectMessage,
-  ErrorMessage,
-  HeartbeatMessage,
-  OpenMessage,
-  PacketMessages,
-  SignalMessage,
-} from '../messages';
+import {CallMessage, ConnectMessage, ErrorMessage, HeartbeatMessage, OpenMessage, PacketMessages} from '../messages';
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
-import {RemoteService, Service} from '../remote-service';
+import {Remote} from '../remote';
 
 const debug = debugFactory('remly:core:socket');
 
 const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
+
+interface SocketEvents {
+  tick: undefined;
+  error: Error;
+  open: undefined;
+  connect: object;
+  connect_error: Error;
+  connected: undefined;
+  closing: string | Error;
+  close: string | Error;
+  packet: Packet;
+  packet_create: Packet;
+  heartbeat: undefined;
+  request: Packet;
+}
 
 export interface SocketOptions {
   id?: string;
@@ -41,20 +46,6 @@ export interface SocketOptions {
   requestTimeout?: number;
   invoke?: RpcInvoke;
   transport?: Transport;
-}
-
-interface SocketEvents {
-  error: Error;
-  open: undefined;
-  connect: object;
-  connect_error: Error;
-  connected: undefined;
-  closing: string | Error;
-  close: string | Error;
-  packet: Packet;
-  heartbeat: undefined;
-  packet_create: Packet;
-  noreq: {type: 'ack' | 'error'; id: number};
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
@@ -72,6 +63,7 @@ export abstract class Socket extends SocketEmittery {
   public state: SocketState;
   public serializer: Serializer;
   public invoke?: RpcInvoke;
+  public readonly remote: Remote;
 
   public readonly options: SocketOptions;
   public interval: number;
@@ -82,8 +74,6 @@ export abstract class Socket extends SocketEmittery {
   protected unsubs: UnsubscribeFn[] = [];
   protected timer: IntervalTimer | null;
   protected connectTimer: TimeoutTimer;
-  protected ee: Emittery = new Emittery();
-  protected requests: RequestRegistry = new RequestRegistry();
   protected alive: Alive;
 
   protected constructor(options: Partial<SocketOptions> = {}) {
@@ -98,6 +88,7 @@ export abstract class Socket extends SocketEmittery {
 
     this.serializer = options.serializer ?? new MsgpackSerializer();
     this.invoke = options.invoke;
+    this.remote = new Remote(this);
 
     if (this.options.transport) {
       this.setTransport(this.options.transport);
@@ -112,26 +103,31 @@ export abstract class Socket extends SocketEmittery {
     return this.alive.lastActive;
   }
 
+  /**
+   * Return a promise for connected state.
+   *
+   * __NOTE__: Visit it again to recheck the connection status. You need to recheck the returned promise instance,
+   * it expires when it has been resolved or rejected.
+   *
+   * - resolve if state is 'connected' or changed from 'open' to 'connected'.
+   * - reject if state is 'closing' or 'closed'
+   */
+  ready(): Promise<void> {
+    if (this.isConnected()) {
+      return Promise.resolve();
+    }
+    if (this.state === 'closing' || this.state === 'closed') {
+      throw new Error('socket is closing or closed');
+    }
+    return this.once('connected');
+  }
+
   isOpen() {
     return this.state === 'open' || this.state === 'connected';
   }
 
   isConnected() {
     return this.state === 'connected';
-  }
-
-  /**
-   * Return a promise for connected state.
-   *
-   * - resolve if state is 'connected' or changed from 'open' to 'connected'.
-   * - reject if state is 'closing' or 'closed'
-   */
-  async ready() {
-    if (this.isConnected()) return;
-    if (this.state === 'closing' || this.state === 'closed') {
-      throw new Error('socket is closing or closed');
-    }
-    return this.once('connected');
   }
 
   setTransport(transport: Transport) {
@@ -154,35 +150,6 @@ export abstract class Socket extends SocketEmittery {
   async close() {
     if (!this.isOpen()) return;
     await this.closeTransport();
-  }
-
-  service<S extends Service>(namespace?: string): RemoteService<S> {
-    return new RemoteService<Service>(this, namespace);
-  }
-
-  async call(method: string, params?: any, timeout?: number) {
-    assert(typeof method === 'string', 'Event must be a string.');
-    await this.assertOrWaitConnected();
-    const req = this.requests.acquire(timeout ?? this.requestTimeout);
-    await this.send('call', {id: req.id, name: method, payload: params});
-    return req.promise;
-  }
-
-  subscribe(signal: string, handler: SignalHandler): UnsubscribeFn {
-    assert(typeof signal === 'string', 'Signal must be a string.');
-    assert(typeof handler === 'function', 'Handler must be a function.');
-    return this.ee.on(signal, handler);
-  }
-
-  subscribeAny(handler: AnySignalHandler): UnsubscribeFn {
-    assert(typeof handler === 'function', 'Handler must be a function.');
-    return this.ee.onAny(handler);
-  }
-
-  async signal(signal: string, data?: any) {
-    assert(typeof signal === 'string', 'Event must be a string.');
-    await this.assertOrWaitConnected();
-    await this.send('signal', {name: signal, payload: data});
   }
 
   async doError(error: any) {
@@ -240,20 +207,17 @@ export abstract class Socket extends SocketEmittery {
         if (!this.isConnected()) {
           return debug('packet received with not connected socket');
         }
+
         switch (type) {
           case PacketType.call:
             await this.handleCall(message);
             break;
-          case PacketType.ack:
-            await this.handleAck(message);
-            break;
-          case PacketType.error:
-            await this.handleError(message);
-            break;
-          case PacketType.signal:
-            await this.handleSignal(message);
+          default:
+            // notify "remote" to handle RPC request
+            await this.emit('request', packet);
             break;
         }
+
         return;
     }
   }
@@ -278,16 +242,6 @@ export abstract class Socket extends SocketEmittery {
     }
   }
 
-  protected async assertOrWaitConnected() {
-    if (!this.isConnected()) {
-      if (this.isOpen()) {
-        await this.once('connected');
-      } else {
-        throw new Error('connection is not active');
-      }
-    }
-  }
-
   protected async doClose(reason: string | Error) {
     if (this.state !== 'closed' && this.state !== 'closing') {
       debug('socket close with reason %s', reason);
@@ -303,7 +257,6 @@ export abstract class Socket extends SocketEmittery {
 
       this.state = 'closed';
       // notify ee disconnected
-      await this.ee.emit('disconnect');
       await this.emit('close', reason);
     }
   }
@@ -405,9 +358,8 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async maybeStall() {
-    const now = Date.now();
-    await this.alive.tick(now);
-    this.requests.tick(now);
+    await this.alive.tick(Date.now());
+    await this.emit('tick');
   }
 
   protected async handleAliveError() {
@@ -445,32 +397,5 @@ export abstract class Socket extends SocketEmittery {
     } catch (e) {
       await this.send('error', {id, ...makeRemoteError(e)});
     }
-  }
-
-  private async handleAck(message: AckMessage) {
-    const {id, payload} = message;
-
-    if (!this.requests.has(id)) {
-      await this.emit('noreq', {type: 'ack', id});
-      return;
-    }
-
-    this.requests.resolve(id, payload);
-  }
-
-  private async handleError(message: ErrorMessage) {
-    const {id, code, message: msg, payload} = message;
-
-    if (!this.requests.has(id)) {
-      await this.emit('noreq', {type: 'error', id});
-      return;
-    }
-
-    this.requests.reject(id, new RemoteError(code, msg, payload));
-  }
-
-  private async handleSignal(message: SignalMessage) {
-    const {name, payload} = message;
-    await this.ee.emit(name, payload);
   }
 }

@@ -1,10 +1,10 @@
+import {assert} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
 import {Socket, ValueOrPromise} from '@remly/core';
 import {Application, ApplicationOptions} from '@remly/server';
 import {Client} from '@remly/client';
 import {monster, MonsterService} from '@remly/testlab';
 import {PrepareFn} from './types';
-import {assert} from 'ts-essentials';
 
 export namespace RPCSuite {
   export type Side = 'both' | 'server' | 'client';
@@ -22,7 +22,7 @@ export namespace RPCSuite {
   }
 
   function setupSocket(socket: Socket) {
-    socket.subscribe('echo', (msg: string) => socket.signal('echo-reply', 'Hello ' + msg));
+    socket.remote.on('echo', (msg: string) => socket.remote.emit('echo-reply', 'Hello ' + msg));
   }
 
   export function run(name: string, prepare: PrepareFn, side: Side = 'both') {
@@ -52,7 +52,7 @@ export namespace RPCSuite {
           it('call a success-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.service<MonsterService>();
+            const service = socket.remote.service<MonsterService>();
             const result = await service.call('add', [1, 2]);
             expect(result).equal(3);
           });
@@ -60,17 +60,17 @@ export namespace RPCSuite {
           it('call a error-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.service<MonsterService>();
+            const service = socket.remote.service<MonsterService>();
             await expect(service.call('error')).rejectedWith(/An error message/);
           });
         });
 
-        describe('subscribe and signal', function () {
-          it('subscribe', async () => {
+        describe('remote.on and signal', function () {
+          it('remote.on', async () => {
             const socket = getSocket();
             assert(socket);
-            const reply = new Promise(resolve => socket.subscribe('echo-reply', resolve));
-            await socket.signal('echo', 'Tom');
+            const reply = new Promise(resolve => socket.remote.on('echo-reply', resolve));
+            await socket.remote.emit('echo', 'Tom');
             expect(await reply).deepEqual('Hello Tom');
           });
         });

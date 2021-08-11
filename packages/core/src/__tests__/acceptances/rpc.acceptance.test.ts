@@ -38,7 +38,7 @@ describe('RCore - PC', function () {
       describe(`call`, function () {
         it('call and return with ack', async () => {
           serverSocket.invoke = (name, params) => params;
-          const result = await clientSocket.call('echo', 'hello');
+          const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
 
@@ -46,12 +46,12 @@ describe('RCore - PC', function () {
           serverSocket.invoke = () => {
             throw new Error('invalid params');
           };
-          await expect(clientSocket.call('echo', 'hello')).rejectedWith('invalid params');
+          await expect(clientSocket.remote.call('echo', 'hello')).rejectedWith('invalid params');
         });
 
         it('calling timeout', async () => {
           serverSocket.invoke = () => delay(serverSocket.requestTimeout * 3);
-          const result = clientSocket.call('echo', 'hello');
+          const result = clientSocket.remote.call('echo', 'hello');
           await clock.tickAsync(serverSocket.requestTimeout * 2);
           await expect(result).rejectedWith(/Request timed out/);
         });
@@ -60,14 +60,14 @@ describe('RCore - PC', function () {
       describe(`subscribe and signal`, function () {
         it('subscribe', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
-          const result = new Promise(resolve => clientSocket.subscribe('message', resolve));
-          await serverSocket.signal('message', message);
+          const result = new Promise(resolve => clientSocket.remote.on('message', resolve));
+          await serverSocket.remote.emit('message', message);
           expect(await result).eql(message);
         });
         it('subscribeAny', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
-          const result = new Promise(resolve => clientSocket.subscribeAny((event, data) => resolve({event, data})));
-          await serverSocket.signal('message', message);
+          const result = new Promise(resolve => clientSocket.remote.onAny((event, data) => resolve({event, data})));
+          await serverSocket.remote.emit('message', message);
           expect(await result).eql({event: 'message', data: message});
         });
       });

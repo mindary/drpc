@@ -12,7 +12,7 @@ describe('Application', function () {
 
     // prepare client and server transport
     const [client, transport] = givenConnectionPair();
-    const service = client.service<MonsterService>();
+    const service = client.remote.service<MonsterService>();
 
     // connect
     app.handle(transport);

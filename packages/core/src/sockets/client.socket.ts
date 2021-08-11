@@ -4,6 +4,7 @@ import {Exception} from '@libit/error/exception';
 import {Socket, SocketOptions} from './socket';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {AuthData} from '../types';
+import {Remote} from '../remote';
 
 const debug = debugFactory('remly:core:client-socket');
 
@@ -20,6 +21,7 @@ export interface ClientSocketOptions extends SocketOptions {
 }
 
 export class ClientSocket extends Socket {
+  public remote: Remote<ClientSocket>;
   public auth?: Auth;
 
   constructor(options?: Partial<ClientSocketOptions>) {
