@@ -1,16 +1,15 @@
-import getPort from 'get-port';
+import {AddressInfo} from 'net';
 import {RPCSuite} from '@remly/testsuite';
 import {WebSocketClient} from '@remly/ws-client';
 import {WebSocketServer} from '../../server';
 
 RPCSuite.run('TCP', async () => {
   const app = RPCSuite.givenApplication();
-  const port = await getPort();
-  const server = new WebSocketServer(app, {port});
+  const server = new WebSocketServer(app, {port: 0});
   await server.start();
 
   const connection = app.once('connect');
-  const clientSocket = WebSocketClient.connect('ws://localhost:' + port);
+  const clientSocket = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
   RPCSuite.setupClient(clientSocket);
   const serverSocket = await connection;
 

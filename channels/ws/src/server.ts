@@ -5,6 +5,7 @@ import {Transport} from '@remly/core';
 import {Application, Server, ServerChannelOptions} from '@remly/server';
 import omit from 'tily/object/omit';
 import {WebSocketServerTransport} from './transport';
+import {assert} from 'ts-essentials';
 
 export interface WebSocketServerOptions extends ServerChannelOptions, Omit<ServerOptions, 'server' | 'noServer'> {}
 
@@ -52,9 +53,7 @@ export class WebSocketServer extends Server<WebSocketServerOptions> {
 
   async start() {
     if (this.server) return;
-    if (!this.options.port) {
-      throw new Error('port is required');
-    }
+    assert(this.options.port != null, 'port is required');
     this.server = http.createServer();
     this.attach(this.server);
     return new Promise(resolve => {

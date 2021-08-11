@@ -43,7 +43,7 @@ export class TCPServer extends Server<TCPServerOptions> {
 
   async start() {
     if (!this.server) {
-      assert(this.options.port, 'Must provide port');
+      assert(this.options.port != null, 'port is required');
       this._server = createServer(this.options);
       this.attach(this._server);
       await new Promise(resolve => this.server!.listen(this.options, () => resolve(null)));
