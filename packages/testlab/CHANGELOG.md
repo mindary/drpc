@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/mindary/remly/compare/@remly/testlab@0.6.10...@remly/testlab@0.7.0) (2021-08-12)
+
+
+### Features
+
+* refactor remote service ([6348dac](https://github.com/mindary/remly/commit/6348dacb487a3ae96b3bb0180b6fa322b9ac4263))
+
+
+
+
+
 ## [0.6.10](https://github.com/mindary/remly/compare/@remly/testlab@0.6.9...@remly/testlab@0.6.10) (2021-08-11)
 
 **Note:** Version bump only for package @remly/testlab

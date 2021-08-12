@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/mindary/remly/compare/@remly/core@0.7.2...@remly/core@0.8.0) (2021-08-12)
+
+
+### Features
+
+* refactor remote service ([6348dac](https://github.com/mindary/remly/commit/6348dacb487a3ae96b3bb0180b6fa322b9ac4263))
+
+
+
+
+
 ## [0.7.2](https://github.com/mindary/remly/compare/@remly/core@0.7.1...@remly/core@0.7.2) (2021-08-11)
 
 **Note:** Version bump only for package @remly/core

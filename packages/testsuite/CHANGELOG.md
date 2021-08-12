@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.4.2...@remly/testsuite@0.5.0) (2021-08-12)
+
+
+### Features
+
+* refactor remote service ([6348dac](https://gitr.net/mindary/remly/commits/6348dacb487a3ae96b3bb0180b6fa322b9ac4263))
+
+
+
+
+
 ## [0.4.2](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.4.1...@remly/testsuite@0.4.2) (2021-08-11)
 
 **Note:** Version bump only for package @remly/testsuite
