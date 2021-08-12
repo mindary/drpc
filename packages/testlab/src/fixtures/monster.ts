@@ -2,9 +2,9 @@ import delay from 'delay';
 import {expose, RemoteError} from '@remly/core';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
-import {PickProperties} from 'ts-essentials';
+import {MonsterService} from './monster.definition';
 
-export class Monster {
+export class Monster implements MonsterService {
   foo = 'bar';
 
   prefix = 'Hello';
@@ -64,7 +64,5 @@ export class Monster {
     return new InvalidError();
   }
 }
-
-export type MonsterService = PickProperties<Monster, Function>;
 
 export const monster = new Monster();

@@ -2,12 +2,12 @@ import {assert} from 'ts-essentials';
 import {Options, UnsubscribeFn} from '@libit/emittery';
 import {RequestRegistry} from './reqreg';
 import {Socket} from './sockets';
-import {RemoteService, Service} from './remote-service';
 import {AckMessage, ErrorMessage, SignalMessage} from './messages';
 import {RemoteError} from './errors';
 import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
+import {RemoteService, GenericMethods, RemoteMethods} from './remote-service';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -53,8 +53,8 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     return this.socket.ready();
   }
 
-  service<SERVICE extends Service = Service>(namespace?: string): RemoteService<SERVICE> {
-    return new RemoteService<SERVICE>(this, namespace);
+  service<T extends GenericMethods>(definition: T, namespace?: string): RemoteMethods<typeof definition> {
+    return RemoteService.build(definition, this, {namespace});
   }
 
   /**

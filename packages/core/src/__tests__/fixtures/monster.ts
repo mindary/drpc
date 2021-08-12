@@ -3,28 +3,7 @@ import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
 import {expose} from '../../decorators';
-
-export interface MonsterService {
-  greet(msg: string): string;
-
-  error(): void;
-
-  exception(): void;
-
-  incrementCounterBy(counter: Counter, value: any): Counter;
-
-  add(a: number, b: number): number;
-
-  addSlow(a: number, b: number, isSlow?: boolean): Promise<number>;
-
-  sleep(ms: number): Promise<number>;
-
-  empty(): void;
-
-  noArgs(): boolean;
-
-  invalidError(): InvalidError;
-}
+import {MonsterService} from './monster.definition';
 
 export class Monster implements MonsterService {
   foo = 'bar';

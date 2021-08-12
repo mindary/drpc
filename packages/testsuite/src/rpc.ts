@@ -3,7 +3,7 @@ import {expect} from '@loopback/testlab';
 import {Socket, ValueOrPromise} from '@remly/core';
 import {Application, ApplicationOptions} from '@remly/server';
 import {Client} from '@remly/client';
-import {monster, MonsterService} from '@remly/testlab';
+import {monster, MonsterDefinition} from '@remly/testlab';
 import {PrepareFn} from './types';
 
 export namespace RPCSuite {
@@ -52,16 +52,16 @@ export namespace RPCSuite {
           it('call a success-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.remote.service<MonsterService>();
-            const result = await service.call('add', [1, 2]);
+            const service = socket.remote.service(MonsterDefinition);
+            const result = await service.add(1, 2);
             expect(result).equal(3);
           });
 
           it('call a error-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.remote.service<MonsterService>();
-            await expect(service.call('error')).rejectedWith(/An error message/);
+            const service = socket.remote.service(MonsterDefinition);
+            await expect(service.error()).rejectedWith(/An error message/);
           });
         });
 

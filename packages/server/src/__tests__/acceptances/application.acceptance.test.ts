@@ -1,4 +1,4 @@
-import {givenMemoryTransportPair, MonsterService, monster} from '@remly/testlab';
+import {givenMemoryTransportPair, monster, MonsterDefinition} from '@remly/testlab';
 import {expect} from '@loopback/testlab';
 import {Transport} from '@remly/core';
 import {Client} from '@remly/client';
@@ -12,7 +12,7 @@ describe('Application', function () {
 
     // prepare client and server transport
     const [client, transport] = givenConnectionPair();
-    const service = client.remote.service<MonsterService>();
+    const service = client.remote.service(MonsterDefinition);
 
     // connect
     app.handle(transport);
@@ -23,7 +23,7 @@ describe('Application', function () {
     expect(app.connections.size).equal(1);
 
     // RPC call
-    const result = await service.call('add', [1, 2]);
+    const result = await service.add(1, 2);
     expect(result).equal(3);
 
     // close
