@@ -3,9 +3,9 @@ import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
 import {expose} from '../../decorators';
-import {MonsterService} from './monster.definition';
+import {MonsterType} from './monster.definition';
 
-export class Monster implements MonsterService {
+export class MonsterService implements MonsterType {
   foo = 'bar';
 
   prefix = 'Hello';
@@ -58,4 +58,4 @@ export class Monster implements MonsterService {
   }
 }
 
-export const monster = new Monster();
+export const monster = new MonsterService();

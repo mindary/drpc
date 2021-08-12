@@ -2,7 +2,7 @@ import {noop} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
 import {DefaultRegistry} from '../../registry';
 import {createNoop} from '../support';
-import {monster} from '../fixtures/monster';
+import {monster} from '../fixtures/monster.service';
 import {protoKeys} from '../../utils';
 import {Method} from '../../method';
 import {UnimplementedError} from '../../errors';
@@ -31,7 +31,7 @@ describe('registry', function () {
 
       it('should register with namespace parameter', function () {
         const registry = new DefaultRegistry();
-        registry.register('add', noop, {namespace: 'monster'});
+        registry.register('add', noop, {service: 'monster'});
         expect(registry.methods).have.key('monster.add');
       });
     });
@@ -55,7 +55,7 @@ describe('registry', function () {
 
       it('should register with namespace parameter', function () {
         const registry = new DefaultRegistry();
-        registry.register(monster, {namespace: 'monster'});
+        registry.register(monster, {service: 'monster'});
         expect(registry.methods).have.key('monster.add');
       });
     });
@@ -76,7 +76,7 @@ describe('registry', function () {
 
     it('should get for namespace', function () {
       const registry = new DefaultRegistry();
-      registry.register(monster, {namespace: 'monster'});
+      registry.register(monster, {service: 'monster'});
       expect(registry.methods).have.key('monster.add');
     });
   });

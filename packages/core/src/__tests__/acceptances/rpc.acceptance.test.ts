@@ -3,6 +3,8 @@ import delay from 'delay';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ClientSocket, ServerSocket} from '../../sockets';
 import {givenSocketPair} from '../support';
+import {Monster} from '../fixtures/monster.definition';
+import {RpcInvoke} from '../../types';
 
 const serializers = [
   // new JsonSerializer(),
@@ -72,6 +74,29 @@ describe('RCore - PC', function () {
           const result = new Promise(resolve => clientSocket.remote.onAny((event, data) => resolve({event, data})));
           await serverSocket.remote.emit('message', message);
           expect(await result).eql({event: 'message', data: message});
+        });
+      });
+
+      describe('service', function () {
+        const Invoker: RpcInvoke = (name, params, reply) => {
+          if (name === 'monster.add') {
+            return reply(params[0] + params[1]);
+          }
+          throw new Error('Unknown method ' + name);
+        };
+
+        it('invoke successfully', async () => {
+          serverSocket.invoke = Invoker;
+          const monster = clientSocket.remote.service(Monster);
+          const result = await monster.add(1, 2);
+          expect(result).eql(3);
+        });
+
+        it('invoke fail with unknown method', async () => {
+          serverSocket.invoke = Invoker;
+          const monster = clientSocket.remote.service(Monster);
+          const result = monster.empty();
+          await expect(result).rejectedWith(/Unknown method/);
         });
       });
     });

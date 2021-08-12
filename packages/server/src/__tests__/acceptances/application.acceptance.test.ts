@@ -1,4 +1,4 @@
-import {givenMemoryTransportPair, monster, MonsterDefinition} from '@remly/testlab';
+import {givenMemoryTransportPair, Monster, monster} from '@remly/testlab';
 import {expect} from '@loopback/testlab';
 import {Transport} from '@remly/core';
 import {Client} from '@remly/client';
@@ -8,11 +8,11 @@ describe('Application', function () {
   it('should work', async () => {
     // prepare application
     const app = new Application();
-    app.register(monster);
+    app.register(monster, {service: Monster.name});
 
     // prepare client and server transport
     const [client, transport] = givenConnectionPair();
-    const service = client.remote.service(MonsterDefinition);
+    const service = client.remote.service(Monster);
 
     // connect
     app.handle(transport);

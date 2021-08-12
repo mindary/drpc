@@ -1,12 +1,15 @@
 import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
+import debugFactory from 'debug';
 import {Handler, Method} from './method';
 import {UnimplementedError} from './errors';
 import {ExposeMetadata} from './types';
 import {getAllExposeMetadata} from './decorators';
 
+const debug = debugFactory('remly:core:registry');
+
 export interface RegisterOptions {
-  namespace?: string;
+  service?: string;
   scope?: any;
 }
 
@@ -64,7 +67,7 @@ export class DefaultRegistry implements Registry {
     }
 
     opts = opts ?? {};
-    const namespace = opts.namespace;
+    const namespace = opts.service;
     // prefer to use opts.scope then service
     scope = opts.scope ?? scope;
 
@@ -72,8 +75,11 @@ export class DefaultRegistry implements Registry {
       if (typeof (service as any)[name] === 'function') {
         assert(!this._methods[name], `Method already bound: "${name}"`);
         const alias = metadata[name].alias ?? name;
-        const full = namespace ? namespace + '.' + alias : alias;
-        this._methods[full] = new Method((service as any)[name], scope);
+        const qualified = namespace ? namespace + '.' + alias : alias;
+        this._methods[qualified] = new Method((service as any)[name], scope);
+        if (debug.enabled) {
+          debug(`register method: ${qualified}`);
+        }
       }
     }
   }
@@ -93,7 +99,7 @@ export class DefaultRegistry implements Registry {
   get(name: string) {
     const method = this._methods[name];
     if (!method) {
-      throw new UnimplementedError();
+      throw new UnimplementedError(`Method not found: "${name}"`);
     }
     return method;
   }

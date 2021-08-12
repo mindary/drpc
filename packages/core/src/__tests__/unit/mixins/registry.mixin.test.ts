@@ -1,6 +1,6 @@
 import {expect} from '@loopback/testlab';
 import {RegistryMixin} from '../../../mixins';
-import {monster} from '../../fixtures/monster';
+import {monster} from '../../fixtures/monster.service';
 
 describe('RegistryMixin', () => {
   it('mixed class has .register() and .unregister()', function () {

@@ -2,30 +2,26 @@ import delay from 'delay';
 import {expose, RemoteError} from '@remly/core';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
-import {MonsterService} from './monster.definition';
+import {MonsterType} from './monster.definition';
 
-export class Monster implements MonsterService {
+export class MonsterService implements MonsterType {
   foo = 'bar';
 
   prefix = 'Hello';
 
-  @expose()
-  greet(msg: string) {
+  @expose() greet(msg: string) {
     return this.prefix + ' ' + msg;
   }
 
-  @expose()
-  error() {
+  @expose() error() {
     throw new RemoteError({code: -1000, message: 'An error message'});
   }
 
-  @expose()
-  exception() {
+  @expose() exception() {
     throw new Error('An exception message');
   }
 
-  @expose()
-  incrementCounterBy(counter: Counter, value: any) {
+  @expose() incrementCounterBy(counter: Counter, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError({code: -1000, message: 'Argument not an instance of Counter'});
     }
@@ -33,8 +29,7 @@ export class Monster implements MonsterService {
     return counter;
   }
 
-  @expose()
-  add(a: number, b: number) {
+  @expose() add(a: number, b: number) {
     return a + b;
   }
 
@@ -51,18 +46,15 @@ export class Monster implements MonsterService {
     return ms;
   }
 
-  @expose()
-  empty() {}
+  @expose() empty() {}
 
-  @expose()
-  noArgs(): boolean {
+  @expose() noArgs(): boolean {
     return true;
   }
 
-  @expose()
-  invalidError() {
+  @expose() invalidError() {
     return new InvalidError();
   }
 }
 
-export const monster = new Monster();
+export const monster = new MonsterService();

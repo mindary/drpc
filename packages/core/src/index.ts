@@ -13,8 +13,9 @@ export * from './method';
 export * from './mixins';
 export * from './transport';
 export * from './sockets';
-export * from './remote';
+export * from './remote-service';
 export * from './remote-emitter';
+export * from './remote';
 
 export * from '@libit/emittery';
 export * from '@remly/types';

@@ -6,39 +6,41 @@ export type ReturnTypeOfMethod<T> = T extends (...args: Array<any>) => any ? Ret
 export type ReturnTypeOfMethodIfExists<T, S> = S extends keyof T ? ReturnTypeOfMethod<T[S]> : any;
 export type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
-export type GenericMethods = {[name: string]: (...args: any[]) => ValueOrPromise<any>};
-export type RemoteMethods<T extends GenericMethods> = {
+export type ServiceMethods = {[name: string]: any};
+export type RemoteMethods<T extends ServiceMethods> = {
   [K in keyof T]: ReplaceReturnType<T[K], Promise<ValueType<ReturnTypeOfMethodIfExists<T, K>>>>;
 };
 
-export interface RemoteServiceBuildOptions {
-  namespace?: string;
-  timeout?: number;
-}
+export type ServiceDefinition<T extends ServiceMethods> = {
+  name: string;
+  methods: T;
+};
 
-export class RemoteService {
+export class RemoteService<T extends ServiceMethods> {
   protected constructor(
-    readonly definition: GenericMethods,
     readonly callable: Callable,
-    readonly namespace?: string,
+    readonly proto: T,
+    readonly service?: string,
     public timeout?: number,
   ) {
-    Object.keys(definition).forEach(name => {
-      (this as any)[name] = (...args: any[]): any => this.call(name, ...args);
+    Object.keys(proto).forEach(name => {
+      const type = typeof proto[name];
+      if (type === 'object' || type === 'function') {
+        (this as any)[name] = (...args: any[]): any => this.call(name, ...args);
+      }
     });
   }
 
-  static build<T extends GenericMethods>(
-    definition: T,
+  static build<T extends ServiceMethods>(
     callable: Callable,
-    options?: RemoteServiceBuildOptions,
-  ): RemoteMethods<typeof definition> {
-    const {namespace, timeout} = options ?? {};
-    return new RemoteService(definition, callable, namespace, timeout) as any;
+    definition: ServiceDefinition<T>,
+    timeout?: number,
+  ): RemoteMethods<T> {
+    return new RemoteService<T>(callable, definition.methods, definition.name, timeout) as any;
   }
 
   protected call(method: string, ...args: any[]): any {
-    const full = this.namespace ? `${this.namespace}.${method}` : <string>method;
-    return <Promise<any>>this.callable.call(full, args, this.timeout);
+    const qualified = this.service ? `${this.service}.${method}` : method;
+    return <Promise<any>>this.callable.call(qualified, args, this.timeout);
   }
 }

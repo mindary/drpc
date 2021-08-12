@@ -7,7 +7,7 @@ import {RemoteError} from './errors';
 import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
-import {RemoteService, GenericMethods, RemoteMethods} from './remote-service';
+import {RemoteService, ServiceDefinition, RemoteMethods, ServiceMethods} from './remote-service';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -53,8 +53,8 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     return this.socket.ready();
   }
 
-  service<T extends GenericMethods>(definition: T, namespace?: string): RemoteMethods<typeof definition> {
-    return RemoteService.build(definition, this, {namespace});
+  service<T extends ServiceMethods>(definition: ServiceDefinition<T>, timeout?: number): RemoteMethods<T> {
+    return RemoteService.build(this, definition, timeout);
   }
 
   /**

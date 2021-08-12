@@ -17,7 +17,7 @@ export type AuthFn = (context: OpenContext) => ValueOrPromise<AuthData>;
 export type Auth = AuthData | AuthFn;
 
 export interface ClientSocketOptions extends SocketOptions {
-  auth: Auth;
+  auth?: Auth;
 }
 
 export class ClientSocket extends Socket {
