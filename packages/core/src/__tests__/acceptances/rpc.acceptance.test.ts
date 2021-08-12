@@ -4,7 +4,7 @@ import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ClientSocket, ServerSocket} from '../../sockets';
 import {givenSocketPair} from '../support';
 import {Monster} from '../fixtures/monster.definition';
-import {RpcInvoke} from '../../types';
+import {RPCInvoke} from '../../types';
 
 const serializers = [
   // new JsonSerializer(),
@@ -78,7 +78,7 @@ describe('RCore - PC', function () {
       });
 
       describe('service', function () {
-        const Invoker: RpcInvoke = (name, params, reply) => {
+        const Invoker: RPCInvoke = (name, params, reply) => {
           if (name === 'monster.add') {
             return reply(params[0] + params[1]);
           }

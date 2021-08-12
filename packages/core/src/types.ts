@@ -3,10 +3,6 @@ import * as Buffer from 'buffer';
 
 export type SignalName = string | symbol;
 
-export type ExposeMetadata = {
-  alias?: string;
-};
-
 export interface Service {
   [name: string]: any;
 }
@@ -15,8 +11,8 @@ export interface Callable {
   call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export type RpcReply = (result?: any) => ValueOrPromise<void>;
-export type RpcInvoke = (name: string, params: any, reply: RpcReply) => ValueOrPromise<void>;
+export type RPCReply = (result?: any) => ValueOrPromise<void>;
+export type RPCInvoke = (name: string, params: any, reply: RPCReply) => ValueOrPromise<void>;
 
 export interface AuthData {
   sid?: string; // ecdsa public key as sid

@@ -2,27 +2,31 @@ import delay from 'delay';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
-import {expose} from '../../decorators';
 import {MonsterType} from './monster.definition';
+import {rpc} from '../../decorators';
 
 export class MonsterService implements MonsterType {
   foo = 'bar';
 
   prefix = 'Hello';
 
-  @expose() greet(msg: string) {
+  @rpc.procedure()
+  greet(msg: string) {
     return this.prefix + ' ' + msg;
   }
 
-  @expose() error() {
+  @rpc.procedure()
+  error() {
     throw new RemoteError(-1000, 'An error message');
   }
 
-  @expose() exception() {
+  @rpc.procedure()
+  exception() {
     throw new Error('An exception message');
   }
 
-  @expose() incrementCounterBy(counter: Counter, value: any) {
+  @rpc.procedure()
+  incrementCounterBy(counter: Counter, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError(-1000, 'Argument not an instance of Counter');
     }
@@ -30,30 +34,34 @@ export class MonsterService implements MonsterType {
     return counter;
   }
 
-  @expose() add(a: number, b: number) {
+  @rpc.procedure()
+  add(a: number, b: number) {
     return a + b;
   }
 
-  @expose()
+  @rpc.procedure()
   async addSlow(a: number, b: number, isSlow?: boolean) {
     const result = a + b;
     if (isSlow) await delay(15);
     return result;
   }
 
-  @expose()
+  @rpc.procedure()
   async sleep(ms: number) {
     await delay(ms);
     return ms;
   }
 
-  @expose() empty() {}
+  @rpc.procedure()
+  empty() {}
 
-  @expose() noArgs(): boolean {
+  @rpc.procedure()
+  noArgs(): boolean {
     return true;
   }
 
-  @expose() invalidError() {
+  @rpc.procedure()
+  invalidError() {
     return new InvalidError();
   }
 }

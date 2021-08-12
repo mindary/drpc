@@ -9,7 +9,7 @@ import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {NetAddress, RpcInvoke} from '../types';
+import {NetAddress, RPCInvoke} from '../types';
 import {Alive} from '../alive';
 import {CallMessage, ConnectMessage, ErrorMessage, HeartbeatMessage, OpenMessage, PacketMessages} from '../messages';
 import {Packet} from '../packet';
@@ -44,7 +44,7 @@ export interface SocketOptions {
   keepalive?: number;
   connectTimeout?: number;
   requestTimeout?: number;
-  invoke?: RpcInvoke;
+  invoke?: RPCInvoke;
   transport?: Transport;
 }
 
@@ -62,7 +62,7 @@ export abstract class Socket extends SocketEmittery {
   public transport: Transport;
   public state: SocketState;
   public serializer: Serializer;
-  public invoke?: RpcInvoke;
+  public invoke?: RPCInvoke;
   public readonly remote: Remote;
 
   public readonly options: SocketOptions;

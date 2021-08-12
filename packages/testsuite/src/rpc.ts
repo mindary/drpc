@@ -11,13 +11,13 @@ export namespace RPCSuite {
 
   export function givenApplication(options?: ApplicationOptions): Application {
     const app = new Application(options);
-    app.register(monster, {service: Monster.name});
+    app.register(Monster.name, monster);
     app.on('connection', setupSocket);
     return app;
   }
 
   export function setupClient(client: Client) {
-    client.register(monster, {service: Monster.name});
+    client.register(Monster.name, monster);
     setupSocket(client);
   }
 

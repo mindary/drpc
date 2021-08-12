@@ -1,41 +1,13 @@
-import {noop} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
 import {DefaultRegistry} from '../../registry';
-import {createNoop} from '../support';
 import {monster} from '../fixtures/monster.service';
 import {protoKeys} from '../../utils';
 import {Method} from '../../method';
 import {UnimplementedError} from '../../errors';
-
-const fn1 = createNoop();
-const fn2 = createNoop();
+import {Monster} from '../fixtures/monster.definition';
 
 describe('registry', function () {
   describe('register', function () {
-    describe('single method', function () {
-      it('should register for single method', function () {
-        const registry = new DefaultRegistry();
-        registry.register('add', noop);
-        expect(registry.methods).have.key('add');
-      });
-
-      it('should throw error if method already bound', function () {
-        const registry = new DefaultRegistry();
-        registry.register('add', fn1);
-        expect(registry.methods['add']).containDeep({
-          handler: fn1,
-          scope: undefined,
-        });
-        expect(() => registry.register('add', fn2)).throw(/Method already bound/);
-      });
-
-      it('should register with namespace parameter', function () {
-        const registry = new DefaultRegistry();
-        registry.register('add', noop, {service: 'monster'});
-        expect(registry.methods).have.key('monster.add');
-      });
-    });
-
     describe('service', function () {
       it('should register a service with all methods', function () {
         const keys = protoKeys(monster).filter(k => typeof (monster as any)[k] === 'function');
@@ -55,7 +27,7 @@ describe('registry', function () {
 
       it('should register with namespace parameter', function () {
         const registry = new DefaultRegistry();
-        registry.register(monster, {service: 'monster'});
+        registry.register(Monster.name, monster);
         expect(registry.methods).have.key('monster.add');
       });
     });
@@ -76,7 +48,7 @@ describe('registry', function () {
 
     it('should get for namespace', function () {
       const registry = new DefaultRegistry();
-      registry.register(monster, {service: 'monster'});
+      registry.register(Monster.name, monster);
       expect(registry.methods).have.key('monster.add');
     });
   });
@@ -136,7 +108,7 @@ describe('registry', function () {
         prefix: '您好',
       };
       const registry = new DefaultRegistry();
-      registry.register(monster, {scope});
+      registry.register(monster, scope);
       const result = await registry.call('greet', 'Tom');
       expect(result).equal('您好 Tom');
     });

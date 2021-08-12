@@ -1,8 +1,7 @@
 import {assert} from 'ts-essentials';
 import {MixinTarget} from '../mixin-target';
-import {DefaultRegistry, RegisterOptions, Registrable, Registry} from '../registry';
-import {Handler} from '../method';
-import {RpcInvoke} from '../types';
+import {DefaultRegistry, Registrable, Registry} from '../registry';
+import {RPCInvoke} from '../types';
 
 export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClass: T) {
   return class extends superClass implements Registrable {
@@ -11,7 +10,7 @@ export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClas
      */
     public registry: Registry;
 
-    public invoke: RpcInvoke;
+    public invoke: RPCInvoke;
 
     constructor(...args: any[]) {
       super(...args);
@@ -39,16 +38,13 @@ export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClas
       }
     }
 
-    register<S extends object>(service: S, opts?: RegisterOptions): void;
-    register<S extends object, K extends keyof S>(service: S, names: (K | string)[], opts?: RegisterOptions): void;
-    register(name: string, handler: Handler, opts?: RegisterOptions): void;
-    register<S extends object>(
-      nameOrService: string | S,
-      handler?: Handler | string[] | RegisterOptions,
-      opts?: RegisterOptions,
-    ) {
+    register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: any): void;
+    register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: any): void;
+    register<SERVICE extends object>(service: SERVICE, scope?: any): void;
+    register<SERVICE extends object>(service: SERVICE, names: string[], scope?: any): void;
+    register<SERVICE extends object>(...args: any[]) {
       assert(this.registry, 'register is not supported for current connection');
-      return this.registry.register(<any>nameOrService, <any>handler, <any>opts);
+      return this.registry.register(args[0], args[1], args[2], args[3]);
     }
 
     unregister(pattern: string | string[]): string[] {

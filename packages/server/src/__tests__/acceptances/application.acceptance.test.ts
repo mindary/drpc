@@ -8,7 +8,7 @@ describe('Application', function () {
   it('should work', async () => {
     // prepare application
     const app = new Application();
-    app.register(monster, {service: Monster.name});
+    app.register(Monster.name, monster);
 
     // prepare client and server transport
     const [client, transport] = givenConnectionPair();

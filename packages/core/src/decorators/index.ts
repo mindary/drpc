@@ -1,1 +1,1 @@
-export * from './expose.decorator';
+export * from './rpc.decorator';

@@ -1,5 +1,5 @@
 import debugFactory from 'debug';
-import {Registry, RegistryMixin, RpcInvoke, Serializer, Transport} from '@remly/core';
+import {Registry, RegistryMixin, RPCInvoke, Serializer, Transport} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {GenericInterceptorChain} from '@libit/interceptor';
 import {Connection} from './connection';
@@ -21,7 +21,7 @@ export interface ApplicationEvents {
 export interface ApplicationOptions {
   registry?: Registry;
   serializer?: Serializer;
-  invoke?: RpcInvoke;
+  invoke?: RPCInvoke;
   connectTimeout?: number;
   requestTimeout?: number;
 }
