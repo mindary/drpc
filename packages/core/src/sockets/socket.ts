@@ -392,8 +392,7 @@ export abstract class Socket extends SocketEmittery {
     const {id, name, payload} = message;
 
     try {
-      const result = await this.invoke(name, payload);
-      await this.send('ack', {id, payload: result});
+      await this.invoke(name, payload, result => this.send('ack', {id, payload: result}));
     } catch (e) {
       await this.send('error', {id, ...makeRemoteError(e)});
     }

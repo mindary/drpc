@@ -32,9 +32,9 @@ export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClas
         //    }
         //  });
         //
-        this.invoke = (name, params) => {
+        this.invoke = async (name, params, reply) => {
           assert(this.registry, 'remote invoking is not supported for current connection');
-          return this.registry.invoke({name, params});
+          await reply(await this.registry.invoke({name, params}));
         };
       }
     }

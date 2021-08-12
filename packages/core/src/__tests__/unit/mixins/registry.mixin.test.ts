@@ -18,7 +18,8 @@ describe('RegistryMixin', () => {
   it('register server and can invoke method', async () => {
     const obj = new ObjectWithRegistry();
     obj.register(monster);
-    const result = await obj.invoke('add', [1, 2]);
+    // eslint-disable-next-line no-void
+    const result = await new Promise(resolve => void obj.invoke('add', [1, 2], resolve));
     expect(result).equal(3);
   });
 

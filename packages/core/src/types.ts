@@ -15,10 +15,8 @@ export interface Callable {
   call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export type RpcInvoke = (name: string, params: any) => ValueOrPromise<any>;
-
-export type SignalHandler = (data?: any) => ValueOrPromise<void>;
-export type AnySignalHandler = (event: string | symbol, data?: any) => ValueOrPromise<void>;
+export type RpcReply = (result?: any) => ValueOrPromise<void>;
+export type RpcInvoke = (name: string, params: any, reply: RpcReply) => ValueOrPromise<void>;
 
 export interface AuthData {
   sid?: string; // ecdsa public key as sid

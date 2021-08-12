@@ -37,7 +37,7 @@ describe('RCore - PC', function () {
 
       describe(`call`, function () {
         it('call and return with ack', async () => {
-          serverSocket.invoke = (name, params) => params;
+          serverSocket.invoke = (name, params, reply) => reply(params);
           const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
@@ -50,7 +50,10 @@ describe('RCore - PC', function () {
         });
 
         it('calling timeout', async () => {
-          serverSocket.invoke = () => delay(serverSocket.requestTimeout * 3);
+          serverSocket.invoke = async (_name, _params, reply) => {
+            await delay(serverSocket.requestTimeout * 3);
+            await reply();
+          };
           const result = clientSocket.remote.call('echo', 'hello');
           await clock.tickAsync(serverSocket.requestTimeout * 2);
           await expect(result).rejectedWith(/Request timed out/);
