@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/mindary/remly/compare/@remly/server@0.8.1...@remly/server@0.9.0) (2021-08-12)
+
+
+### Features
+
+* initial port service definition to replace service interface to provide more convenient calling ([7a656ec](https://github.com/mindary/remly/commit/7a656ec4ab655f091a4f62963e2be3ba05b77d36))
+* refactor register signature ([e62aeeb](https://github.com/mindary/remly/commit/e62aeeb9779963fb18221505f47ba29e5fb279ad))
+
+
+
+
+
 ## [0.8.1](https://github.com/mindary/remly/compare/@remly/server@0.8.0...@remly/server@0.8.1) (2021-08-12)
 
 **Note:** Version bump only for package @remly/server

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.5.1...@remly/testsuite@0.6.0) (2021-08-12)
+
+
+### Features
+
+* initial port service definition to replace service interface to provide more convenient calling ([7a656ec](https://gitr.net/mindary/remly/commits/7a656ec4ab655f091a4f62963e2be3ba05b77d36))
+* refactor register signature ([e62aeeb](https://gitr.net/mindary/remly/commits/e62aeeb9779963fb18221505f47ba29e5fb279ad))
+
+
+
+
+
 ## [0.5.1](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.5.0...@remly/testsuite@0.5.1) (2021-08-12)
 
 **Note:** Version bump only for package @remly/testsuite
