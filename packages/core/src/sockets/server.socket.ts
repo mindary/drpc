@@ -4,13 +4,7 @@ import {Socket, SocketOptions} from './socket';
 import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
-import {AuthData} from '../types';
 import {Remote} from '../remote';
-
-export interface Handshake {
-  auth: AuthData;
-  challenge: Buffer;
-}
 
 export type Connect<T extends ServerSocket = ServerSocket> = (socket: T) => ValueOrPromise<any>;
 
@@ -19,27 +13,31 @@ export interface ServerSocketOptions extends SocketOptions {
 }
 
 export class ServerSocket extends Socket {
-  public id: string;
+  /**
+   * Additional information that can be attached to the Connection instance and which will be used in DTO/Persistent
+   */
+  public data: Record<string, any> = {};
+
   public remote: Remote<ServerSocket>;
+
+  public id: string;
+  public challenge: Buffer;
   public connect: Connect;
-  public handshake: Handshake;
 
   constructor(id: string, transport: Transport, options?: Partial<ServerSocketOptions>) {
-    options = options ?? {};
     super({...options, id, transport});
-    this.handshake = {} as any;
-    this.connect = options.connect ?? noop;
+    this.connect = options?.connect ?? noop;
     process.nextTick(() => this.open());
   }
 
   protected async open() {
     this.transport.sid = this.id;
-    this.handshake.challenge = nonce();
+    this.challenge = nonce();
     // sends an `open` packet
     await this.send('open', {
       sid: this.id,
       keepalive: this.keepalive,
-      challenge: this.handshake.challenge,
+      challenge: this.challenge,
     });
 
     await this.emit('open');
@@ -50,10 +48,11 @@ export class ServerSocket extends Socket {
   }
 
   protected async handleConnect(message: ConnectMessage) {
-    this.handshake.auth = message.payload;
+    this.handshake.auth = message.payload ?? {};
 
     try {
       await this.connect(this);
+      this.handshake.sid = this.id;
       await this.send('connect', {payload: {sid: this.id}});
       await this.doConnected();
     } catch (e) {

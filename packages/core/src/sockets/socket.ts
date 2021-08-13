@@ -9,7 +9,7 @@ import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {NetAddress, RPCInvoke} from '../types';
+import {AuthData, NetAddress, RPCInvoke} from '../types';
 import {Alive} from '../alive';
 import {CallMessage, ConnectMessage, ErrorMessage, HeartbeatMessage, OpenMessage, PacketMessages} from '../messages';
 import {Packet} from '../packet';
@@ -55,6 +55,11 @@ const DEFAULT_OPTIONS: SocketOptions = {
   requestTimeout: 10 * 1000,
 };
 
+export interface Handshake {
+  sid: string;
+  auth: AuthData;
+}
+
 export class SocketEmittery extends Emittery<SocketEvents> {}
 
 export abstract class Socket extends SocketEmittery {
@@ -64,6 +69,7 @@ export abstract class Socket extends SocketEmittery {
   public serializer: Serializer;
   public invoke?: RPCInvoke;
   public readonly remote: Remote;
+  public readonly handshake = {} as Handshake;
 
   public readonly options: SocketOptions;
   public interval: number;

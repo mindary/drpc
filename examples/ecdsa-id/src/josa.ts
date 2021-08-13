@@ -9,7 +9,8 @@ export interface JOSAMiddlewareOptions {
 export function josa(options: JOSAMiddlewareOptions): ConnectHandler {
   const {signer} = options;
   return async (connection, next) => {
-    const {auth, challenge} = connection.handshake;
+    const {challenge} = connection;
+    const {auth} = connection.handshake;
     if (auth.sig) {
       const ticket = signer.unpackAndVerify(auth.sig);
       if (challenge.compare(ticket.payload) !== 0) {

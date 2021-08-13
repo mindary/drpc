@@ -32,15 +32,24 @@ export class ClientSocket extends Socket {
 
   protected async handleOpen(message: OpenMessage) {
     debug('transport is open - connecting');
-    this.keepalive = message.keepalive;
-    const {challenge} = message;
-    const payload = typeof this.auth === 'function' ? await this.auth({socket: this, challenge}) : this.auth;
-    await this.send('connect', {payload});
+    const {keepalive, challenge} = message;
+    this.keepalive = keepalive;
+    this.handshake.auth =
+      typeof this.auth === 'function'
+        ? await this.auth({
+            socket: this,
+            challenge,
+          })
+        : this.auth ?? {};
+    await this.send('connect', {
+      payload: this.handshake.auth,
+    });
   }
 
   protected async handleConnect(message: ConnectMessage) {
-    const sid = message.payload?.sid;
+    const {sid} = message.payload ?? {};
     if (sid) {
+      this.handshake.sid = sid;
       await this.doConnected(sid);
     } else {
       await this.emit('connect_error', new Exception('connect ack lacks "sid"'));
