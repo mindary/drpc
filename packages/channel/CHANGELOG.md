@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://gitr.net/mindary/remly/compare/@remly/channel@0.1.12...@remly/channel@0.2.0) (2021-08-13)
+
+
+### Features
+
+* refactor registry ([7fa2ff2](https://gitr.net/mindary/remly/commits/7fa2ff269adc99a01ef10eb028f645847f55be92))
+
+
+
+
+
 ## [0.1.12](https://gitr.net/mindary/remly/compare/@remly/channel@0.1.11...@remly/channel@0.1.12) (2021-08-12)
 
 **Note:** Version bump only for package @remly/channel

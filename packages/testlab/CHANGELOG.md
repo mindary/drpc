@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/mindary/remly/compare/@remly/testlab@0.8.0...@remly/testlab@0.9.0) (2021-08-13)
+
+
+### Features
+
+* refactor registry ([7fa2ff2](https://github.com/mindary/remly/commit/7fa2ff269adc99a01ef10eb028f645847f55be92))
+
+
+
+
+
 # [0.8.0](https://github.com/mindary/remly/compare/@remly/testlab@0.7.1...@remly/testlab@0.8.0) (2021-08-12)
 
 
