@@ -9,7 +9,7 @@ import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {AuthData, NetAddress, RPCInvoke} from '../types';
+import {Metadata, NetAddress, RPCInvoke} from '../types';
 import {Alive} from '../alive';
 import {CallMessage, ConnectMessage, ErrorMessage, HeartbeatMessage, OpenMessage, PacketMessages} from '../messages';
 import {Packet} from '../packet';
@@ -25,7 +25,7 @@ export type SocketState = TransportState | 'connected';
 interface SocketEvents {
   tick: undefined;
   error: Error;
-  open: undefined;
+  open: Socket;
   connect: object;
   connect_error: Error;
   connected: undefined;
@@ -57,7 +57,7 @@ const DEFAULT_OPTIONS: SocketOptions = {
 
 export interface Handshake {
   sid: string;
-  auth: AuthData;
+  metadata: Metadata;
 }
 
 export class SocketEmittery extends Emittery<SocketEvents> {}

@@ -14,11 +14,13 @@ export interface Callable {
 export type RPCReply = (result?: any) => ValueOrPromise<void>;
 export type RPCInvoke = (name: string, params: any, reply: RPCReply) => ValueOrPromise<void>;
 
-export interface AuthData {
-  sid?: string; // ecdsa public key as sid
-  tok?: string | Buffer; // token
-  sig?: Buffer; // packed josa signature
-  [key: string]: any;
+export interface Metadata extends Record<string, any> {
+  auth?: {
+    sid?: string; // ecdsa public key as sid
+    tok?: string | Buffer; // token
+    sig?: Buffer; // signature
+    [key: string]: any;
+  };
 }
 
 export interface NetAddress {

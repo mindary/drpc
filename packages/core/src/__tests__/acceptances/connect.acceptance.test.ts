@@ -66,10 +66,10 @@ describe('Core - Connect', function () {
 
     it('should allow', async () => {
       const AUTH = {token: 'hello'};
-      clientSocket.auth = AUTH;
-      serverSocket.connect = socket => {
-        const {auth} = socket.handshake;
-        if (auth.token !== AUTH.token) {
+      clientSocket.metadata.auth = AUTH;
+      serverSocket.onConnect = socket => {
+        const {auth} = socket.handshake.metadata;
+        if (auth?.token !== AUTH.token) {
           throw new Error('Unauthorized');
         }
       };
@@ -77,8 +77,8 @@ describe('Core - Connect', function () {
     });
 
     it('should deny', async () => {
-      clientSocket.auth = {token: 'hello'};
-      serverSocket.connect = () => {
+      clientSocket.metadata.auth = {token: 'hello'};
+      serverSocket.onConnect = () => {
         throw new Error('Unauthorized');
       };
       const error = await clientSocket.once('connect_error');
@@ -103,14 +103,14 @@ describe('Core - Connect', function () {
     });
 
     it('client should throw ConnectTimeoutError for server long time authenticating', async () => {
-      serverSocket.connect = async () => delay(clientSocket.connectTimeout + 5000);
+      serverSocket.onConnect = async () => delay(clientSocket.connectTimeout + 5000);
       const error = clientSocket.once('connect_error');
       clock.tick(clientSocket.connectTimeout + 1000);
       expect(await error).instanceOf(ConnectTimeoutError);
     });
 
     it('server should throw ConnectTimeoutError for client long time response for "open"', async () => {
-      clientSocket.auth = async () => delay(serverSocket.connectTimeout + 5000);
+      clientSocket.onConnect = async () => delay(serverSocket.connectTimeout + 5000);
       const error = serverSocket.once('connect_error');
       clock.tick(serverSocket.connectTimeout + 1000);
       expect(await error).instanceOf(ConnectTimeoutError);

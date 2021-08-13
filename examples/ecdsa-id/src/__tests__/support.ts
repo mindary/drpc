@@ -1,7 +1,8 @@
-import {Identity, Signer} from '@libit/josa';
-import {AuthData, OpenContext, TCPServer} from '@remly/tcp';
-import {TCPClient} from '@remly/tcp-client';
 import getPort from 'get-port';
+import {Identity, Signer} from '@libit/josa';
+import {TCPServer} from '@remly/tcp';
+import {TCPClient} from '@remly/tcp-client';
+import {ClientSocket} from '@remly/core';
 import {ECDSAApplication} from '../application';
 
 export async function setupApplication({signer, identity}: {signer: Signer; identity: Identity}) {
@@ -11,15 +12,14 @@ export async function setupApplication({signer, identity}: {signer: Signer; iden
   app.bind(server);
   await server.start();
 
-  const client = TCPClient.connect(port, {auth: auth({signer, identity})});
+  const client = TCPClient.connect(port, {onConnect: auth({signer, identity})});
 
   return {app, client, server};
 }
 
 function auth({signer, identity}: {signer: Signer; identity: Identity}) {
-  return async (context: OpenContext): Promise<AuthData> => {
-    const {challenge} = context;
+  return async (socket: ClientSocket, challenge: Buffer): Promise<void> => {
     const sig = signer.signAndPack(challenge, identity, {noTimestamp: true});
-    return {sig};
+    socket.metadata.auth = {sig};
   };
 }

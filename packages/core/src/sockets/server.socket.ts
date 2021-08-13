@@ -6,10 +6,10 @@ import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
 
-export type Connect<T extends ServerSocket = ServerSocket> = (socket: T) => ValueOrPromise<any>;
+export type OnServerConnect<T extends ServerSocket = ServerSocket> = (socket: T) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
-  connect?: Connect;
+  onConnect?: OnServerConnect;
 }
 
 export class ServerSocket extends Socket {
@@ -22,11 +22,11 @@ export class ServerSocket extends Socket {
 
   public id: string;
   public challenge: Buffer;
-  public connect: Connect;
+  public onConnect: OnServerConnect;
 
   constructor(id: string, transport: Transport, options?: Partial<ServerSocketOptions>) {
     super({...options, id, transport});
-    this.connect = options?.connect ?? noop;
+    this.onConnect = options?.onConnect ?? noop;
     process.nextTick(() => this.open());
   }
 
@@ -40,7 +40,7 @@ export class ServerSocket extends Socket {
       challenge: this.challenge,
     });
 
-    await this.emit('open');
+    await this.emit('open', this);
   }
 
   protected handleOpen(message: OpenMessage) {
@@ -48,10 +48,10 @@ export class ServerSocket extends Socket {
   }
 
   protected async handleConnect(message: ConnectMessage) {
-    this.handshake.auth = message.payload ?? {};
+    this.handshake.metadata = message.payload ?? {};
 
     try {
-      await this.connect(this);
+      await this.onConnect(this);
       this.handshake.sid = this.id;
       await this.send('connect', {payload: {sid: this.id}});
       await this.doConnected();

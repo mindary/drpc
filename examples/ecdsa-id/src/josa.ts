@@ -10,8 +10,8 @@ export function josa(options: JOSAMiddlewareOptions): ConnectHandler {
   const {signer} = options;
   return async (connection, next) => {
     const {challenge} = connection;
-    const {auth} = connection.handshake;
-    if (auth.sig) {
+    const {auth} = connection.handshake?.metadata;
+    if (auth?.sig) {
       const ticket = signer.unpackAndVerify(auth.sig);
       if (challenge.compare(ticket.payload) !== 0) {
         throw new Error('signature is invalid');

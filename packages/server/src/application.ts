@@ -94,7 +94,7 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
       invoke: this.invoke,
-      connect: () => this.doConnect(connection),
+      onConnect: () => this.doConnect(connection),
     });
   }
 

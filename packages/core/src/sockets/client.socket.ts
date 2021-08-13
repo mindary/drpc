@@ -3,7 +3,7 @@ import debugFactory from 'debug';
 import {Exception} from '@libit/error/exception';
 import {Socket, SocketOptions} from './socket';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
-import {AuthData} from '../types';
+import {Metadata} from '../types';
 import {Remote} from '../remote';
 
 const debug = debugFactory('remly:core:client-socket');
@@ -13,36 +13,41 @@ export interface OpenContext {
   challenge: Buffer;
 }
 
-export type AuthFn = (context: OpenContext) => ValueOrPromise<AuthData>;
-export type Auth = AuthData | AuthFn;
+export type OnClientConnect<SOCKET extends ClientSocket = ClientSocket> = (
+  socket: SOCKET,
+  challenge: Buffer,
+) => ValueOrPromise<void>;
 
 export interface ClientSocketOptions extends SocketOptions {
-  auth?: Auth;
+  metadata?: Metadata;
+  onConnect?: OnClientConnect;
 }
 
 export class ClientSocket extends Socket {
   public remote: Remote<ClientSocket>;
-  public auth?: Auth;
+
+  public onConnect?: OnClientConnect;
 
   constructor(options?: Partial<ClientSocketOptions>) {
-    options = options ?? {};
     super(options);
-    this.auth = options.auth;
+    this.handshake.metadata = Object.assign({}, options?.metadata);
+    this.onConnect = options?.onConnect;
+  }
+
+  get metadata() {
+    return this.handshake.metadata;
   }
 
   protected async handleOpen(message: OpenMessage) {
     debug('transport is open - connecting');
     const {keepalive, challenge} = message;
     this.keepalive = keepalive;
-    this.handshake.auth =
-      typeof this.auth === 'function'
-        ? await this.auth({
-            socket: this,
-            challenge,
-          })
-        : this.auth ?? {};
+    if (this.onConnect) {
+      await this.onConnect(this, challenge);
+    }
+    Object.freeze(this.handshake.metadata);
     await this.send('connect', {
-      payload: this.handshake.auth,
+      payload: this.handshake.metadata,
     });
   }
 
