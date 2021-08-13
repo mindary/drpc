@@ -38,10 +38,10 @@ export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClas
       }
     }
 
-    register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: any): void;
-    register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: any): void;
-    register<SERVICE extends object>(service: SERVICE, scope?: any): void;
-    register<SERVICE extends object>(service: SERVICE, names: string[], scope?: any): void;
+    register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;
+    register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: object): void;
+    register<SERVICE extends object>(service: SERVICE, scope?: object): void;
+    register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
     register<SERVICE extends object>(...args: any[]) {
       assert(this.registry, 'register is not supported for current connection');
       return this.registry.register(args[0], args[1], args[2], args[3]);

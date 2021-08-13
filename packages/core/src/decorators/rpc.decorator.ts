@@ -1,44 +1,43 @@
-import {MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
+import {MetadataAccessor, MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
 import {Constructor} from '@remly/types';
-import {EXPOSE_METADATA_LEY} from '../keys';
 
-export type RPCProcedureMetadata = {
+export type RPCMethodMetadata = {
   name?: string;
 };
 
+export const RPC_METHOD_METADATA = MetadataAccessor.create<RPCMethodMetadata, MethodDecorator>('rpc:method');
+
 export namespace rpc {
-  export function procedure(metadata?: RPCProcedureMetadata | string) {
+  export function method(metadata?: RPCMethodMetadata | string) {
     if (typeof metadata === 'string') {
       metadata = {name: metadata};
     }
     metadata = metadata ?? {};
-    return MethodDecoratorFactory.createDecorator<RPCProcedureMetadata>(EXPOSE_METADATA_LEY, metadata);
+    return MethodDecoratorFactory.createDecorator<RPCMethodMetadata>(RPC_METHOD_METADATA, metadata);
   }
 }
 
 /**
- * Fetch expose method metadata stored by `@rpc.procedure` decorator.
+ * Fetch expose method metadata stored by `@rpc.method` decorator.
  *
  * @param serviceClass - Target service
  * @param methodName - Target method
  */
-export function getRPCProcedureMetadata(serviceClass: Constructor<{}>, methodName: string): RPCProcedureMetadata {
+export function getRPCMethodMetadata(serviceClass: Constructor<unknown>, methodName: string): RPCMethodMetadata {
   return (
-    MetadataInspector.getMethodMetadata<RPCProcedureMetadata>(
-      EXPOSE_METADATA_LEY,
-      serviceClass.prototype,
-      methodName,
-    ) ?? {}
+    MetadataInspector.getMethodMetadata<RPCMethodMetadata>(RPC_METHOD_METADATA, serviceClass.prototype, methodName) ??
+    ({} as RPCMethodMetadata)
   );
 }
 
 /**
- * Fetch all expose method metadata stored by `@rpc.procedure` decorator.
+ * Fetch all method method metadata stored by `@rpc.method` decorator.
  *
  * @param serviceClass - Target service
  */
-export function getAllRPCProcedureMetadata(
-  serviceClass: Constructor<{}>,
-): MetadataMap<RPCProcedureMetadata> | undefined {
-  return MetadataInspector.getAllMethodMetadata<RPCProcedureMetadata>(EXPOSE_METADATA_LEY, serviceClass.prototype);
+export function getAllRPCMethodMetadata(serviceClass: Constructor<unknown>): MetadataMap<RPCMethodMetadata> {
+  return (
+    MetadataInspector.getAllMethodMetadata<RPCMethodMetadata>(RPC_METHOD_METADATA, serviceClass.prototype) ??
+    ({} as MetadataMap<RPCMethodMetadata>)
+  );
 }

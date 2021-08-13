@@ -1,9 +1,12 @@
 import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
+import toArray from 'tily/array/toArray';
 import debugFactory from 'debug';
 import {Method} from './method';
 import {UnimplementedError} from './errors';
-import {getAllRPCProcedureMetadata, RPCProcedureMetadata} from './decorators';
+import {getAllRPCMethodMetadata} from './decorators';
+import flatten from 'tily/array/flatten';
+import uniq from 'tily/array/uniq';
 
 const debug = debugFactory('remly:core:registry');
 
@@ -17,10 +20,14 @@ export interface ServiceInvokeRequest {
 }
 
 export interface Registrable {
-  register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: any): void;
-  register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: any): void;
-  register<SERVICE extends object>(service: SERVICE, scope?: any): void;
-  register<SERVICE extends object>(service: SERVICE, names: string[], scope?: any): void;
+  register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;
+
+  register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: object): void;
+
+  register<SERVICE extends object>(service: SERVICE, scope?: object): void;
+
+  register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
+
   unregister(pattern: string | string[]): string[];
 }
 
@@ -43,23 +50,26 @@ export class DefaultRegistry implements Registry {
     return this._methods;
   }
 
-  register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: any): void;
-  register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: any): void;
-  register<SERVICE extends object>(service: SERVICE, scope?: any): void;
-  register<SERVICE extends object>(service: SERVICE, names: string[], scope?: any): void;
+  register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;
+  register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: object): void;
+  register<SERVICE extends object>(service: SERVICE, scope?: object): void;
+  register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
   register(a: any, b?: any, c?: any, d?: any) {
     const {namespace, service, names, scope} = resolveRegisterArgs(a, b, c, d);
-    let meta: Record<string, RPCProcedureMetadata> = {} as any;
-    if (names) {
-      names.forEach(name => {
-        if (name === '*') {
-          Object.assign(meta, getAllRPCProcedureMetadata(service.constructor as any));
-        } else {
-          meta[name] = meta[name] ?? {};
-        }
-      });
-    } else {
-      meta = getAllRPCProcedureMetadata(service.constructor as any) ?? {};
+    // Using a fresh meta but not use direct MetadataMap for avoid poison the original metadata store
+    const meta = Object.assign({}, getAllRPCMethodMetadata(service.constructor));
+    if (names?.length) {
+      uniq(
+        flatten<string>(
+          names.map(n =>
+            n === '*'
+              ? [...Object.getOwnPropertyNames(service), ...Object.getOwnPropertyNames(service.constructor.prototype)]
+              : n,
+          ),
+        ),
+      )
+        .filter(n => typeof service[n] === 'function' && n !== 'constructor')
+        .forEach(n => (meta[n] = meta[n] ?? {}));
     }
 
     for (const name of Object.keys(meta)) {
@@ -129,8 +139,8 @@ function resolveRegisterArgs(
     c = d;
   }
 
-  if (Array.isArray(b)) {
-    names = b;
+  if (Array.isArray(b) || typeof b === 'string') {
+    names = toArray(b);
     b = c;
   }
   const service = a;

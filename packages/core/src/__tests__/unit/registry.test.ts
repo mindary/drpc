@@ -1,16 +1,17 @@
 import {expect} from '@loopback/testlab';
 import {DefaultRegistry} from '../../registry';
-import {monster} from '../fixtures/monster.service';
+import {monster, MonsterService} from '../fixtures/monster.service';
 import {protoKeys} from '../../utils';
 import {Method} from '../../method';
 import {UnimplementedError} from '../../errors';
 import {Monster} from '../fixtures/monster.definition';
+import {getAllRPCMethodMetadata} from '../../decorators';
 
 describe('registry', function () {
   describe('register', function () {
     describe('service', function () {
-      it('should register a service with all methods', function () {
-        const keys = protoKeys(monster).filter(k => typeof (monster as any)[k] === 'function');
+      it('should only register decorated methods', function () {
+        const keys = Object.keys(getAllRPCMethodMetadata(MonsterService) ?? {});
         const registry = new DefaultRegistry();
         registry.register(monster);
         expect(Object.keys(registry.methods)).deepEqual(keys);
@@ -18,11 +19,24 @@ describe('registry', function () {
         Object.values(registry.methods).forEach(m => expect(m.scope).equal(monster));
       });
 
-      it('should register a service with specified methods', function () {
-        const keys = ['add', 'addSlow'];
+      it('should register a service with all methods with wildcard', function () {
+        const keys = protoKeys(monster).filter(k => typeof (monster as any)[k] === 'function');
         const registry = new DefaultRegistry();
-        registry.register(monster, keys);
+        registry.register(monster, '*');
         expect(Object.keys(registry.methods)).deepEqual(keys);
+        // assert monster
+        Object.values(registry.methods).forEach(m => expect(m.scope).equal(monster));
+      });
+
+      it('should register extra methods if specified', function () {
+        const keys = ['extraMethod1'];
+        const r1 = new DefaultRegistry();
+        r1.register(monster);
+        expect(Object.keys(r1.methods)).not.containDeep(keys);
+
+        const r2 = new DefaultRegistry();
+        r2.register(monster, keys);
+        expect(Object.keys(r2.methods)).containDeep(keys);
       });
 
       it('should register with namespace parameter', function () {

@@ -14,6 +14,7 @@ export const Monster = {
     empty: {} as () => void,
     noArgs: {} as () => boolean,
     invalidError: {} as () => InvalidError,
+    extraMethod1: {} as () => string,
   },
 };
 

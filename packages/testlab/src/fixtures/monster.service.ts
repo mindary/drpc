@@ -9,19 +9,19 @@ export class MonsterService implements MonsterType {
 
   prefix = 'Hello';
 
-  @rpc.procedure() greet(msg: string) {
+  @rpc.method() greet(msg: string) {
     return this.prefix + ' ' + msg;
   }
 
-  @rpc.procedure() error() {
+  @rpc.method() error() {
     throw new RemoteError({code: -1000, message: 'An error message'});
   }
 
-  @rpc.procedure() exception() {
+  @rpc.method() exception() {
     throw new Error('An exception message');
   }
 
-  @rpc.procedure() incrementCounterBy(counter: Counter, value: any) {
+  @rpc.method() incrementCounterBy(counter: Counter, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError({code: -1000, message: 'Argument not an instance of Counter'});
     }
@@ -29,30 +29,30 @@ export class MonsterService implements MonsterType {
     return counter;
   }
 
-  @rpc.procedure() add(a: number, b: number) {
+  @rpc.method() add(a: number, b: number) {
     return a + b;
   }
 
-  @rpc.procedure()
+  @rpc.method()
   async addSlow(a: number, b: number, isSlow?: boolean) {
     const result = a + b;
     if (isSlow) await delay(15);
     return result;
   }
 
-  @rpc.procedure()
+  @rpc.method()
   async sleep(ms: number) {
     await delay(ms);
     return ms;
   }
 
-  @rpc.procedure() empty() {}
+  @rpc.method() empty() {}
 
-  @rpc.procedure() noArgs(): boolean {
+  @rpc.method() noArgs(): boolean {
     return true;
   }
 
-  @rpc.procedure() invalidError() {
+  @rpc.method() invalidError() {
     return new InvalidError();
   }
 }

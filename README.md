@@ -4,21 +4,33 @@ An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker
 
 ## Usage
 
-### TCPServer and TCPClient
+### TCP Channel
 
-```js
+```ts
+// greeter.definition.ts
+export const Greeter = {
+  name: 'greeter',
+  methods: {
+    greet: {} as (name: strting) => string,
+  },
+};
+```
+
+```ts
+// main.ts
 import {Application} from '@remly/server';
 import {TCPServer} from '@remly/tcp';
 import {TCPClient} from '@remly/tcp-client';
+import {Greeter} from './greeter.definition';
 
-(async () => {
+async function main() {
   // *******************
   // Setup Server
   // *******************
   // prepare applicaiton
   const remapp = new Application();
-  // register a server method
-  remapp.register('greet', name => `Hello, ${name}!`);
+  // register all methods of the service with '*' name filter
+  remapp.register(Greeter.name, {greet: name => `Hello, ${name}!`}, '*');
   // signal every client on connected
   remapp.on('connection', async connection => {
     await connection.signal('message', 'Welcome');
@@ -35,11 +47,12 @@ import {TCPClient} from '@remly/tcp-client';
   // *******************
   const client = TCPClient.connect(3000);
   // subscribe "message" signal
-  client.subscribe('message', message => {
+  client.remote.on('message', message => {
     console.log(message); // => Welcome
   });
-  // call remote server method
-  const result = await client.call('greet', ['Tom']);
+  const service = client.remote.service(Greeter);
+  // call remote method
+  const result = await service.greet('Tom');
   console.log(result);
 
   await client.end();
@@ -48,20 +61,13 @@ import {TCPClient} from '@remly/tcp-client';
   // =>
   // Welcome
   // Hello, Tom!
-})();
+}
+
+main().catch(err => {
+  console.log(err);
+  process.exit(1);
+});
 ```
-
-## Why?
-
-Most websocket-based protocols use JSON. JSON is big and slow. In many cases when needing to send binary data over a
-conventional websocket protocol, the programmer is forced to use hex strings inside the JSON serialization. This is
-inefficient.
-
-Furthermore, most event-based abstractions on top of websockets introduce an enormous amount of bloat due to the
-inclusion of fallback transports (xhr, long-polling, etc) as well as even higher level abstractions (channels).
-
-Remly works with efficient msgpack serializers or your custom serializers and gives you a simple event based interface
-without anything else. No channels, no fallback, no complicated handshakes or feature testing over HTTP.
 
 ## Specification
 
@@ -69,5 +75,4 @@ See `spec.md`.
 
 ## Licence
 
-- Copyright (c) 2020, Yuan Tao (MIT License).
-- Copyright (c) 2017, Christopher Jeffrey (MIT License).
+- Copyright (c) 2021, Yuan Tao (MIT License).
