@@ -35,7 +35,7 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.4.13",
+    "@types/node": "^16.6.1",
     "a-defer": "^0.1.1"
   },
   "files": [

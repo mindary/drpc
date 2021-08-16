@@ -2,12 +2,13 @@ import {assert} from 'ts-essentials';
 import {Options, UnsubscribeFn} from '@libit/emittery';
 import {RequestRegistry} from './reqreg';
 import {Socket} from './sockets';
-import {AckMessage, ErrorMessage, SignalMessage} from './messages';
+import {AckMessage, ErrorMessage} from './messages';
 import {RemoteError} from './errors';
 import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
-import {RemoteService, ServiceDefinition, RemoteMethods, ServiceMethods} from './remote-service';
+import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
+import {CallRequest} from './types';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -84,6 +85,11 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     await this.socket.send('signal', {name: event, payload: data});
   }
 
+  async handleSignal(request: CallRequest) {
+    const {name, params} = request;
+    await this.emitter.emit(name, params);
+  }
+
   protected bind() {
     if (!this.unsubs.length) {
       this.unsubs.push(
@@ -92,7 +98,7 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
           this.dispose();
         }),
         this.socket.on('tick', () => this.requests.tick()),
-        this.socket.on('request', packet => this.handleRequest(packet)),
+        this.socket.on('reply', packet => this.handleReply(packet)),
       );
     }
   }
@@ -103,16 +109,13 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     }
   }
 
-  protected async handleRequest(packet: Packet) {
+  protected async handleReply(packet: Packet) {
     switch (packet.type) {
       case PacketType.ack:
         await this.handleAck(packet.message);
         break;
       case PacketType.error:
         await this.handleError(packet.message);
-        break;
-      case PacketType.signal:
-        await this.handleSignal(packet.message);
         break;
     }
   }
@@ -137,11 +140,6 @@ export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<Remote
     }
 
     this.requests.reject(id, new RemoteError(code, msg, payload));
-  }
-
-  protected async handleSignal(message: SignalMessage) {
-    const {name, payload} = message;
-    await this.emitter.emit(name, payload);
   }
 
   protected async assertOrWaitConnected() {

@@ -7,20 +7,32 @@ import {toError} from '@libit/error/utils';
 import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError} from '../errors';
+import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {Metadata, NetAddress, RPCInvoke} from '../types';
+import {CallRequest, Metadata, NetAddress} from '../types';
 import {Alive} from '../alive';
-import {CallMessage, ConnectMessage, ErrorMessage, HeartbeatMessage, OpenMessage, PacketMessages} from '../messages';
+import {
+  CallMessage,
+  ConnectMessage,
+  ErrorMessage,
+  HeartbeatMessage,
+  OpenMessage,
+  PacketMessages,
+  SignalMessage,
+} from '../messages';
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
 import {Remote} from '../remote';
+import {CallContext} from '../contexts';
 
 const debug = debugFactory('remly:core:socket');
 
 const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
+
+export type OnCall<SOCKET extends Socket = Socket> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
+export type OnSignal<SOCKET extends Socket = Socket> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
 
 interface SocketEvents {
   tick: undefined;
@@ -34,21 +46,22 @@ interface SocketEvents {
   packet: Packet;
   packet_create: Packet;
   heartbeat: undefined;
-  request: Packet;
+  reply: Packet;
 }
 
-export interface SocketOptions {
+export interface SocketOptions<SOCKET extends Socket = any> {
   id?: string;
   serializer?: Serializer;
   interval?: number;
   keepalive?: number;
   connectTimeout?: number;
   requestTimeout?: number;
-  invoke?: RPCInvoke;
   transport?: Transport;
+  oncall?: OnCall<SOCKET>;
+  onsignal?: OnSignal<SOCKET>;
 }
 
-const DEFAULT_OPTIONS: SocketOptions = {
+const DEFAULT_OPTIONS: SocketOptions<any> = {
   interval: 5 * 1000,
   keepalive: 10 * 1000,
   connectTimeout: 20 * 1000,
@@ -67,9 +80,10 @@ export abstract class Socket extends SocketEmittery {
   public transport: Transport;
   public state: SocketState;
   public serializer: Serializer;
-  public invoke?: RPCInvoke;
+  public oncall?: OnCall;
+  public onsignal?: OnSignal;
   public readonly remote: Remote;
-  public readonly handshake = {} as Handshake;
+  public readonly handshake: Handshake;
 
   public readonly options: SocketOptions;
   public interval: number;
@@ -82,7 +96,7 @@ export abstract class Socket extends SocketEmittery {
   protected connectTimer: TimeoutTimer;
   protected alive: Alive;
 
-  protected constructor(options: Partial<SocketOptions> = {}) {
+  protected constructor(options: SocketOptions = {}) {
     super();
 
     this.options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -93,12 +107,24 @@ export abstract class Socket extends SocketEmittery {
     this.requestTimeout = this.options.requestTimeout!;
 
     this.serializer = options.serializer ?? new MsgpackSerializer();
-    this.invoke = options.invoke;
+    this.oncall = options.oncall;
+    this.onsignal = options.onsignal;
+
     this.remote = new Remote(this);
+
+    this.handshake = {sid: '', metadata: {}};
 
     if (this.options.transport) {
       this.setTransport(this.options.transport);
     }
+  }
+
+  get metadata(): Metadata {
+    return this.handshake.metadata;
+  }
+
+  set metadata(metadata: Metadata | undefined) {
+    this.handshake.metadata = metadata ?? {};
   }
 
   get address(): NetAddress {
@@ -179,7 +205,7 @@ export abstract class Socket extends SocketEmittery {
         if (debug.enabled) {
           debug(`deserialize error for packet "${PacketTypeMap[type] ?? 'unknown'}"`, e);
         }
-        await this.send('connect_error', new InvalidPayloadError(e.message));
+        await this.sendError(new InvalidPayloadError(e.message));
         return;
       }
     }
@@ -188,43 +214,55 @@ export abstract class Socket extends SocketEmittery {
     if (debug.enabled) {
       debug(`received packet "${PacketTypeMap[type] ?? 'unknown'}"`);
     }
-    await this.emit('packet', packet);
+    try {
+      await this.emit('packet', packet);
 
-    // Socket is live - any packet counts
-    await this.emit('heartbeat');
+      // Socket is live - any packet counts
+      await this.emit('heartbeat');
 
-    switch (type) {
-      case PacketType.open:
-        await this.handleOpen(message);
-        return;
-      case PacketType.ping:
-        await this.handlePing(message);
-        return;
-      case PacketType.pong:
-        await this.handlePong(message);
-        break;
-      case PacketType.connect:
-        await this.handleConnect(message);
-        break;
-      case PacketType.connect_error:
+      // handle connect error first
+      // id of 0 or null or undefined means connect error
+      if (type === PacketType.error && !message.id) {
         await this.handleConnectError(message);
-        break;
-      default:
-        if (!this.isConnected()) {
-          return debug('packet received with not connected socket');
-        }
-
-        switch (type) {
-          case PacketType.call:
-            await this.handleCall(message);
-            break;
-          default:
-            // notify "remote" to handle RPC request
-            await this.emit('request', packet);
-            break;
-        }
-
         return;
+      }
+
+      switch (type) {
+        case PacketType.open:
+          await this.handleOpen(message);
+          break;
+        case PacketType.ping:
+          await this.handlePing(message);
+          break;
+        case PacketType.pong:
+          await this.handlePong(message);
+          break;
+        case PacketType.connect:
+          await this.handleConnect(message);
+          break;
+
+        default:
+          if (!this.isConnected()) {
+            return debug('packet received with not connected socket');
+          }
+
+          switch (type) {
+            case PacketType.call:
+            case PacketType.signal:
+              await this.handleCall(message);
+              break;
+            // call response
+            case PacketType.ack:
+            case PacketType.error:
+              // notify to handle call responses
+              await this.emit('reply', packet);
+              break;
+          }
+
+          return;
+      }
+    } catch (e) {
+      await this.emit('error', e);
     }
   }
 
@@ -246,6 +284,16 @@ export abstract class Socket extends SocketEmittery {
         console.error(e);
       }
     }
+  }
+
+  async sendError(error: RemoteError): Promise<void>;
+  async sendError(id: number, error: RemoteError): Promise<void>;
+  async sendError(id: number | RemoteError, error?: RemoteError) {
+    if (typeof id !== 'number') {
+      error = id;
+      id = 0;
+    }
+    await this.send('error', {id, ...makeRemoteError(error)});
   }
 
   protected async doClose(reason: string | Error) {
@@ -385,22 +433,45 @@ export abstract class Socket extends SocketEmittery {
     }, this.connectTimeout);
   }
 
+  protected createCallContext(request: CallRequest) {
+    return new CallContext<this>(this, request);
+  }
+
+  protected async doCall(context: CallContext<this>) {
+    await this.oncall?.(context);
+  }
+
+  protected async doSignal(context: CallContext<this>) {
+    await this.onsignal?.(context);
+  }
+
   private async handleConnectError(message: ErrorMessage) {
     await this.emit('connect_error', toError(message));
     await this.close();
   }
 
-  private async handleCall(message: CallMessage) {
-    if (!this.invoke) {
-      throw new Error('"invoke" has not been set');
-    }
-
-    const {id, name, payload} = message;
-
+  private async handleCall(message: CallMessage | SignalMessage) {
+    // id of 0,null,undefined means signal
+    const id = (message as CallMessage).id;
+    const request = {id, name: message.name, params: message.payload};
+    const context = this.createCallContext(request);
     try {
-      await this.invoke(name, payload, result => this.send('ack', {id, payload: result}));
+      if (id) {
+        // call
+        await this.doCall(context);
+        if (!context.ended) {
+          await context.end(context.result);
+        }
+      } else {
+        // signal
+        await this.doSignal(context);
+        await this.remote.handleSignal(request);
+      }
     } catch (e) {
-      await this.send('error', {id, ...makeRemoteError(e)});
+      if (context.ended) {
+        throw e;
+      }
+      await context.error(e);
     }
   }
 }

@@ -11,8 +11,11 @@ export interface Callable {
   call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export type RPCReply = (result?: any) => ValueOrPromise<void>;
-export type RPCInvoke = (name: string, params: any, reply: RPCReply) => ValueOrPromise<void>;
+export interface CallRequest {
+  id?: number;
+  name: string;
+  params: any;
+}
 
 export interface Metadata extends Record<string, any> {
   auth?: {

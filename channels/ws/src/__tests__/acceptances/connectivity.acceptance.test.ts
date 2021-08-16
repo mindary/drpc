@@ -9,7 +9,7 @@ ConnectivitySuite.run('WebSocket', async () => {
   const server = new WebSocketServer(app, {port: 0});
   await server.start();
 
-  const connection = app.once('connect');
+  const connection = app.once('connection');
   const clientSocket = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
   const serverSocket = await connection;
   const close = async () => {

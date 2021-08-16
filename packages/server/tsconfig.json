@@ -17,6 +17,9 @@
       "path": "../core/tsconfig.json"
     },
     {
+      "path": "../interception/tsconfig.json"
+    },
+    {
       "path": "../serializer-msgpack/tsconfig.json"
     },
     {

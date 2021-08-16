@@ -27,13 +27,13 @@
     "@remly/core": "^0.11.1",
     "tily": "^2.8.3",
     "ts-essentials": "^7.0.3",
-    "ws": "^8.0.0"
+    "ws": "^8.1.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.4.13",
+    "@types/node": "^16.6.1",
     "@types/ws": "^7.4.7"
   },
   "files": [

@@ -3,63 +3,55 @@ import {ErrorLike, isErrorLike} from '@libit/error/types';
 
 export enum ErrorCode {
   /**
+   * Reserved for implementation-defined server-errors.
+   */
+  UNKNOWN = 2,
+
+  CONNECT_TIMEOUT = 11,
+
+  CONNECTION_STALL = 12,
+
+  INVALID_PAYLOAD = 13,
+
+  /**
    * Invalid method parameter(s).
    */
-  INVALID_PARAMS = 3,
+  INVALID_PARAMS = 21,
 
   /**
    * The method does not exist / is not available.
    */
-  UNIMPLEMENTED = 12,
+  UNIMPLEMENTED = 22,
+
+  CALL_TIMEOUT = 23,
 
   /**
-   * Internal RPC error.
+   * Internal Rpc error.
    */
-  INTERNAL_ERROR = 13,
-
-  /**
-   * Reserved for implementation-defined server-errors.
-   */
-  UNKNOWN = 2,
+  INTERNAL_ERROR = 23,
 }
 
 export const ErrorMessages: Record<ErrorCode, string> = {
+  [ErrorCode.UNKNOWN]: 'Unknown error',
+  [ErrorCode.CONNECT_TIMEOUT]: 'Connect timeout',
+  [ErrorCode.CONNECTION_STALL]: 'Connection stall',
+  [ErrorCode.INVALID_PAYLOAD]: 'Invalid payload',
   [ErrorCode.UNIMPLEMENTED]: 'Method not found',
   [ErrorCode.INVALID_PARAMS]: 'Invalid params',
+  [ErrorCode.CALL_TIMEOUT]: 'Call timeout',
   [ErrorCode.INTERNAL_ERROR]: 'Internal error',
-  [ErrorCode.UNKNOWN]: 'Unknown error',
 };
-
-export class TimeoutError extends Exception {
-  code = 'TIMEOUT';
-}
-
-export class ConnectTimeoutError extends TimeoutError {
-  code = 'CONNECT_TIMEOUT';
-}
-
-export class ConnectionStallError extends Exception {
-  code = 'CONNECTION_STALL';
-}
-
-export class InvalidPayloadError extends Exception {
-  code = 'INVALID_PAYLOAD';
-
-  constructor(message?: string) {
-    super(message);
-  }
-}
 
 export class RemoteError extends Exception {
   code: number;
-  data?: any;
+  payload?: any;
 
-  constructor(cause: ErrorLike, data?: any);
-  constructor(code?: number, message?: string, data?: any);
-  constructor(code?: any, message?: any, data?: any) {
+  constructor(cause: ErrorLike, payload?: any);
+  constructor(code?: number, message?: string, payload?: any);
+  constructor(code?: any, message?: any, payload?: any) {
     super();
     if (isErrorLike(code)) {
-      data = message;
+      payload = message;
       if (typeof code === 'string') {
         message = code;
         code = undefined;
@@ -71,32 +63,48 @@ export class RemoteError extends Exception {
     }
     this.code = code;
     this.message = message ?? ErrorMessages[<ErrorCode>this.code] ?? ErrorMessages[ErrorCode.UNKNOWN];
-    this.data = data;
+    this.payload = payload;
   }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      payload: this.payload,
+    };
+  }
+}
+
+export class ConnectTimeoutError extends RemoteError {
+  code = ErrorCode.CONNECT_TIMEOUT;
+}
+
+export class ConnectionStallError extends RemoteError {
+  code = ErrorCode.CONNECTION_STALL;
+}
+
+export class InvalidPayloadError extends RemoteError {
+  code = ErrorCode.INVALID_PAYLOAD;
 }
 
 export class UnimplementedError extends RemoteError {
-  constructor(message?: string, data?: any) {
-    super(ErrorCode.UNIMPLEMENTED, message, data);
-  }
+  code = ErrorCode.UNIMPLEMENTED;
 }
 
 export class InvalidParamsError extends RemoteError {
-  constructor(message?: string, data?: any) {
-    super(ErrorCode.INVALID_PARAMS, message, data);
-  }
+  code = ErrorCode.INVALID_PARAMS;
+}
+
+export class CallTimeoutError extends RemoteError {
+  code = ErrorCode.CALL_TIMEOUT;
 }
 
 export class InternalError extends RemoteError {
-  constructor(message?: string, data?: any) {
-    super(ErrorCode.INTERNAL_ERROR, message, data);
-  }
+  code: ErrorCode.INTERNAL_ERROR;
 }
 
 export class UnknownError extends RemoteError {
-  constructor(message?: string, data?: any) {
-    super(ErrorCode.UNKNOWN, message, data);
-  }
+  code: ErrorCode.UNKNOWN;
 }
 
 export function makeRemoteError(source: any): RemoteError {
@@ -104,9 +112,17 @@ export function makeRemoteError(source: any): RemoteError {
     return new InternalError();
   }
 
+  if (isRemoteError(source)) {
+    return source;
+  }
+
   if (typeof source === 'object') {
     return new RemoteError(source);
   }
 
-  return new InternalError(undefined, source);
+  return new InternalError(source);
+}
+
+export function isRemoteError(x: object): x is RemoteError {
+  return x && 'code' in x && 'message' in x;
 }

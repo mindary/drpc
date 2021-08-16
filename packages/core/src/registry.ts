@@ -4,15 +4,11 @@ import toArray from 'tily/array/toArray';
 import debugFactory from 'debug';
 import {Method} from './method';
 import {UnimplementedError} from './errors';
-import {getAllRPCMethodMetadata} from './decorators';
+import {getAllRpcMethodMetadata} from './decorators';
 import flatten from 'tily/array/flatten';
 import uniq from 'tily/array/uniq';
 
 const debug = debugFactory('remly:core:registry');
-
-export interface RegisterOptions {
-  scope?: any;
-}
 
 export interface ServiceInvokeRequest {
   name: string;
@@ -57,7 +53,7 @@ export class DefaultRegistry implements Registry {
   register(a: any, b?: any, c?: any, d?: any) {
     const {namespace, service, names, scope} = resolveRegisterArgs(a, b, c, d);
     // Using a fresh meta but not use direct MetadataMap for avoid poison the original metadata store
-    const meta = Object.assign({}, getAllRPCMethodMetadata(service.constructor));
+    const meta = Object.assign({}, getAllRpcMethodMetadata(service.constructor));
     if (names?.length) {
       uniq(
         flatten<string>(

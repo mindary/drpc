@@ -29,7 +29,7 @@
     "@types/ws": "^7.4.7",
     "tily": "^2.8.3",
     "ts-essentials": "^7.0.3",
-    "ws": "^8.0.0"
+    "ws": "^8.1.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
@@ -37,8 +37,8 @@
     "@loopback/testlab": "^3.4.2",
     "@remly/testlab": "^0.9.1",
     "@remly/testsuite": "^0.6.2",
-    "@remly/ws-client": "^0.3.2",
-    "@types/node": "^16.4.13"
+    "@remly/ws-client": "^0.3.14",
+    "@types/node": "^16.6.1"
   },
   "files": [
     "README.md",

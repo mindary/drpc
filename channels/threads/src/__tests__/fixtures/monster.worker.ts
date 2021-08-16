@@ -1,6 +1,6 @@
 import {isMainThread, parentPort} from 'worker_threads';
 import {ThreadWorker} from '@remly/threads-worker';
-import {RPCSuite} from '@remly/testsuite';
+import {RpcSuite} from '@remly/testsuite';
 
 (() => {
   if (isMainThread || !parentPort) {
@@ -9,5 +9,5 @@ import {RPCSuite} from '@remly/testsuite';
   }
 
   const client = new ThreadWorker(parentPort);
-  RPCSuite.setupClient(client);
+  RpcSuite.setupClient(client);
 })();

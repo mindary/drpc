@@ -1,23 +1,30 @@
 import {assert} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
-import {Socket, ValueOrPromise} from '@remly/core';
+import {DefaultRegistry, Socket, ValueOrPromise} from '@remly/core';
 import {Application, ApplicationOptions} from '@remly/server';
 import {Client} from '@remly/client';
 import {Monster, monster} from '@remly/testlab';
 import {PrepareFn} from './types';
 
-export namespace RPCSuite {
+export namespace RpcSuite {
   export type Side = 'both' | 'server' | 'client';
 
   export function givenApplication(options?: ApplicationOptions): Application {
     const app = new Application(options);
-    app.register(Monster.name, monster);
+
+    const registry = new DefaultRegistry();
+    registry.register(Monster.name, monster);
+    app.oncall = async context => (context.result = await registry.invoke(context.request));
+
     app.on('connection', setupSocket);
     return app;
   }
 
   export function setupClient(client: Client) {
-    client.register(Monster.name, monster);
+    const registry = new DefaultRegistry();
+    registry.register(Monster.name, monster);
+    client.oncall = async context => (context.result = await registry.invoke(context.request));
+
     setupSocket(client);
   }
 
@@ -25,8 +32,8 @@ export namespace RPCSuite {
     socket.remote.on('echo', (msg: string) => socket.remote.emit('echo-reply', 'Hello ' + msg));
   }
 
-  export function run(name: string, prepare: PrepareFn, side: Side = 'both') {
-    describe(`${name} - TestSuite RPC`, function () {
+  export function run(prepare: PrepareFn, side: Side = 'both') {
+    describe(`TestSuite Rpc`, function () {
       let app: Application;
       let serverSocket: Socket | undefined;
       let clientSocket: Socket | undefined;

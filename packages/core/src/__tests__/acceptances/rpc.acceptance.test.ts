@@ -1,17 +1,14 @@
 import {expect, sinon} from '@loopback/testlab';
 import delay from 'delay';
+import {JsonSerializer} from '@remly/serializer';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {ClientSocket, ServerSocket} from '../../sockets';
+import {ClientSocket, OnCall, ServerSocket} from '../../sockets';
 import {givenSocketPair} from '../support';
 import {Monster} from '../fixtures/monster.definition';
-import {RPCInvoke} from '../../types';
 
-const serializers = [
-  // new JsonSerializer(),
-  new MsgpackSerializer(),
-];
+const serializers = [new JsonSerializer(), new MsgpackSerializer()];
 
-describe('RCore - PC', function () {
+describe('Core - RPC', function () {
   for (const serializer of serializers) {
     const serializerName = serializer.constructor.name;
     const options = {server: {serializer}, client: {serializer}};
@@ -39,22 +36,22 @@ describe('RCore - PC', function () {
 
       describe(`call`, function () {
         it('call and return with ack', async () => {
-          serverSocket.invoke = (name, params, reply) => reply(params);
+          serverSocket.oncall = context => context.end(context.params);
           const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
 
         it('call and throw an error', async () => {
-          serverSocket.invoke = () => {
+          serverSocket.oncall = () => {
             throw new Error('invalid params');
           };
           await expect(clientSocket.remote.call('echo', 'hello')).rejectedWith('invalid params');
         });
 
         it('calling timeout', async () => {
-          serverSocket.invoke = async (_name, _params, reply) => {
+          serverSocket.oncall = async context => {
             await delay(serverSocket.requestTimeout * 3);
-            await reply();
+            await context.end();
           };
           const result = clientSocket.remote.call('echo', 'hello');
           await clock.tickAsync(serverSocket.requestTimeout * 2);
@@ -78,22 +75,22 @@ describe('RCore - PC', function () {
       });
 
       describe('service', function () {
-        const Invoker: RPCInvoke = (name, params, reply) => {
-          if (name === 'monster.add') {
-            return reply(params[0] + params[1]);
+        const Invoker: OnCall = context => {
+          if (context.name === 'monster.add') {
+            return context.end(context.params[0] + context.params[1]);
           }
-          throw new Error('Unknown method ' + name);
+          throw new Error('Unknown method ' + context.name);
         };
 
         it('invoke successfully', async () => {
-          serverSocket.invoke = Invoker;
+          serverSocket.oncall = Invoker;
           const monster = clientSocket.remote.service(Monster);
           const result = await monster.add(1, 2);
           expect(result).eql(3);
         });
 
         it('invoke fail with unknown method', async () => {
-          serverSocket.invoke = Invoker;
+          serverSocket.oncall = Invoker;
           const monster = clientSocket.remote.service(Monster);
           const result = monster.empty();
           await expect(result).rejectedWith(/Unknown method/);

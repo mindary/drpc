@@ -5,13 +5,13 @@ import {protoKeys} from '../../utils';
 import {Method} from '../../method';
 import {UnimplementedError} from '../../errors';
 import {Monster} from '../fixtures/monster.definition';
-import {getAllRPCMethodMetadata} from '../../decorators';
+import {getAllRpcMethodMetadata} from '../../decorators';
 
 describe('registry', function () {
   describe('register', function () {
     describe('service', function () {
       it('should only register decorated methods', function () {
-        const keys = Object.keys(getAllRPCMethodMetadata(MonsterService) ?? {});
+        const keys = Object.keys(getAllRpcMethodMetadata(MonsterService) ?? {});
         const registry = new DefaultRegistry();
         registry.register(monster);
         expect(Object.keys(registry.methods)).deepEqual(keys);

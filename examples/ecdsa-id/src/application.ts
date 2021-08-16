@@ -9,6 +9,6 @@ export class ECDSAApplication extends Application {
     super(options);
     this.signer = new Signer();
 
-    this.use(josa({serializer: this.serializer, signer: this.signer}));
+    this.addConnectInterceptor(josa({serializer: this.serializer, signer: this.signer}));
   }
 }

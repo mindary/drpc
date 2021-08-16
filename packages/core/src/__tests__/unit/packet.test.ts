@@ -21,10 +21,6 @@ const CASES: {
   connect: {
     payload: Buffer.from('{"token": "12345678"}'),
   },
-  connect_error: {
-    code: 'INVALID_TOKEN',
-    message: '非法令牌',
-  },
   call: {
     id: 1001,
     name: 'echo',

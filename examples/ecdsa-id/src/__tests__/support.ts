@@ -12,7 +12,7 @@ export async function setupApplication({signer, identity}: {signer: Signer; iden
   app.bind(server);
   await server.start();
 
-  const client = TCPClient.connect(port, {onConnect: auth({signer, identity})});
+  const client = TCPClient.connect(port, {onconnect: auth({signer, identity})});
 
   return {app, client, server};
 }

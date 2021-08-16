@@ -12,11 +12,6 @@ export interface OpenMessage extends Message {
 
 export interface ConnectMessage extends Message {}
 
-export interface ConnectErrorMessage extends Message {
-  code?: string;
-  message: string;
-}
-
 export interface HeartbeatMessage extends Message {}
 
 export interface CallMessage extends Message {
@@ -41,11 +36,14 @@ export interface SignalMessage extends Message {
 export interface PacketMessages {
   open: OpenMessage;
   connect: ConnectMessage;
-  connect_error: ConnectErrorMessage;
   ping: HeartbeatMessage;
   pong: HeartbeatMessage;
   call: CallMessage;
   ack: AckMessage;
   signal: SignalMessage;
   error: ErrorMessage;
+}
+
+export function isCallMessage(x?: object): x is CallMessage {
+  return x != null && 'id' in x && 'name' in x;
 }

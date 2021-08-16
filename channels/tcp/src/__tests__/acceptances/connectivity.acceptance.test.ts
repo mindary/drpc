@@ -9,7 +9,7 @@ ConnectivitySuite.run('TCP', async () => {
   const server = new TCPServer(app, {port: 0});
   await server.start();
 
-  const connection = app.once('connect');
+  const connection = app.once('connection');
   const clientSocket = TCPClient.connect((server.address as AddressInfo).port);
   const serverSocket = await connection;
   const close = async () => {

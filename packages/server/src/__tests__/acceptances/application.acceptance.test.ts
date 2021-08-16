@@ -1,17 +1,17 @@
 import {givenMemoryTransportPair, Monster, monster} from '@remly/testlab';
 import {expect} from '@loopback/testlab';
-import {Transport} from '@remly/core';
+import {RegistryMixin, Transport} from '@remly/core';
 import {Client} from '@remly/client';
 import {Application} from '../../application';
 
 describe('Application', function () {
   it('should work', async () => {
     // prepare application
-    const app = new Application();
+    const app = new ApplicationWithRegistry();
     app.register(Monster.name, monster);
 
     // prepare client and server transport
-    const [client, transport] = givenConnectionPair();
+    const [client, transport] = givenSocketPair();
     const service = client.remote.service(Monster);
 
     // connect
@@ -22,7 +22,7 @@ describe('Application', function () {
 
     expect(app.connections.size).equal(1);
 
-    // RPC call
+    // Rpc call
     const result = await service.add(1, 2);
     expect(result).equal(3);
 
@@ -32,7 +32,9 @@ describe('Application', function () {
     expect(app.connections.size).equal(0);
   });
 
-  function givenConnectionPair(): [Client, Transport] {
+  class ApplicationWithRegistry extends RegistryMixin(Application) {}
+
+  function givenSocketPair(): [Client, Transport] {
     const [t1, t2] = givenMemoryTransportPair();
     const client = new Client().setTransport(t1);
     return [client, t2];

@@ -1,18 +1,26 @@
 import debugFactory from 'debug';
-import {Registry, RegistryMixin, RPCInvoke, Serializer, Transport} from '@remly/core';
+import {
+  CallContext,
+  ConnectContext,
+  OnCall,
+  OnServerConnect,
+  OnSignal,
+  Registry,
+  Serializer,
+  Transport,
+} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
-import {GenericInterceptorChain} from '@libit/interceptor';
+import {Interception} from '@remly/interception';
 import {Connection} from './connection';
-import {ConnectHandler} from './types';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
 import {Server} from './server';
+import {ServerCallHandler, ServerConnectHandler} from './types';
 
-const debug = debugFactory('remly:server:app');
+const debug = debugFactory('remly:server:application');
 
 export interface ApplicationEvents {
   error: Error;
-  connect: Connection;
   connection: Connection;
   disconnect: Connection;
   connectionClose: Connection;
@@ -21,7 +29,6 @@ export interface ApplicationEvents {
 export interface ApplicationOptions {
   registry?: Registry;
   serializer?: Serializer;
-  invoke?: RPCInvoke;
   connectTimeout?: number;
   requestTimeout?: number;
 }
@@ -35,15 +42,21 @@ export class ApplicationEmittery extends Emittery<ApplicationEvents> {
   //
 }
 
-export class Application extends RegistryMixin(ApplicationEmittery) {
+export class Application extends ApplicationEmittery {
   public readonly serializer: Serializer;
   public readonly connections: Map<string, Connection> = new Map();
 
+  public onconnect: OnServerConnect;
+  public oncall: OnCall;
+  public onsignal: OnSignal;
+
   protected options: ApplicationOptions;
-  protected connectHandlers: ConnectHandler[] = [];
+  protected onTransport: (transport: Transport) => void;
+
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected onTransport: (transport: Transport) => void;
+  protected connectInterception = new Interception<ConnectContext<Connection>>();
+  protected incomingInterception = new Interception<CallContext<Connection>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -83,43 +96,95 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
     return this;
   }
 
-  use(fn: ConnectHandler): this {
-    this.connectHandlers.push(fn);
+  addConnectInterceptor(interceptor: ServerConnectHandler) {
+    this.connectInterception.add(interceptor);
+    return this;
+  }
+
+  addIncomingInterceptor(interceptor: ServerCallHandler) {
+    this.incomingInterception.add(interceptor);
     return this;
   }
 
   handle(transport: Transport) {
-    const connection: Connection = new Connection(generateId(), transport, {
+    new Connection(generateId(), transport, {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
-      invoke: this.invoke,
-      onConnect: () => this.doConnect(connection),
+      onconnect: context => this.handleConnect(context),
+      oncall: context => this.handleCall(context),
+      onsignal: context => this.handleCall(context),
     });
   }
 
-  protected async doConnect(connection: Connection) {
-    debug('adding connection', connection.id);
+  protected async handleConnect(context: ConnectContext<Connection>) {
+    const {socket} = context;
+    debug('adding connection', socket.id);
+    try {
+      await this.connectInterception.invoke(context);
+      await this.doConnect(context);
+    } catch (e) {
+      await context.error(e);
+    }
+  }
 
-    await this.invokeConnectHandlers(connection);
+  protected async handleCall(context: CallContext<Connection>) {
+    try {
+      // Both "call" and "signal" will share same interceptors
+      await this.incomingInterception.invoke(context);
 
-    if (connection.state !== 'open') {
-      return debug('next called after connection was closed - ignoring socket');
+      //
+      // The reason we need to handle "call" and "signal" separately is that "call" needs to ensure that the service
+      // provides the corresponding method, otherwise will send "Method not found" error.
+      //
+      // But "signal" does not perform such a check.
+      //
+      if (context.id) {
+        await this.doCall(context);
+      } else {
+        await this.doSignal(context);
+      }
+    } catch (e) {
+      await context.error(e);
+    }
+  }
+
+  protected async doConnect(context: ConnectContext<Connection>) {
+    const {socket} = context;
+
+    if (!socket.isOpen()) {
+      return debug('socket has been closed - cancel connect');
     }
 
-    this.connections.set(connection.id, connection);
-    this.connectionsUnsubs.set(connection.id, [
-      connection.on('connected', () => this.doConnected(connection)),
-      connection.on('close', () => this.doRemove(connection)),
+    if (this.onconnect) {
+      await this.onconnect(context);
+    }
+
+    this.connections.set(socket.id, socket);
+    this.connectionsUnsubs.set(socket.id, [
+      socket.on('connected', () => this._connected(socket)),
+      socket.on('close', () => this._remove(socket)),
     ]);
   }
 
-  protected async doConnected(connection: Connection) {
-    await this.emit('connect', connection);
+  protected async doCall(context: CallContext<Connection>) {
+    if (this.oncall) {
+      await this.oncall(context);
+    }
+    return respond(context);
+  }
+
+  protected async doSignal(context: CallContext<Connection>) {
+    if (this.onsignal) {
+      await this.onsignal(context);
+    }
+  }
+
+  protected async _connected(connection: Connection) {
     await this.emit('connection', connection);
   }
 
-  protected async doRemove(connection: Connection) {
+  protected async _remove(connection: Connection) {
     if (this.connections.has(connection.id)) {
       this.connections.delete(connection.id);
 
@@ -132,9 +197,11 @@ export class Application extends RegistryMixin(ApplicationEmittery) {
       debug('ignoring remove for connection %s', connection.id);
     }
   }
+}
 
-  protected async invokeConnectHandlers(connection: Connection) {
-    const chain = new GenericInterceptorChain(connection, this.connectHandlers);
-    return chain.invokeInterceptors();
+export function respond(context: CallContext<Connection>) {
+  const result = context.result;
+  if (!context.ended) {
+    return context.end(result);
   }
 }

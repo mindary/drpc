@@ -5,11 +5,14 @@ import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
+import {ConnectContext} from '../contexts';
 
-export type OnServerConnect<T extends ServerSocket = ServerSocket> = (socket: T) => ValueOrPromise<any>;
+export type OnServerConnect<SOCKET extends ServerSocket = ServerSocket> = (
+  context: ConnectContext<SOCKET>,
+) => ValueOrPromise<any>;
 
-export interface ServerSocketOptions extends SocketOptions {
-  onConnect?: OnServerConnect;
+export interface ServerSocketOptions<SOCKET extends ServerSocket = ServerSocket> extends SocketOptions<SOCKET> {
+  onconnect?: OnServerConnect<SOCKET>;
 }
 
 export class ServerSocket extends Socket {
@@ -22,11 +25,11 @@ export class ServerSocket extends Socket {
 
   public id: string;
   public challenge: Buffer;
-  public onConnect: OnServerConnect;
+  public onconnect: OnServerConnect<this>;
 
-  constructor(id: string, transport: Transport, options?: Partial<ServerSocketOptions>) {
+  constructor(id: string, transport: Transport, options?: ServerSocketOptions) {
     super({...options, id, transport});
-    this.onConnect = options?.onConnect ?? noop;
+    this.onconnect = options?.onconnect ?? noop;
     process.nextTick(() => this.open());
   }
 
@@ -43,20 +46,27 @@ export class ServerSocket extends Socket {
     await this.emit('open', this);
   }
 
+  protected createConnectContext() {
+    return new ConnectContext<this>(this);
+  }
+
   protected handleOpen(message: OpenMessage) {
     return this.doError('invalid open direction');
   }
 
   protected async handleConnect(message: ConnectMessage) {
-    this.handshake.metadata = message.payload ?? {};
+    this.metadata = message.payload ?? {};
+    const context = this.createConnectContext();
 
     try {
-      await this.onConnect(this);
+      await this.onconnect(context);
+      if (!context.ended) {
+        await context.end({sid: this.id});
+      }
       this.handshake.sid = this.id;
-      await this.send('connect', {payload: {sid: this.id}});
       await this.doConnected();
     } catch (e) {
-      await this.send('connect_error', {message: e.message, payload: e.data});
+      await context.error(e);
     }
   }
 

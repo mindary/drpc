@@ -1,50 +1,40 @@
 import {assert} from 'ts-essentials';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, Registrable, Registry} from '../registry';
-import {RPCInvoke} from '../types';
+import {OnCall} from '../sockets';
+import {CallRequest} from '../types';
 
-export function RegistryMixin<T extends MixinTarget<Record<any, any>>>(superClass: T) {
+export interface WithOnCall {
+  oncall: OnCall;
+}
+
+export function RegistryMixin<T extends MixinTarget<WithOnCall>>(superClass: T) {
   return class extends superClass implements Registrable {
     /**
      * Server or Client service registry
      */
-    public registry: Registry;
-
-    public invoke: RPCInvoke;
+    registry: Registry;
+    oncall: OnCall;
 
     constructor(...args: any[]) {
       super(...args);
 
-      this.registry = this.options?.registry ?? new DefaultRegistry();
+      this.registry = (this as any).options?.registry ?? new DefaultRegistry();
+      this.oncall = async context => (context.result = await this.invokeWithRegistry(context.request));
+    }
 
-      if (!this.invoke) {
-        // set default registry based invoke function
-        // can be set to other invoke mechanism
-        //
-        // e.g.
-        //
-        //  server.on('connection', connection => {
-        //    const context = new SomeContext(app);
-        //    connection.invoke = async (name, params, reply) => {
-        //      ...
-        //      await reply(invokeSomeThingWithContext(name, params, context));
-        //    }
-        //  });
-        //
-        this.invoke = async (name, params, reply) => {
-          assert(this.registry, 'remote invoking is not supported for current connection');
-          await reply(await this.registry.invoke({name, params}));
-        };
-      }
+    async invokeWithRegistry(request: CallRequest) {
+      assert(this.registry, 'remote invoking is not supported for current connection');
+      return this.registry.invoke(request);
     }
 
     register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;
     register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: object): void;
     register<SERVICE extends object>(service: SERVICE, scope?: object): void;
     register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
-    register<SERVICE extends object>(...args: any[]) {
+    register<SERVICE extends object>(namespace: any, service?: any, names?: any, scope?: any) {
       assert(this.registry, 'register is not supported for current connection');
-      return this.registry.register(args[0], args[1], args[2], args[3]);
+      return this.registry.register(namespace, service, names, scope);
     }
 
     unregister(pattern: string | string[]): string[] {

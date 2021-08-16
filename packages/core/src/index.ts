@@ -1,4 +1,5 @@
 export * from './types';
+export * from './mixin-target';
 export * from './errors';
 export * from './alive';
 export * from './messages';
@@ -13,6 +14,7 @@ export * from './method';
 export * from './mixins';
 export * from './transport';
 export * from './sockets';
+export * from './contexts';
 export * from './remote-service';
 export * from './remote-emitter';
 export * from './remote';

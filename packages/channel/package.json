@@ -32,7 +32,7 @@
     "@remly/tcp": "^0.5.17",
     "@remly/ws": "^0.5.17",
     "@types/debug": "^4.1.7",
-    "@types/node": "^16.4.1",
+    "@types/node": "^16.6.1",
     "remly-channel-throwing": "file:./dist/__tests__/fixtures/remly-channel-throwing"
   },
   "files": [

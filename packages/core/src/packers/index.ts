@@ -10,7 +10,6 @@ import {ack} from './ack';
 import {signal} from './signal';
 import {error} from './error';
 import {connect} from './connect';
-import {connectError} from './connect_error';
 
 export * from './types';
 
@@ -19,7 +18,6 @@ export const packers: {
 } = {
   [PacketType.open]: open,
   [PacketType.connect]: connect,
-  [PacketType.connect_error]: connectError,
   [PacketType.ping]: ping,
   [PacketType.pong]: pong,
   [PacketType.call]: call,

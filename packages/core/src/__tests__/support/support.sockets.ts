@@ -17,8 +17,11 @@ export function givenMemoryTransportPair(options?: MemoryTransportOptions) {
 
 export function givenSocketPair(id: string, options: SocketsOptions = {}): [ServerSocket, ClientSocket] {
   const [t1, t2] = givenMemoryTransportPair(options.transport);
+  const onerror = (e: Error) => console.error(e);
   const server = new ServerSocket(id, t1, options.server);
   const client = new ClientSocket(options.client).setTransport(t2);
+  server.on('error', onerror);
+  client.on('error', onerror);
   return [server, client];
 }
 

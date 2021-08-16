@@ -4,7 +4,6 @@ import {ReverseMap} from '@remly/types';
 export const PacketType = {
   open: 10,
   connect: 11,
-  connect_error: 12,
   signal: 20,
   call: 30,
   ack: 31,

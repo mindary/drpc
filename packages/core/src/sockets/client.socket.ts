@@ -4,7 +4,6 @@ import {Exception} from '@libit/error/exception';
 import {Socket, SocketOptions} from './socket';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Metadata} from '../types';
-import {Remote} from '../remote';
 
 const debug = debugFactory('remly:core:client-socket');
 
@@ -18,32 +17,26 @@ export type OnClientConnect<SOCKET extends ClientSocket = ClientSocket> = (
   challenge: Buffer,
 ) => ValueOrPromise<void>;
 
-export interface ClientSocketOptions extends SocketOptions {
+export interface ClientSocketOptions<SOCKET extends ClientSocket = ClientSocket> extends SocketOptions<SOCKET> {
   metadata?: Metadata;
-  onConnect?: OnClientConnect;
+  onconnect?: OnClientConnect;
 }
 
 export class ClientSocket extends Socket {
-  public remote: Remote<ClientSocket>;
+  public onconnect?: OnClientConnect;
 
-  public onConnect?: OnClientConnect;
-
-  constructor(options?: Partial<ClientSocketOptions>) {
+  constructor(options?: ClientSocketOptions) {
     super(options);
     this.handshake.metadata = Object.assign({}, options?.metadata);
-    this.onConnect = options?.onConnect;
-  }
-
-  get metadata() {
-    return this.handshake.metadata;
+    this.onconnect = options?.onconnect;
   }
 
   protected async handleOpen(message: OpenMessage) {
     debug('transport is open - connecting');
     const {keepalive, challenge} = message;
     this.keepalive = keepalive;
-    if (this.onConnect) {
-      await this.onConnect(this, challenge);
+    if (this.onconnect) {
+      await this.onconnect(this, challenge);
     }
     Object.freeze(this.handshake.metadata);
     await this.send('connect', {

@@ -1,7 +1,7 @@
 import {assert} from 'ts-essentials';
-import {TimeoutError} from './errors';
+import {CallTimeoutError} from './errors';
 
-export interface Request {
+interface RequestReceipt {
   timeout: number;
   timestamp: number;
   resolve(value?: unknown): void;
@@ -18,8 +18,8 @@ const DEFAULT_REQUEST_TIMEOUT = 10 * 1000;
 
 export class RequestRegistry {
   public readonly options: RequestRegistryOptions;
-  protected store: Map<number, Request>;
-  protected currentRequestId = 0;
+  protected store: Map<number, RequestReceipt>;
+  protected currentRequestId = 1;
   protected timer: any;
 
   constructor(options: Partial<RequestRegistryOptions> = {}) {
@@ -83,7 +83,7 @@ export class RequestRegistry {
     this.store.forEach((req, key) => {
       if (now! - req.timestamp > (req.timeout ?? this.options.timeout)) {
         this.store.delete(key);
-        req.reject(new TimeoutError('Request timed out.'));
+        req.reject(new CallTimeoutError('Request timed out.'));
       }
     });
   }
@@ -104,7 +104,7 @@ export class RequestRegistry {
   }
 
   protected nextRequestId() {
-    if (++this.currentRequestId === 0x100000000) this.currentRequestId = 0;
+    if (++this.currentRequestId === 0x100000000) this.currentRequestId = 1;
     return this.currentRequestId;
   }
 }

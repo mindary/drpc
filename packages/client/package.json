@@ -23,13 +23,16 @@
     "verify": "npm pack && tar xf remly-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.11.1"
+    "@libit/interceptor": "^0.2.1",
+    "@remly/core": "^0.11.1",
+    "@remly/interception": "^0.1.0",
+    "ts-essentials": "^7.0.3"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.4.13"
+    "@types/node": "^16.6.1"
   },
   "files": [
     "README.md",

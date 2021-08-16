@@ -1,19 +1,19 @@
 import {MetadataAccessor, MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
 import {Constructor} from '@remly/types';
 
-export type RPCMethodMetadata = {
+export type RpcMethodMetadata = {
   name?: string;
 };
 
-export const RPC_METHOD_METADATA = MetadataAccessor.create<RPCMethodMetadata, MethodDecorator>('rpc:method');
+export const Rpc_METHOD_METADATA = MetadataAccessor.create<RpcMethodMetadata, MethodDecorator>('rpc:method');
 
 export namespace rpc {
-  export function method(metadata?: RPCMethodMetadata | string) {
+  export function method(metadata?: RpcMethodMetadata | string) {
     if (typeof metadata === 'string') {
       metadata = {name: metadata};
     }
     metadata = metadata ?? {};
-    return MethodDecoratorFactory.createDecorator<RPCMethodMetadata>(RPC_METHOD_METADATA, metadata);
+    return MethodDecoratorFactory.createDecorator<RpcMethodMetadata>(Rpc_METHOD_METADATA, metadata);
   }
 }
 
@@ -23,10 +23,10 @@ export namespace rpc {
  * @param serviceClass - Target service
  * @param methodName - Target method
  */
-export function getRPCMethodMetadata(serviceClass: Constructor<unknown>, methodName: string): RPCMethodMetadata {
+export function getRpcMethodMetadata(serviceClass: Constructor<unknown>, methodName: string): RpcMethodMetadata {
   return (
-    MetadataInspector.getMethodMetadata<RPCMethodMetadata>(RPC_METHOD_METADATA, serviceClass.prototype, methodName) ??
-    ({} as RPCMethodMetadata)
+    MetadataInspector.getMethodMetadata<RpcMethodMetadata>(Rpc_METHOD_METADATA, serviceClass.prototype, methodName) ??
+    ({} as RpcMethodMetadata)
   );
 }
 
@@ -35,9 +35,9 @@ export function getRPCMethodMetadata(serviceClass: Constructor<unknown>, methodN
  *
  * @param serviceClass - Target service
  */
-export function getAllRPCMethodMetadata(serviceClass: Constructor<unknown>): MetadataMap<RPCMethodMetadata> {
+export function getAllRpcMethodMetadata(serviceClass: Constructor<unknown>): MetadataMap<RpcMethodMetadata> {
   return (
-    MetadataInspector.getAllMethodMetadata<RPCMethodMetadata>(RPC_METHOD_METADATA, serviceClass.prototype) ??
-    ({} as MetadataMap<RPCMethodMetadata>)
+    MetadataInspector.getAllMethodMetadata<RpcMethodMetadata>(Rpc_METHOD_METADATA, serviceClass.prototype) ??
+    ({} as MetadataMap<RpcMethodMetadata>)
   );
 }
