@@ -1,9 +1,8 @@
 {
   "name": "@remly/interception",
   "description": "The interception mixin",
-  "version": "0.1.0",
-  "keywords": [
-  ],
+  "version": "0.2.0",
+  "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
@@ -27,8 +26,8 @@
     "@libit/interceptor": "^0.2.1"
   },
   "dependencies": {
-    "@remly/core": "^0.11.1",
-    "@remly/types": "^0.3.2",
+    "@remly/core": "^0.12.0",
+    "@remly/types": "^0.4.0",
     "debug": "^4.3.2",
     "ts-essentials": "^7.0.3"
   },

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/mindary/remly/compare/@remly/core@0.11.1...@remly/core@0.12.0) (2021-08-16)
+
+
+### Features
+
+* add interception support for connect, call and signal ([ca2d625](https://github.com/mindary/remly/commit/ca2d625c216f18420c7d5c73ed26296ca9297974))
+
+
+
+
+
 ## [0.11.1](https://github.com/mindary/remly/compare/@remly/core@0.11.0...@remly/core@0.11.1) (2021-08-13)
 
 **Note:** Version bump only for package @remly/core
