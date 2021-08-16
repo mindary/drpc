@@ -1,7 +1,7 @@
 {
   "name": "@remly/tcp-client",
   "description": "The remly TCP client library",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,8 +23,8 @@
     "verify": "npm pack && tar xf remly-tcp-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.5.1",
-    "@remly/core": "^0.12.1",
+    "@remly/client": "^0.5.2",
+    "@remly/core": "^0.12.2",
     "tily": "^2.8.3",
     "ts-essentials": "^7.0.3"
   },
