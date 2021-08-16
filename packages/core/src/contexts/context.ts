@@ -1,13 +1,21 @@
+import {Emittery} from '@libit/emittery';
 import {Socket} from '../sockets';
 import {PacketTypeKeyType} from '../packet-types';
 import {PacketMessages} from '../messages';
 import {makeRemoteError, RemoteError} from '../errors';
 
-export abstract class Context<SOCKET extends Socket = Socket> {
+export interface ContextEvents {
+  ended: undefined;
+  finished: undefined;
+}
+
+export abstract class Context<SOCKET extends Socket = Socket> extends Emittery<ContextEvents> {
   #ended: boolean;
   #finished: boolean;
 
-  constructor(public readonly socket: SOCKET) {}
+  constructor(public readonly socket: SOCKET) {
+    super();
+  }
 
   get ended() {
     return this.#ended;
@@ -33,8 +41,10 @@ export abstract class Context<SOCKET extends Socket = Socket> {
       throw new Error('socket is ended');
     }
     this.#ended = true;
+    await this.emit('ended');
     await this.send(type, message);
     this.#finished = true;
+    await this.emit('finished');
   }
 
   private async send<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {
