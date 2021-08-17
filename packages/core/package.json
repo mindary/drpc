@@ -1,7 +1,7 @@
 {
   "name": "@remly/core",
   "description": "A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

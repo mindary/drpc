@@ -1,7 +1,7 @@
 {
   "name": "@remly/example-ecdsa-id",
   "description": "A authentication example with ECDSA",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,16 +25,16 @@
   },
   "dependencies": {
     "@libit/josa": "^0.4.4",
-    "@remly/core": "^0.12.2",
-    "@remly/server": "^0.10.3",
-    "@remly/tcp": "^0.6.3"
+    "@remly/core": "^0.12.3",
+    "@remly/server": "^0.10.4",
+    "@remly/tcp": "^0.6.4"
   },
   "devDependencies": {
     "@libit/josa": "^0.4.4",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/tcp-client": "^0.4.2",
+    "@remly/tcp-client": "^0.4.3",
     "@types/node": "^16.6.1",
     "get-port": "^5.1.1"
   },
