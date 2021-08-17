@@ -25,6 +25,14 @@ export abstract class Context<SOCKET extends Socket = Socket> extends Emittery<C
     return this.#finished;
   }
 
+  get sid() {
+    return this.socket.id;
+  }
+
+  get address() {
+    return this.socket.address;
+  }
+
   async error(err?: any) {
     if (err == null) {
       return;
