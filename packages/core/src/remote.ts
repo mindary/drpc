@@ -17,7 +17,7 @@ export interface RemoteEvents {
   [p: string]: any;
 }
 
-export class Remote<SOCKET extends Socket = Socket> extends RemoteEmitter<RemoteEvents> {
+export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
   protected requests: RequestRegistry = new RequestRegistry();
   protected unsubs: UnsubscribeFn[] = [];
 

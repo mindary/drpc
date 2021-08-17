@@ -1,15 +1,18 @@
-import {CallContext, ClientSocket, ClientSocketOptions} from '@remly/core';
+import {CallContext, ClientSocket, ClientSocketOptions, OnCall, OnSignal, Remote} from '@remly/core';
 import {Interception, InterceptionHandler} from '@remly/interception';
 
 import 'ts-essentials';
 import '@libit/interceptor';
 
-export interface ClientOptions extends ClientSocketOptions {}
+export interface ClientOptions extends ClientSocketOptions {
+  oncall?: OnCall<Client>;
+  onsignal?: OnSignal<Client>;
+}
 
 export class Client extends ClientSocket {
-  // public remote: Remote<Client>;
-  // public oncall?: OnCall<Client>;
-  // public onsignal?: OnSignal<Client>;
+  public remote: Remote<Client>;
+  public oncall?: OnCall<Client>;
+  public onsignal?: OnSignal<Client>;
 
   protected incomingInterception = new Interception<CallContext<Client>>();
 

@@ -31,8 +31,8 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnCall<SOCKET extends Socket = Socket> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
-export type OnSignal<SOCKET extends Socket = Socket> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
+export type OnCall<SOCKET extends Socket = any> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
+export type OnSignal<SOCKET extends Socket = any> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
 
 interface SocketEvents {
   tick: undefined;
@@ -49,7 +49,7 @@ interface SocketEvents {
   reply: Packet;
 }
 
-export interface SocketOptions<SOCKET extends Socket = any> {
+export interface SocketOptions {
   id?: string;
   serializer?: Serializer;
   interval?: number;
@@ -57,11 +57,11 @@ export interface SocketOptions<SOCKET extends Socket = any> {
   connectTimeout?: number;
   requestTimeout?: number;
   transport?: Transport;
-  oncall?: OnCall<SOCKET>;
-  onsignal?: OnSignal<SOCKET>;
+  oncall?: OnCall;
+  onsignal?: OnSignal;
 }
 
-const DEFAULT_OPTIONS: SocketOptions<any> = {
+const DEFAULT_OPTIONS: SocketOptions = {
   interval: 5 * 1000,
   keepalive: 10 * 1000,
   connectTimeout: 20 * 1000,

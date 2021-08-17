@@ -7,12 +7,12 @@ import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
 import {ConnectContext} from '../contexts';
 
-export type OnServerConnect<SOCKET extends ServerSocket = ServerSocket> = (
+export type OnServerConnect<SOCKET extends ServerSocket = any> = (
   context: ConnectContext<SOCKET>,
 ) => ValueOrPromise<any>;
 
-export interface ServerSocketOptions<SOCKET extends ServerSocket = ServerSocket> extends SocketOptions<SOCKET> {
-  onconnect?: OnServerConnect<SOCKET>;
+export interface ServerSocketOptions extends SocketOptions {
+  onconnect?: OnServerConnect;
 }
 
 export class ServerSocket extends Socket {
@@ -21,11 +21,11 @@ export class ServerSocket extends Socket {
    */
   public data: Record<string, any> = {};
 
-  public remote: Remote<ServerSocket>;
+  public remote: Remote;
 
   public id: string;
   public challenge: Buffer;
-  public onconnect: OnServerConnect<this>;
+  public onconnect: OnServerConnect;
 
   constructor(id: string, transport: Transport, options?: ServerSocketOptions) {
     super({...options, id, transport});

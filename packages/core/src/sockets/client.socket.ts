@@ -7,17 +7,12 @@ import {Metadata} from '../types';
 
 const debug = debugFactory('remly:core:client-socket');
 
-export interface OpenContext {
-  socket: ClientSocket;
-  challenge: Buffer;
-}
-
-export type OnClientConnect<SOCKET extends ClientSocket = ClientSocket> = (
+export type OnClientConnect<SOCKET extends ClientSocket = any> = (
   socket: SOCKET,
   challenge: Buffer,
 ) => ValueOrPromise<void>;
 
-export interface ClientSocketOptions<SOCKET extends ClientSocket = ClientSocket> extends SocketOptions<SOCKET> {
+export interface ClientSocketOptions extends SocketOptions {
   metadata?: Metadata;
   onconnect?: OnClientConnect;
 }
