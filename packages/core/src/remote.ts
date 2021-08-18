@@ -83,6 +83,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
 
     return this.dispatch(request, async () => {
       await this.socket.send('call', {id: req.id, name: request.name, payload: request.params});
+      request.end().catch(err => this.socket.emit('error', err));
       return req.promise;
     });
   }
@@ -99,6 +100,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     await this.assertOrWaitConnected();
     await this.dispatch(request, async () => {
       await this.socket.send('signal', {name: request.name, payload: request.params});
+      request.end().catch(err => this.socket.emit('error', err));
     });
   }
 
