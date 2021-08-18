@@ -1,19 +1,10 @@
 import 'ts-essentials';
 import '@libit/interceptor';
 
-import {
-  ClientSocket,
-  ClientSocketOptions,
-  Emittery,
-  IncomingRequest,
-  OnRequest,
-  OutgoingRequest,
-  Remote,
-  SocketEvents,
-} from '@remly/core';
-import {Interception, InterceptionHandler} from '@remly/interception';
+import {ClientSocket, ClientSocketOptions, Emittery, OnRequest, Remote, SocketEvents} from '@remly/core';
+import {Interception} from '@remly/interception';
 import {Next} from '@libit/interceptor';
-import {CLIENT_UNSUBS, ClientIncomingRequest, ClientOutgoingRequest} from './types';
+import {CLIENT_UNSUBS, ClientDispatchHandler, ClientRequest, ClientRequestHandler} from './types';
 
 export interface ClientOptions extends ClientSocketOptions {
   onrequest?: OnRequest<ClientSocket>;
@@ -24,8 +15,8 @@ export class Client extends Emittery<SocketEvents> {
 
   public onrequest?: OnRequest<ClientSocket>;
 
-  protected requestInterception = new Interception<ClientIncomingRequest>();
-  protected dispatchInterception = new Interception<ClientOutgoingRequest>();
+  protected requestInterception = new Interception<ClientRequest>();
+  protected dispatchInterception = new Interception<ClientRequest>();
 
   constructor(public options?: ClientOptions) {
     super();
@@ -45,12 +36,12 @@ export class Client extends Emittery<SocketEvents> {
     return this.socket.ready();
   }
 
-  addRequestInterceptor(handler: InterceptionHandler<IncomingRequest<ClientSocket>>) {
+  addRequestInterceptor(handler: ClientRequestHandler) {
     this.requestInterception.add(handler);
     return this;
   }
 
-  addRemoteInterceptor(handler: InterceptionHandler<OutgoingRequest<ClientSocket>>) {
+  addDispatchInterceptor(handler: ClientDispatchHandler) {
     this.dispatchInterception.add(handler);
     return this;
   }
@@ -80,11 +71,11 @@ export class Client extends Emittery<SocketEvents> {
     }
   }
 
-  protected async doRequest(request: ClientIncomingRequest) {
+  protected async doRequest(request: ClientRequest) {
     return this.requestInterception.invoke(request, async () => this.onrequest?.(request));
   }
 
-  protected async doDispatch(request: ClientOutgoingRequest, next: Next) {
+  protected async doDispatch(request: ClientRequest, next: Next) {
     return this.dispatchInterception.invoke(request, next);
   }
 }

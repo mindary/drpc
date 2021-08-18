@@ -1,26 +1,12 @@
-import {RequestContent} from './types';
 import {Socket} from '../sockets';
+import {Request} from './request';
 
-export class OutgoingRequest<SOCKET extends Socket = any> {
-  constructor(public readonly socket: SOCKET, public readonly content: RequestContent) {}
-
-  get id() {
-    return this.content.id;
+export class OutgoingRequest<SOCKET extends Socket = any> extends Request<SOCKET> {
+  end(payload: any): Promise<any> {
+    throw new Error('Unsupported');
   }
 
-  get name() {
-    return this.content.name;
-  }
-
-  set name(name) {
-    this.content.name = name;
-  }
-
-  get params() {
-    return this.content.params;
-  }
-
-  set params(params: any) {
-    this.content.params = params;
+  error(err: any): Promise<any> {
+    throw new Error('Unsupported');
   }
 }

@@ -1,21 +1,13 @@
 import debugFactory from 'debug';
-import {
-  IncomingRequest,
-  OnRequest,
-  OnServerConnect,
-  OutgoingRequest,
-  Registry,
-  Serializer,
-  Transport,
-} from '@remly/core';
+import {OnRequest, OnServerConnect, Registry, Serializer, Transport} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
+import {Next} from '@libit/interceptor';
 import {Interception} from '@remly/interception';
 import {Connection} from './connection';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
 import {Server} from './server';
-import {ServerDispatchHandler, ServerRequestHandler} from './types';
-import {Next} from '@libit/interceptor';
+import {ServerDispatchHandler, ServerRequest, ServerRequestHandler} from './types';
 
 const debug = debugFactory('remly:server:application');
 
@@ -54,9 +46,9 @@ export class Application extends ApplicationEmittery {
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<IncomingRequest<Connection>>();
-  protected requestInterception = new Interception<IncomingRequest<Connection>>();
-  protected dispatchInterception = new Interception<OutgoingRequest<Connection>>();
+  protected connectInterception = new Interception<ServerRequest>();
+  protected requestInterception = new Interception<ServerRequest>();
+  protected dispatchInterception = new Interception<ServerRequest>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -122,7 +114,7 @@ export class Application extends ApplicationEmittery {
     });
   }
 
-  protected async handleConnect(request: IncomingRequest<Connection>) {
+  protected async handleConnect(request: ServerRequest) {
     const {socket} = request;
     debug('adding connection', socket.id);
     try {
@@ -133,7 +125,7 @@ export class Application extends ApplicationEmittery {
     }
   }
 
-  protected async handleRequest(request: IncomingRequest<Connection>) {
+  protected async handleRequest(request: ServerRequest) {
     try {
       return this.requestInterception.invoke(request, () => this.doRequest(request));
       // await this.doRequest(request);
@@ -142,11 +134,11 @@ export class Application extends ApplicationEmittery {
     }
   }
 
-  protected async handleDispatch(request: OutgoingRequest, next: Next) {
+  protected async handleDispatch(request: ServerRequest, next: Next) {
     return this.dispatchInterception.invoke(request, next);
   }
 
-  protected async doConnect(request: IncomingRequest<Connection>) {
+  protected async doConnect(request: ServerRequest) {
     const {socket} = request;
 
     if (!socket.isOpen()) {
@@ -164,7 +156,7 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doRequest(request: IncomingRequest<Connection>) {
+  protected async doRequest(request: ServerRequest) {
     if (this.onrequest) {
       return this.onrequest(request);
     }

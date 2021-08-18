@@ -1,80 +1,10 @@
-import {Emittery} from '@libit/emittery';
 import {Socket} from '../sockets';
 import {PacketTypeKeyType} from '../packet-types';
 import {PacketMessages} from '../messages';
-import {RequestContent} from './types';
 import {makeRemoteError} from '../errors';
+import {Request} from './request';
 
-export interface ContextEvents {
-  ended: undefined;
-  finished: undefined;
-}
-
-const EMPTY_REQUEST_MESSAGE: RequestContent = {
-  id: 0,
-  name: '',
-  params: undefined,
-};
-
-export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<ContextEvents> {
-  readonly content: RequestContent;
-
-  #ended: boolean;
-  #finished: boolean;
-
-  constructor(public readonly socket: SOCKET, info?: RequestContent) {
-    super();
-    this.content = info ?? EMPTY_REQUEST_MESSAGE;
-  }
-
-  get ended() {
-    return this.#ended;
-  }
-
-  get finished() {
-    return this.#finished;
-  }
-
-  get sid() {
-    return this.socket.id;
-  }
-
-  get address() {
-    return this.socket.address;
-  }
-
-  get id(): number | undefined {
-    return this.content.id;
-  }
-
-  get name() {
-    return this.content.name;
-  }
-
-  get params() {
-    return this.content.params;
-  }
-
-  hasId() {
-    return this.id != null && this.id > 0;
-  }
-
-  hasName() {
-    return !!this.name;
-  }
-
-  isConnect() {
-    return !this.hasId() && !this.hasName();
-  }
-
-  isCall() {
-    return this.hasId() && this.hasName();
-  }
-
-  isSignal() {
-    return !this.hasId() && this.hasName();
-  }
-
+export class IncomingRequest<SOCKET extends Socket = any> extends Request<SOCKET> {
   async end(payload?: any) {
     if (this.isConnect()) {
       return this.sendAndEnd('connect', {payload});
@@ -95,13 +25,13 @@ export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<Conte
   }
 
   protected async sendAndEnd<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {
-    if (this.#ended) {
+    if (this._ended) {
       throw new Error('socket is ended');
     }
-    this.#ended = true;
+    this._ended = true;
     await this.emit('ended');
     await this.send(type, message);
-    this.#finished = true;
+    this._finished = true;
     await this.emit('finished');
   }
 

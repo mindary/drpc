@@ -23,7 +23,7 @@ import {
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
 import {Dispatch, Remote} from '../remote';
-import {IncomingRequest, RequestContent} from '../request';
+import {IncomingRequest, Request, RequestContent} from '../request';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -31,7 +31,7 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnRequest<SOCKET extends Socket = any> = (request: IncomingRequest<SOCKET>) => ValueOrPromise<void>;
+export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
 
 export interface SocketEvents {
   tick: undefined;

@@ -1,10 +1,9 @@
 import {GenericInterceptor} from '@libit/interceptor';
-import {ClientSocket, IncomingRequest, OutgoingRequest} from '@remly/core';
+import {ClientSocket, Request} from '@remly/core';
 
-export type ClientIncomingRequest = IncomingRequest<ClientSocket>;
-export type ClientOutgoingRequest = OutgoingRequest<ClientSocket>;
+export type ClientRequest = Request<ClientSocket>;
 
-export type ClientRequestHandler = GenericInterceptor<ClientIncomingRequest>;
-export type ClientDispatchHandler = GenericInterceptor<ClientOutgoingRequest>;
+export type ClientRequestHandler = GenericInterceptor<ClientRequest>;
+export type ClientDispatchHandler = GenericInterceptor<ClientRequest>;
 
 export const CLIENT_UNSUBS = Symbol('client:unsubs');

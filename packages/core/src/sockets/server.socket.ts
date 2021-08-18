@@ -5,11 +5,9 @@ import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
-import {IncomingRequest} from '../request';
+import {IncomingRequest, Request} from '../request';
 
-export type OnServerConnect<SOCKET extends ServerSocket = any> = (
-  request: IncomingRequest<SOCKET>,
-) => ValueOrPromise<any>;
+export type OnServerConnect<SOCKET extends ServerSocket = any> = (request: Request<SOCKET>) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   onconnect?: OnServerConnect;
