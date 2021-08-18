@@ -38,8 +38,10 @@ export class Application extends ApplicationEmittery {
   public readonly serializer: Serializer;
   public readonly connections: Map<string, Connection> = new Map();
 
-  public onconnect: OnServerConnect;
-  public onrequest: OnRequest;
+  public onconnect?: OnServerConnect;
+  public onrequest?: OnRequest;
+  public oncall?: OnRequest;
+  public onsignal?: OnRequest;
 
   protected options: ApplicationOptions;
   protected onTransport: (transport: Transport) => void;
@@ -56,6 +58,8 @@ export class Application extends ApplicationEmittery {
     this.connectTimeout = this.options.connectTimeout;
     this.serializer = this.options.serializer ?? new MsgpackSerializer();
     this.onTransport = transport => this.handle(transport);
+
+    this.onrequest = request => request.isCall() ? this.oncall?.(request) : this.onsignal?.(request);
   }
 
   private _connectTimeout: number;
@@ -119,7 +123,6 @@ export class Application extends ApplicationEmittery {
     debug('adding connection', socket.id);
     try {
       await this.connectInterception.invoke(request, () => this.doConnect(request));
-      // await this.doConnect(request);
     } catch (e) {
       await request.error(e);
     }
@@ -128,7 +131,6 @@ export class Application extends ApplicationEmittery {
   protected async handleRequest(request: ServerRequest) {
     try {
       return this.requestInterception.invoke(request, () => this.doRequest(request));
-      // await this.doRequest(request);
     } catch (e) {
       await request.error(e);
     }
