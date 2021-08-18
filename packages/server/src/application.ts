@@ -59,7 +59,7 @@ export class Application extends ApplicationEmittery {
     this.serializer = this.options.serializer ?? new MsgpackSerializer();
     this.onTransport = transport => this.handle(transport);
 
-    this.onrequest = request => request.isCall() ? this.oncall?.(request) : this.onsignal?.(request);
+    this.onrequest = request => (request.isCall() ? this.oncall?.(request) : this.onsignal?.(request));
   }
 
   private _connectTimeout: number;
