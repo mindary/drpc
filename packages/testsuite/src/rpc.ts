@@ -14,7 +14,7 @@ export namespace RpcSuite {
 
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    app.onrequest = async request => request.isCall() && (request.result = await registry.invoke(request));
+    app.onrequest = async request => request.isCall() && registry.invoke(request);
 
     app.on('connection', setupSocket);
     return app;
@@ -23,7 +23,7 @@ export namespace RpcSuite {
   export function setupClient(client: Client) {
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    client.onrequest = async request => request.isCall() && (request.result = await registry.invoke(request));
+    client.onrequest = async request => request.isCall() && registry.invoke(request);
 
     setupSocket(client.socket);
   }
@@ -72,8 +72,8 @@ export namespace RpcSuite {
           });
         });
 
-        describe('remote.on and signal', function () {
-          it('remote.on', async () => {
+        describe('remote on and signal', function () {
+          it('remote on', async () => {
             const socket = getSocket();
             assert(socket);
             const reply = new Promise(resolve => socket.remote.on('echo-reply', resolve));

@@ -435,7 +435,7 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async doRequest(request: IncomingRequest<this>) {
-    await this.onrequest?.(request);
+    return this.onrequest?.(request);
   }
 
   private async handleConnectError(message: ErrorMessage) {
@@ -448,21 +448,22 @@ export abstract class Socket extends SocketEmittery {
     const id = (message as CallMessage).id;
     const request = this.createRequest({id, name: message.name, params: message.payload});
     try {
-      await this.doRequest(request);
+      const result = await this.doRequest(request);
       if (id) {
         // call
         if (!request.ended) {
-          await request.end(request.result);
+          await request.end(result);
         }
       } else {
         // signal
         await this.remote.emit(request);
       }
     } catch (e) {
-      if (request.ended) {
-        throw e;
+      if (!request.ended && e && e.message) {
+        await request.error(e);
+      } else {
+        console.error(e);
       }
-      await request.error(e);
     }
   }
 }

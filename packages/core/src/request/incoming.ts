@@ -2,8 +2,8 @@ import {Emittery} from '@libit/emittery';
 import {Socket} from '../sockets';
 import {PacketTypeKeyType} from '../packet-types';
 import {PacketMessages} from '../messages';
-import {makeRemoteError, RemoteError} from '../errors';
 import {RequestContent} from './types';
+import {makeRemoteError} from '../errors';
 
 export interface ContextEvents {
   ended: undefined;
@@ -21,7 +21,6 @@ export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<Conte
 
   #ended: boolean;
   #finished: boolean;
-  #result: any;
 
   constructor(public readonly socket: SOCKET, info?: RequestContent) {
     super();
@@ -54,14 +53,6 @@ export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<Conte
 
   get params() {
     return this.content.params;
-  }
-
-  get result() {
-    return this.#result;
-  }
-
-  set result(result: any) {
-    this.#result = result;
   }
 
   hasId() {
@@ -100,11 +91,7 @@ export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<Conte
     }
     const isNativeError = Object.prototype.toString.call(err) === '[object Error]' || err instanceof Error;
     if (!isNativeError) throw new TypeError('non-error thrown: ' + err.toJSON());
-    await this.doError(makeRemoteError(err));
-  }
-
-  protected doError(err: RemoteError): Promise<void> {
-    return this.sendAndEnd('error', {id: this.id ?? 0, ...err});
+    return this.sendAndEnd('error', {id: this.id ?? 0, ...makeRemoteError(err)});
   }
 
   protected async sendAndEnd<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {

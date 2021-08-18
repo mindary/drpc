@@ -166,9 +166,8 @@ export class Application extends ApplicationEmittery {
 
   protected async doRequest(request: IncomingRequest<Connection>) {
     if (this.onrequest) {
-      await this.onrequest(request);
+      return this.onrequest(request);
     }
-    return respond(request);
   }
 
   protected async _connected(connection: Connection) {
@@ -186,14 +185,6 @@ export class Application extends ApplicationEmittery {
       await this.emit('connectionClose', connection);
     } else {
       debug('ignoring remove for connection %s', connection.id);
-    }
-  }
-}
-
-export function respond(request: IncomingRequest<Connection>) {
-  if (request.isCall()) {
-    if (!request.ended) {
-      return request.end(request.result);
     }
   }
 }

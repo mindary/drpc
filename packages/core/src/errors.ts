@@ -28,7 +28,7 @@ export enum ErrorCode {
   /**
    * Internal Rpc error.
    */
-  INTERNAL_ERROR = 23,
+  INTERNAL_ERROR = 24,
 }
 
 export const ErrorMessages: Record<ErrorCode, string> = {

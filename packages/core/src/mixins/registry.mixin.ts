@@ -22,7 +22,7 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
       this.onrequest = async request => {
         if (request.isCall()) {
-          request.result = await this.invokeWithRegistry(request);
+          return this.invokeWithRegistry(request);
         }
       };
     }

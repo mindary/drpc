@@ -45,6 +45,20 @@ export class Client extends Emittery<SocketEvents> {
     return this.socket.ready();
   }
 
+  addRequestInterceptor(handler: InterceptionHandler<IncomingRequest<ClientSocket>>) {
+    this.requestInterception.add(handler);
+    return this;
+  }
+
+  addRemoteInterceptor(handler: InterceptionHandler<OutgoingRequest<ClientSocket>>) {
+    this.dispatchInterception.add(handler);
+    return this;
+  }
+
+  close() {
+    return this.socket.close();
+  }
+
   protected createSocket() {
     const socket = new ClientSocket({
       ...this.options,
@@ -66,24 +80,8 @@ export class Client extends Emittery<SocketEvents> {
     }
   }
 
-  addRequestInterceptor(handler: InterceptionHandler<IncomingRequest<ClientSocket>>) {
-    this.requestInterception.add(handler);
-    return this;
-  }
-
-  addRemoteInterceptor(handler: InterceptionHandler<OutgoingRequest<ClientSocket>>) {
-    this.dispatchInterception.add(handler);
-    return this;
-  }
-
-  close() {
-    return this.socket.close();
-  }
-
   protected async doRequest(request: ClientIncomingRequest) {
-    return this.requestInterception.invoke(request, async () => {
-      await this.onrequest?.(request);
-    });
+    return this.requestInterception.invoke(request, async () => this.onrequest?.(request));
   }
 
   protected async doDispatch(request: ClientOutgoingRequest, next: Next) {
