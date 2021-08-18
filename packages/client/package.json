@@ -1,7 +1,7 @@
 {
   "name": "@remly/client",
   "description": "The remly abstract client",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@libit/interceptor": "^0.2.1",
-    "@remly/core": "^0.13.0",
-    "@remly/interception": "^0.3.0",
+    "@remly/core": "^0.13.1",
+    "@remly/interception": "^0.3.1",
     "ts-essentials": "^7.0.3"
   },
   "devDependencies": {

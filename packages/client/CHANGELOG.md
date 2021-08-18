@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://gitr.net/mindary/remly/compare/@remly/client@0.6.0...@remly/client@0.6.1) (2021-08-18)
+
+**Note:** Version bump only for package @remly/client
+
+
+
+
+
 # [0.6.0](https://gitr.net/mindary/remly/compare/@remly/client@0.5.3...@remly/client@0.6.0) (2021-08-18)
 
 

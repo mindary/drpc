@@ -1,7 +1,7 @@
 {
   "name": "@remly/channel",
   "description": "A channel resolver and factory library",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@libit/error": "^0.3.6",
-    "@remly/server": "^0.11.0",
+    "@remly/server": "^0.11.1",
     "debug": "^4.3.2",
     "ts-essentials": "^7.0.3"
   },
@@ -29,8 +29,8 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/tcp": "^0.7.0",
-    "@remly/ws": "^0.7.0",
+    "@remly/tcp": "^0.7.1",
+    "@remly/ws": "^0.7.1",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.6.1",
     "remly-channel-throwing": "file:./dist/__tests__/fixtures/remly-channel-throwing"
