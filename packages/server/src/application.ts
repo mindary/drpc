@@ -1,12 +1,21 @@
 import debugFactory from 'debug';
-import {OnRequest, OnServerConnect, Registry, Request, Serializer, Transport} from '@remly/core';
+import {
+  IncomingRequest,
+  OnRequest,
+  OnServerConnect,
+  OutgoingRequest,
+  Registry,
+  Serializer,
+  Transport,
+} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Interception} from '@remly/interception';
 import {Connection} from './connection';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
 import {Server} from './server';
-import {ServerRequestHandler} from './types';
+import {ServerDispatchHandler, ServerRequestHandler} from './types';
+import {Next} from '@libit/interceptor';
 
 const debug = debugFactory('remly:server:application');
 
@@ -45,9 +54,9 @@ export class Application extends ApplicationEmittery {
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<Request<Connection>>();
-  protected requestInterception = new Interception<Request<Connection>>();
-  protected remoteInterception = new Interception<Request<Connection>>();
+  protected connectInterception = new Interception<IncomingRequest<Connection>>();
+  protected requestInterception = new Interception<IncomingRequest<Connection>>();
+  protected dispatchInterception = new Interception<OutgoingRequest<Connection>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -97,8 +106,8 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
-  addRemoteInterceptor(interceptor: ServerRequestHandler) {
-    this.remoteInterception.add(interceptor);
+  addDispatchInterceptor(interceptor: ServerDispatchHandler) {
+    this.dispatchInterception.add(interceptor);
     return this;
   }
 
@@ -107,40 +116,37 @@ export class Application extends ApplicationEmittery {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
+      dispatch: (request, next) => this.handleDispatch(request, next),
       onconnect: request => this.handleConnect(request),
       onrequest: request => this.handleRequest(request),
     });
   }
 
-  protected async handleConnect(request: Request<Connection>) {
+  protected async handleConnect(request: IncomingRequest<Connection>) {
     const {socket} = request;
     debug('adding connection', socket.id);
     try {
-      await this.connectInterception.invoke(request);
-      await this.doConnect(request);
+      await this.connectInterception.invoke(request, () => this.doConnect(request));
+      // await this.doConnect(request);
     } catch (e) {
       await request.error(e);
     }
   }
 
-  protected async handleRequest(request: Request<Connection>) {
+  protected async handleRequest(request: IncomingRequest<Connection>) {
     try {
-      // Both "call" and "signal" will share same interceptors
-      await this.requestInterception.invoke(request);
-
-      //
-      // The reason we need to handle "call" and "signal" separately is that "call" needs to ensure that the service
-      // provides the corresponding method, otherwise will send "Method not found" error.
-      //
-      // But "signal" does not perform such a check.
-      //
-      await this.doRequest(request);
+      return this.requestInterception.invoke(request, () => this.doRequest(request));
+      // await this.doRequest(request);
     } catch (e) {
       await request.error(e);
     }
   }
 
-  protected async doConnect(request: Request<Connection>) {
+  protected async handleDispatch(request: OutgoingRequest, next: Next) {
+    return this.dispatchInterception.invoke(request, next);
+  }
+
+  protected async doConnect(request: IncomingRequest<Connection>) {
     const {socket} = request;
 
     if (!socket.isOpen()) {
@@ -158,7 +164,7 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doRequest(request: Request<Connection>) {
+  protected async doRequest(request: IncomingRequest<Connection>) {
     if (this.onrequest) {
       await this.onrequest(request);
     }
@@ -184,7 +190,7 @@ export class Application extends ApplicationEmittery {
   }
 }
 
-export function respond(request: Request<Connection>) {
+export function respond(request: IncomingRequest<Connection>) {
   if (request.isCall()) {
     if (!request.ended) {
       return request.end(request.result);

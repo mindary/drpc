@@ -8,7 +8,8 @@ import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
 import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
-import {RequestInfo} from './types';
+import {GenericInterceptor} from '@libit/interceptor';
+import {OutgoingRequest, RequestContent} from './request';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -17,12 +18,21 @@ export interface RemoteEvents {
   [p: string]: any;
 }
 
+export type Dispatch = GenericInterceptor<OutgoingRequest>;
+
+export interface RemoteOptions extends Options<any> {
+  dispatch?: Dispatch;
+}
+
 export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
+  public dispatch: Dispatch;
+
   protected requests: RequestRegistry = new RequestRegistry();
   protected unsubs: UnsubscribeFn[] = [];
 
-  constructor(public socket: SOCKET, options: Options<any> = {}) {
+  constructor(public socket: SOCKET, options: RemoteOptions = {}) {
     super(options);
+    this.dispatch = options?.dispatch ?? ((request, next) => next());
     this.bind();
   }
 
@@ -69,8 +79,12 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     assert(typeof method === 'string', 'Event must be a string.');
     await this.assertOrWaitConnected();
     const req = this.requests.acquire(timeout ?? this.socket.requestTimeout);
-    await this.socket.send('call', {id: req.id, name: method, payload: args});
-    return req.promise;
+    const request = new OutgoingRequest(this.socket, {id: req.id, name: method, params: args});
+
+    return this.dispatch(request, async () => {
+      await this.socket.send('call', {id: req.id, name: request.name, payload: request.params});
+      return req.promise;
+    });
   }
 
   /**
@@ -81,13 +95,16 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
    */
   async signal(event: string, data?: any) {
     assert(typeof event === 'string', 'Event must be a string.');
+    const request = new OutgoingRequest(this.socket, {name: event, params: data});
     await this.assertOrWaitConnected();
-    await this.socket.send('signal', {name: event, payload: data});
+    await this.dispatch(request, async () => {
+      await this.socket.send('signal', {name: request.name, payload: request.params});
+    });
   }
 
-  async emit(request: RequestInfo) {
-    const {name, args} = request;
-    await this.emitter.emit(name, args);
+  async emit(content: RequestContent) {
+    const {name, params} = content;
+    await this.emitter.emit(name, params);
   }
 
   protected bind() {
@@ -98,7 +115,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
           this.dispose();
         }),
         this.socket.on('tick', () => this.requests.tick()),
-        this.socket.on('reply', packet => this.handleReply(packet)),
+        this.socket.on('response', packet => this.handleReply(packet)),
       );
     }
   }

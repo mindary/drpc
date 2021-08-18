@@ -30,6 +30,7 @@
     "@libit/bufio": "^0.4.2",
     "@libit/emittery": "^0.10.1",
     "@libit/error": "^0.3.6",
+    "@libit/interceptor": "^0.2.1",
     "@libit/timer": "^0.2.8",
     "@loopback/metadata": "^3.3.2",
     "@remly/serializer": "^0.7.1",

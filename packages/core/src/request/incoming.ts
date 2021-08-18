@@ -1,31 +1,31 @@
 import {Emittery} from '@libit/emittery';
-import {Socket} from './sockets';
-import {PacketTypeKeyType} from './packet-types';
-import {PacketMessages} from './messages';
-import {makeRemoteError, RemoteError} from './errors';
-import {RequestInfo} from './types';
+import {Socket} from '../sockets';
+import {PacketTypeKeyType} from '../packet-types';
+import {PacketMessages} from '../messages';
+import {makeRemoteError, RemoteError} from '../errors';
+import {RequestContent} from './types';
 
 export interface ContextEvents {
   ended: undefined;
   finished: undefined;
 }
 
-const EMPTY_REQUEST_MESSAGE: RequestInfo = {
+const EMPTY_REQUEST_MESSAGE: RequestContent = {
   id: 0,
   name: '',
-  args: undefined,
+  params: undefined,
 };
 
-export class Request<SOCKET extends Socket = any> extends Emittery<ContextEvents> {
-  readonly info: RequestInfo;
+export class IncomingRequest<SOCKET extends Socket = any> extends Emittery<ContextEvents> {
+  readonly content: RequestContent;
 
   #ended: boolean;
   #finished: boolean;
   #result: any;
 
-  constructor(public readonly socket: SOCKET, info?: RequestInfo) {
+  constructor(public readonly socket: SOCKET, info?: RequestContent) {
     super();
-    this.info = info ?? EMPTY_REQUEST_MESSAGE;
+    this.content = info ?? EMPTY_REQUEST_MESSAGE;
   }
 
   get ended() {
@@ -45,15 +45,15 @@ export class Request<SOCKET extends Socket = any> extends Emittery<ContextEvents
   }
 
   get id(): number | undefined {
-    return this.info.id;
+    return this.content.id;
   }
 
   get name() {
-    return this.info.name;
+    return this.content.name;
   }
 
-  get args() {
-    return this.info.args;
+  get params() {
+    return this.content.params;
   }
 
   get result() {

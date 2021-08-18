@@ -12,7 +12,7 @@ const debug = debugFactory('remly:core:registry');
 
 export interface ServiceInvokeRequest {
   name: string;
-  args?: any;
+  params?: any;
 }
 
 export interface Registrable {
@@ -106,8 +106,8 @@ export class DefaultRegistry implements Registry {
   }
 
   async invoke(request: ServiceInvokeRequest) {
-    const {name, args} = request;
-    return this.call(name, args);
+    const {name, params} = request;
+    return this.call(name, params);
   }
 }
 

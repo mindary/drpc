@@ -36,7 +36,7 @@ describe('Core - RPC', function () {
 
       describe(`call`, function () {
         it('call and return with ack', async () => {
-          serverSocket.onrequest = request => request.end(request.args);
+          serverSocket.onrequest = request => request.end(request.params);
           const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
@@ -77,7 +77,7 @@ describe('Core - RPC', function () {
       describe('service', function () {
         const Invoker: OnRequest = request => {
           if (request.name === 'monster.add') {
-            return request.end(request.args[0] + request.args[1]);
+            return request.end(request.params[0] + request.params[1]);
           }
           throw new Error('Unknown method ' + request.name);
         };

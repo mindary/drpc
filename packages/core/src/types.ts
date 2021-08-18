@@ -11,12 +11,6 @@ export interface Callable {
   call(name: string, args?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export interface RequestInfo {
-  id?: number;
-  name: string;
-  args?: any;
-}
-
 export interface Metadata extends Record<string, any> {
   auth?: {
     sid?: string; // ecdsa public key as sid

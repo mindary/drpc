@@ -1,9 +1,19 @@
 import 'ts-essentials';
 import '@libit/interceptor';
 
-import {ClientSocket, ClientSocketOptions, Emittery, OnRequest, Remote, Request, SocketEvents} from '@remly/core';
+import {
+  ClientSocket,
+  ClientSocketOptions,
+  Emittery,
+  IncomingRequest,
+  OnRequest,
+  OutgoingRequest,
+  Remote,
+  SocketEvents,
+} from '@remly/core';
 import {Interception, InterceptionHandler} from '@remly/interception';
-import {CLIENT_UNSUBS} from './types';
+import {Next} from '@libit/interceptor';
+import {CLIENT_UNSUBS, ClientIncomingRequest, ClientOutgoingRequest} from './types';
 
 export interface ClientOptions extends ClientSocketOptions {
   onrequest?: OnRequest<ClientSocket>;
@@ -14,8 +24,8 @@ export class Client extends Emittery<SocketEvents> {
 
   public onrequest?: OnRequest<ClientSocket>;
 
-  protected requestInterception = new Interception<Request<ClientSocket>>();
-  protected remoteInterception = new Interception<Request<ClientSocket>>();
+  protected requestInterception = new Interception<ClientIncomingRequest>();
+  protected dispatchInterception = new Interception<ClientOutgoingRequest>();
 
   constructor(public options?: ClientOptions) {
     super();
@@ -36,13 +46,16 @@ export class Client extends Emittery<SocketEvents> {
   }
 
   protected createSocket() {
-    const socket = new ClientSocket(this.options);
+    const socket = new ClientSocket({
+      ...this.options,
+      onrequest: request => this.doRequest(request),
+      dispatch: (request, next) => this.doDispatch(request, next),
+    });
     this.bind(socket);
     return socket;
   }
 
   protected bind(socket: ClientSocket) {
-    socket.onrequest = request => this.doRequest(request);
     (socket as any)[CLIENT_UNSUBS] = [socket.onAny((event, data) => this.emit(event, data))];
   }
 
@@ -51,16 +64,15 @@ export class Client extends Emittery<SocketEvents> {
     while (unsubs?.length) {
       unsubs.shift()();
     }
-    socket.onrequest = undefined;
   }
 
-  addRequestInterceptor(handler: InterceptionHandler<Request<ClientSocket>>) {
+  addRequestInterceptor(handler: InterceptionHandler<IncomingRequest<ClientSocket>>) {
     this.requestInterception.add(handler);
     return this;
   }
 
-  addRemoteInterceptor(handler: InterceptionHandler<Request<ClientSocket>>) {
-    this.remoteInterception.add(handler);
+  addRemoteInterceptor(handler: InterceptionHandler<OutgoingRequest<ClientSocket>>) {
+    this.dispatchInterception.add(handler);
     return this;
   }
 
@@ -68,12 +80,13 @@ export class Client extends Emittery<SocketEvents> {
     return this.socket.close();
   }
 
-  protected async doRequest(request: Request<ClientSocket>) {
-    await this.invokeRequestInterceptors(request);
-    await this.onrequest?.(request);
+  protected async doRequest(request: ClientIncomingRequest) {
+    return this.requestInterception.invoke(request, async () => {
+      await this.onrequest?.(request);
+    });
   }
 
-  protected async invokeRequestInterceptors(request: Request<ClientSocket>) {
-    await this.requestInterception.invoke(request);
+  protected async doDispatch(request: ClientOutgoingRequest, next: Next) {
+    return this.dispatchInterception.invoke(request, next);
   }
 }

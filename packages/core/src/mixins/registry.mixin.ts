@@ -2,7 +2,7 @@ import {assert} from 'ts-essentials';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, Registrable, Registry} from '../registry';
 import {OnRequest} from '../sockets';
-import {RequestInfo} from '../types';
+import {RequestContent} from '../request';
 
 export interface WithOnRequest {
   onrequest: OnRequest;
@@ -22,14 +22,14 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
       this.onrequest = async request => {
         if (request.isCall()) {
-          request.result = await this.invokeWithRegistry(request.info);
+          request.result = await this.invokeWithRegistry(request);
         }
       };
     }
 
-    async invokeWithRegistry(message: RequestInfo) {
-      assert(this.registry, 'remote invoking is not supported for current connection');
-      return this.registry.invoke(message);
+    async invokeWithRegistry(content: RequestContent) {
+      assert(this.registry, 'remote invoking is not supported for current socket');
+      return this.registry.invoke(content);
     }
 
     register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;

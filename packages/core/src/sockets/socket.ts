@@ -9,7 +9,7 @@ import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {RequestInfo, Metadata, NetAddress} from '../types';
+import {Metadata, NetAddress} from '../types';
 import {Alive} from '../alive';
 import {
   CallMessage,
@@ -22,8 +22,8 @@ import {
 } from '../messages';
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
-import {Remote} from '../remote';
-import {Request} from '../request';
+import {Dispatch, Remote} from '../remote';
+import {IncomingRequest, RequestContent} from '../request';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -31,7 +31,7 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
+export type OnRequest<SOCKET extends Socket = any> = (request: IncomingRequest<SOCKET>) => ValueOrPromise<void>;
 
 export interface SocketEvents {
   tick: undefined;
@@ -45,7 +45,7 @@ export interface SocketEvents {
   packet: Packet;
   packet_create: Packet;
   heartbeat: undefined;
-  reply: Packet;
+  response: Packet;
 }
 
 export interface SocketOptions {
@@ -57,6 +57,7 @@ export interface SocketOptions {
   requestTimeout?: number;
   transport?: Transport;
   onrequest?: OnRequest;
+  dispatch?: Dispatch;
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
@@ -106,7 +107,7 @@ export abstract class Socket extends SocketEmittery {
     this.serializer = options.serializer ?? new MsgpackSerializer();
     this.onrequest = options.onrequest;
 
-    this.remote = new Remote(this);
+    this.remote = new Remote(this, {dispatch: options.dispatch});
 
     this.handshake = {sid: '', metadata: {}};
 
@@ -251,7 +252,7 @@ export abstract class Socket extends SocketEmittery {
             case PacketType.ack:
             case PacketType.error:
               // notify to handle call responses
-              await this.emit('reply', packet);
+              await this.emit('response', packet);
               break;
           }
 
@@ -429,11 +430,11 @@ export abstract class Socket extends SocketEmittery {
     }, this.connectTimeout);
   }
 
-  protected createRequest(message: RequestInfo) {
-    return new Request<this>(this, message);
+  protected createRequest(content: RequestContent) {
+    return new IncomingRequest<this>(this, content);
   }
 
-  protected async doRequest(request: Request<this>) {
+  protected async doRequest(request: IncomingRequest<this>) {
     await this.onrequest?.(request);
   }
 
@@ -445,7 +446,7 @@ export abstract class Socket extends SocketEmittery {
   private async handleRequest(message: CallMessage | SignalMessage) {
     // id of 0,null,undefined means signal
     const id = (message as CallMessage).id;
-    const request = this.createRequest({id, name: message.name, args: message.payload});
+    const request = this.createRequest({id, name: message.name, params: message.payload});
     try {
       await this.doRequest(request);
       if (id) {

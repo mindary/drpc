@@ -5,9 +5,11 @@ import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
-import {Request} from '../request';
+import {IncomingRequest} from '../request';
 
-export type OnServerConnect<SOCKET extends ServerSocket = any> = (request: Request<SOCKET>) => ValueOrPromise<any>;
+export type OnServerConnect<SOCKET extends ServerSocket = any> = (
+  request: IncomingRequest<SOCKET>,
+) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   onconnect?: OnServerConnect;
@@ -45,7 +47,7 @@ export class ServerSocket extends Socket {
   }
 
   protected createConnectContext() {
-    return new Request<this>(this);
+    return new IncomingRequest<this>(this);
   }
 
   protected handleOpen(message: OpenMessage) {
