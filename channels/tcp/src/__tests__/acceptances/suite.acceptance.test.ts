@@ -10,8 +10,9 @@ describe('TCP - Suite', function () {
     await server.start();
 
     const connection = app.once('connection');
-    const clientSocket = TCPClient.connect((server.address as AddressInfo).port);
-    RpcSuite.setupClient(clientSocket);
+    const client = TCPClient.connect((server.address as AddressInfo).port);
+    RpcSuite.setupClient(client);
+    const clientSocket = client.socket;
     const serverSocket = await connection;
 
     const close = async () => {

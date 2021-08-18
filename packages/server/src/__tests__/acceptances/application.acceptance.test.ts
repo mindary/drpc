@@ -36,7 +36,8 @@ describe('Application', function () {
 
   function givenSocketPair(): [Client, Transport] {
     const [t1, t2] = givenMemoryTransportPair();
-    const client = new Client().setTransport(t1);
+    const client = new Client();
+    client.socket.setTransport(t1);
     return [client, t2];
   }
 });

@@ -79,13 +79,13 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
    * @param event
    * @param data
    */
-  async emit(event: string, data?: any) {
+  async signal(event: string, data?: any) {
     assert(typeof event === 'string', 'Event must be a string.');
     await this.assertOrWaitConnected();
     await this.socket.send('signal', {name: event, payload: data});
   }
 
-  async handleSignal(request: RequestInfo) {
+  async emit(request: RequestInfo) {
     const {name, args} = request;
     await this.emitter.emit(name, args);
   }
@@ -124,7 +124,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     const {id, payload} = message;
 
     if (!this.requests.has(id)) {
-      await this.emit('noreq', {type: 'ack', id});
+      await this.signal('noreq', {type: 'ack', id});
       return;
     }
 
@@ -135,7 +135,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     const {id, code, message: msg, payload} = message;
 
     if (!this.requests.has(id)) {
-      await this.emit('noreq', {type: 'error', id});
+      await this.signal('noreq', {type: 'error', id});
       return;
     }
 

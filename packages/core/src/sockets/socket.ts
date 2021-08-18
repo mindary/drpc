@@ -31,10 +31,9 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnCall<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
-export type OnSignal<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
+export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
 
-interface SocketEvents {
+export interface SocketEvents {
   tick: undefined;
   error: Error;
   open: Socket;
@@ -57,8 +56,7 @@ export interface SocketOptions {
   connectTimeout?: number;
   requestTimeout?: number;
   transport?: Transport;
-  oncall?: OnCall;
-  onsignal?: OnSignal;
+  onrequest?: OnRequest;
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
@@ -80,8 +78,7 @@ export abstract class Socket extends SocketEmittery {
   public transport: Transport;
   public state: SocketState;
   public serializer: Serializer;
-  public oncall?: OnCall;
-  public onsignal?: OnSignal;
+  public onrequest?: OnRequest;
   public readonly remote: Remote;
   public readonly handshake: Handshake;
 
@@ -107,8 +104,7 @@ export abstract class Socket extends SocketEmittery {
     this.requestTimeout = this.options.requestTimeout!;
 
     this.serializer = options.serializer ?? new MsgpackSerializer();
-    this.oncall = options.oncall;
-    this.onsignal = options.onsignal;
+    this.onrequest = options.onrequest;
 
     this.remote = new Remote(this);
 
@@ -249,7 +245,7 @@ export abstract class Socket extends SocketEmittery {
           switch (type) {
             case PacketType.call:
             case PacketType.signal:
-              await this.handleCall(message);
+              await this.handleRequest(message);
               break;
             // call response
             case PacketType.ack:
@@ -437,12 +433,8 @@ export abstract class Socket extends SocketEmittery {
     return new Request<this>(this, message);
   }
 
-  protected async doCall(request: Request<this>) {
-    await this.oncall?.(request);
-  }
-
-  protected async doSignal(request: Request<this>) {
-    await this.onsignal?.(request);
+  protected async doRequest(request: Request<this>) {
+    await this.onrequest?.(request);
   }
 
   private async handleConnectError(message: ErrorMessage) {
@@ -450,21 +442,20 @@ export abstract class Socket extends SocketEmittery {
     await this.close();
   }
 
-  private async handleCall(message: CallMessage | SignalMessage) {
+  private async handleRequest(message: CallMessage | SignalMessage) {
     // id of 0,null,undefined means signal
     const id = (message as CallMessage).id;
     const request = this.createRequest({id, name: message.name, args: message.payload});
     try {
+      await this.doRequest(request);
       if (id) {
         // call
-        await this.doCall(request);
         if (!request.ended) {
           await request.end(request.result);
         }
       } else {
         // signal
-        await this.doSignal(request);
-        await this.remote.handleSignal(request);
+        await this.remote.emit(request);
       }
     } catch (e) {
       if (request.ended) {

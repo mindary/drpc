@@ -10,8 +10,9 @@ describe('WebSocket - Suite', function () {
     await server.start();
 
     const connection = app.once('connection');
-    const clientSocket = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
-    RpcSuite.setupClient(clientSocket);
+    const client = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
+    RpcSuite.setupClient(client);
+    const clientSocket = client.socket;
     const serverSocket = await connection;
 
     const close = async () => {

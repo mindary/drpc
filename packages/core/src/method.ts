@@ -1,8 +1,7 @@
 export type Handler = (...args: any[]) => any;
 
 export class Method {
-  constructor(public handler: Handler, public scope?: any) {
-  }
+  constructor(public handler: Handler, public scope?: any) {}
 
   invoke(args: any): Promise<any> {
     if (args == null) {

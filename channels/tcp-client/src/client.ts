@@ -21,6 +21,7 @@ export class TCPClient extends Client {
   connect(port: number, host?: string) {
     assert(typeof port === 'number', 'Must pass a port.');
     const socket = net.connect(port, host);
-    socket.once('connect', () => this.setTransport(new TCPTransport(socket)));
+    socket.once('connect', () => this.socket.setTransport(new TCPTransport(socket)));
+    return this;
   }
 }

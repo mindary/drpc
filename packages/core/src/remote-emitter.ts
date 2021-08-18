@@ -3,7 +3,7 @@ import {DatalessEventNames, Emittery, OmnipresentEventData, Options, Unsubscribe
 
 export type Emitter<EventData, AllEventData, DatalessEvents> = Omit<
   PickProperties<Emittery<EventData, AllEventData, DatalessEvents>, Function>,
-  'emitSerial'
+  'emitSerial' | 'emit'
 >;
 
 export class RemoteEmitter<
@@ -44,11 +44,11 @@ export class RemoteEmitter<
     return this.emitter.events(eventName);
   }
 
-  emit<Name extends DatalessEvents>(eventName: Name): Promise<void>;
-  emit<Name extends keyof EventData>(eventName: Name, eventData: EventData[Name]): Promise<void>;
-  emit(eventName: any, eventData?: any): Promise<void> {
-    return this.emitter.emit(eventName, eventData);
-  }
+  // emit<Name extends DatalessEvents>(eventName: Name): Promise<void>;
+  // emit<Name extends keyof EventData>(eventName: Name, eventData: EventData[Name]): Promise<void>;
+  // emit(eventName: any, eventData?: any): Promise<void> {
+  //   return this.emitter.emit(eventName, eventData);
+  // }
 
   onAny(listener: (eventName: keyof EventData, eventData?: EventData[keyof EventData]) => any): UnsubscribeFn {
     return this.emitter.onAny(listener);

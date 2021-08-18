@@ -2,7 +2,7 @@ import {expect, sinon} from '@loopback/testlab';
 import delay from 'delay';
 import {JsonSerializer} from '@remly/serializer';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {ClientSocket, OnCall, ServerSocket} from '../../sockets';
+import {ClientSocket, OnRequest, ServerSocket} from '../../sockets';
 import {givenSocketPair} from '../support';
 import {Monster} from '../fixtures/monster.definition';
 
@@ -36,20 +36,20 @@ describe('Core - RPC', function () {
 
       describe(`call`, function () {
         it('call and return with ack', async () => {
-          serverSocket.oncall = request => request.end(request.args);
+          serverSocket.onrequest = request => request.end(request.args);
           const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
 
         it('call and throw an error', async () => {
-          serverSocket.oncall = () => {
+          serverSocket.onrequest = () => {
             throw new Error('invalid args');
           };
           await expect(clientSocket.remote.call('echo', 'hello')).rejectedWith('invalid args');
         });
 
         it('calling timeout', async () => {
-          serverSocket.oncall = async request => {
+          serverSocket.onrequest = async request => {
             await delay(serverSocket.requestTimeout * 3);
             await request.end();
           };
@@ -63,19 +63,19 @@ describe('Core - RPC', function () {
         it('subscribe', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
           const result = new Promise(resolve => clientSocket.remote.on('message', resolve));
-          await serverSocket.remote.emit('message', message);
+          await serverSocket.remote.signal('message', message);
           expect(await result).eql(message);
         });
         it('subscribeAny', async () => {
           const message = {from: 'foo', to: 'bar', content: 'hello world'};
           const result = new Promise(resolve => clientSocket.remote.onAny((event, data) => resolve({event, data})));
-          await serverSocket.remote.emit('message', message);
+          await serverSocket.remote.signal('message', message);
           expect(await result).eql({event: 'message', data: message});
         });
       });
 
       describe('service', function () {
-        const Invoker: OnCall = request => {
+        const Invoker: OnRequest = request => {
           if (request.name === 'monster.add') {
             return request.end(request.args[0] + request.args[1]);
           }
@@ -83,14 +83,14 @@ describe('Core - RPC', function () {
         };
 
         it('invoke successfully', async () => {
-          serverSocket.oncall = Invoker;
+          serverSocket.onrequest = Invoker;
           const monster = clientSocket.remote.service(Monster);
           const result = await monster.add(1, 2);
           expect(result).eql(3);
         });
 
         it('invoke fail with unknown method', async () => {
-          serverSocket.oncall = Invoker;
+          serverSocket.onrequest = Invoker;
           const monster = clientSocket.remote.service(Monster);
           const result = monster.empty();
           await expect(result).rejectedWith(/Unknown method/);

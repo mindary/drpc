@@ -15,6 +15,7 @@ export class WebSocketClient extends Client {
   }
 
   connect(address: string | URL, options?: WebSocket.ClientOptions | ClientRequestArgs) {
-    return this.setTransport(new WebSocketTransport(new WebSocket(address, options)));
+    this.socket.setTransport(new WebSocketTransport(new WebSocket(address, options)));
+    return this;
   }
 }

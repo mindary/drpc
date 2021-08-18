@@ -1,26 +1,30 @@
 import {assert} from 'ts-essentials';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, Registrable, Registry} from '../registry';
-import {OnCall} from '../sockets';
+import {OnRequest} from '../sockets';
 import {RequestInfo} from '../types';
 
-export interface WithOnCall {
-  oncall: OnCall;
+export interface WithOnRequest {
+  onrequest: OnRequest;
 }
 
-export function RegistryMixin<T extends MixinTarget<WithOnCall>>(superClass: T) {
+export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: T) {
   return class extends superClass implements Registrable {
     /**
      * Server or Client service registry
      */
     registry: Registry;
-    oncall: OnCall;
+    onrequest: OnRequest;
 
     constructor(...args: any[]) {
       super(...args);
 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
-      this.oncall = async request => (request.result = await this.invokeWithRegistry(request.info));
+      this.onrequest = async request => {
+        if (request.isCall()) {
+          request.result = await this.invokeWithRegistry(request.info);
+        }
+      };
     }
 
     async invokeWithRegistry(message: RequestInfo) {

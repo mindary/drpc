@@ -1,5 +1,5 @@
 import debugFactory from 'debug';
-import {OnCall, OnServerConnect, OnSignal, Registry, Request, Serializer, Transport} from '@remly/core';
+import {OnRequest, OnServerConnect, Registry, Request, Serializer, Transport} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Interception} from '@remly/interception';
 import {Connection} from './connection';
@@ -38,8 +38,7 @@ export class Application extends ApplicationEmittery {
   public readonly connections: Map<string, Connection> = new Map();
 
   public onconnect: OnServerConnect;
-  public oncall: OnCall;
-  public onsignal: OnSignal;
+  public onrequest: OnRequest;
 
   protected options: ApplicationOptions;
   protected onTransport: (transport: Transport) => void;
@@ -48,6 +47,7 @@ export class Application extends ApplicationEmittery {
 
   protected connectInterception = new Interception<Request<Connection>>();
   protected requestInterception = new Interception<Request<Connection>>();
+  protected remoteInterception = new Interception<Request<Connection>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -97,14 +97,18 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
+  addRemoteInterceptor(interceptor: ServerRequestHandler) {
+    this.remoteInterception.add(interceptor);
+    return this;
+  }
+
   handle(transport: Transport) {
     new Connection(generateId(), transport, {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
       onconnect: request => this.handleConnect(request),
-      oncall: request => this.handleCall(request),
-      onsignal: request => this.handleCall(request),
+      onrequest: request => this.handleRequest(request),
     });
   }
 
@@ -119,7 +123,7 @@ export class Application extends ApplicationEmittery {
     }
   }
 
-  protected async handleCall(request: Request<Connection>) {
+  protected async handleRequest(request: Request<Connection>) {
     try {
       // Both "call" and "signal" will share same interceptors
       await this.requestInterception.invoke(request);
@@ -130,11 +134,7 @@ export class Application extends ApplicationEmittery {
       //
       // But "signal" does not perform such a check.
       //
-      if (request.id) {
-        await this.doCall(request);
-      } else {
-        await this.doSignal(request);
-      }
+      await this.doRequest(request);
     } catch (e) {
       await request.error(e);
     }
@@ -158,17 +158,11 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doCall(request: Request<Connection>) {
-    if (this.oncall) {
-      await this.oncall(request);
+  protected async doRequest(request: Request<Connection>) {
+    if (this.onrequest) {
+      await this.onrequest(request);
     }
     return respond(request);
-  }
-
-  protected async doSignal(request: Request<Connection>) {
-    if (this.onsignal) {
-      await this.onsignal(request);
-    }
   }
 
   protected async _connected(connection: Connection) {
@@ -191,8 +185,9 @@ export class Application extends ApplicationEmittery {
 }
 
 export function respond(request: Request<Connection>) {
-  const result = request.result;
-  if (!request.ended) {
-    return request.end(result);
+  if (request.isCall()) {
+    if (!request.ended) {
+      return request.end(request.result);
+    }
   }
 }

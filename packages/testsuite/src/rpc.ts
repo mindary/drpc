@@ -14,7 +14,7 @@ export namespace RpcSuite {
 
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    app.oncall = async request => (request.result = await registry.invoke(request));
+    app.onrequest = async request => request.isCall() && (request.result = await registry.invoke(request));
 
     app.on('connection', setupSocket);
     return app;
@@ -23,13 +23,13 @@ export namespace RpcSuite {
   export function setupClient(client: Client) {
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    client.oncall = async request => (request.result = await registry.invoke(request));
+    client.onrequest = async request => request.isCall() && (request.result = await registry.invoke(request));
 
-    setupSocket(client);
+    setupSocket(client.socket);
   }
 
   function setupSocket(socket: Socket) {
-    socket.remote.on('echo', (msg: string) => socket.remote.emit('echo-reply', 'Hello ' + msg));
+    socket.remote.on('echo', (msg: string) => socket.remote.signal('echo-reply', 'Hello ' + msg));
   }
 
   export function run(prepare: PrepareFn, side: Side = 'both') {
@@ -77,7 +77,7 @@ export namespace RpcSuite {
             const socket = getSocket();
             assert(socket);
             const reply = new Promise(resolve => socket.remote.on('echo-reply', resolve));
-            await socket.remote.emit('echo', 'Tom');
+            await socket.remote.signal('echo', 'Tom');
             expect(await reply).deepEqual('Hello Tom');
           });
         });

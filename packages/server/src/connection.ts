@@ -1,14 +1,12 @@
-import {OnCall, OnSignal, Remote, ServerSocket, ServerSocketOptions, Transport} from '@remly/core';
+import {OnRequest, Remote, ServerSocket, ServerSocketOptions, Transport} from '@remly/core';
 
 export interface ConnectionOptions extends ServerSocketOptions {
-  oncall?: OnCall<Connection>;
-  onsignal?: OnSignal<Connection>;
+  onrequest?: OnRequest<Connection>;
 }
 
 export class Connection extends ServerSocket {
   public remote: Remote<Connection>;
-  public oncall: OnCall<Connection>;
-  public onsignal: OnSignal<Connection>;
+  public onrequest: OnRequest<Connection>;
 
   constructor(id: string, transport: Transport, options?: ConnectionOptions) {
     super(id, transport, options);

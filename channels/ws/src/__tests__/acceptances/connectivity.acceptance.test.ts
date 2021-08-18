@@ -10,7 +10,8 @@ ConnectivitySuite.run('WebSocket', async () => {
   await server.start();
 
   const connection = app.once('connection');
-  const clientSocket = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
+  const client = WebSocketClient.connect('ws://localhost:' + (server.address as AddressInfo).port);
+  const clientSocket = client.socket;
   const serverSocket = await connection;
   const close = async () => {
     await server.stop();
