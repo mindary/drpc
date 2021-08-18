@@ -6,14 +6,14 @@ import {Interception} from '@remly/interception';
 import {Next} from '@libit/interceptor';
 import {CLIENT_UNSUBS, ClientDispatchHandler, ClientRequest, ClientRequestHandler} from './types';
 
-export interface ClientOptions extends ClientSocketOptions {
-  onrequest?: OnRequest<ClientSocket>;
-}
+export interface ClientOptions extends ClientSocketOptions {}
 
 export class Client extends Emittery<SocketEvents> {
   public socket: ClientSocket;
 
   public onrequest?: OnRequest<ClientSocket>;
+  public oncall?: OnRequest<ClientSocket>;
+  public onsignal?: OnRequest<ClientSocket>;
 
   protected requestInterception = new Interception<ClientRequest>();
   protected dispatchInterception = new Interception<ClientRequest>();
@@ -22,6 +22,7 @@ export class Client extends Emittery<SocketEvents> {
     super();
     this.options = options ?? {};
     this.socket = this.createSocket();
+    this.onrequest = request => (request.isCall() ? this.oncall?.(request) : this.onsignal?.(request));
   }
 
   get id() {

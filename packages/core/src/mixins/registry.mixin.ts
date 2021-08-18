@@ -5,7 +5,7 @@ import {OnRequest} from '../sockets';
 import {RequestContent} from '../request';
 
 export interface WithOnRequest {
-  onrequest: OnRequest;
+  onrequest?: OnRequest;
 }
 
 export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: T) {
@@ -14,7 +14,7 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
      * Server or Client service registry
      */
     registry: Registry;
-    onrequest: OnRequest;
+    onrequest?: OnRequest;
 
     constructor(...args: any[]) {
       super(...args);
