@@ -9,7 +9,7 @@ import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
 import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {CallRequest, Metadata, NetAddress} from '../types';
+import {RequestInfo, Metadata, NetAddress} from '../types';
 import {Alive} from '../alive';
 import {
   CallMessage,
@@ -23,7 +23,7 @@ import {
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
 import {Remote} from '../remote';
-import {CallContext} from '../contexts';
+import {Request} from '../request';
 
 const debug = debugFactory('remly:core:socket');
 
@@ -31,8 +31,8 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnCall<SOCKET extends Socket = any> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
-export type OnSignal<SOCKET extends Socket = any> = (context: CallContext<SOCKET>) => ValueOrPromise<void>;
+export type OnCall<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
+export type OnSignal<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
 
 interface SocketEvents {
   tick: undefined;
@@ -433,16 +433,16 @@ export abstract class Socket extends SocketEmittery {
     }, this.connectTimeout);
   }
 
-  protected createCallContext(request: CallRequest) {
-    return new CallContext<this>(this, request);
+  protected createRequest(message: RequestInfo) {
+    return new Request<this>(this, message);
   }
 
-  protected async doCall(context: CallContext<this>) {
-    await this.oncall?.(context);
+  protected async doCall(request: Request<this>) {
+    await this.oncall?.(request);
   }
 
-  protected async doSignal(context: CallContext<this>) {
-    await this.onsignal?.(context);
+  protected async doSignal(request: Request<this>) {
+    await this.onsignal?.(request);
   }
 
   private async handleConnectError(message: ErrorMessage) {
@@ -453,25 +453,24 @@ export abstract class Socket extends SocketEmittery {
   private async handleCall(message: CallMessage | SignalMessage) {
     // id of 0,null,undefined means signal
     const id = (message as CallMessage).id;
-    const request = {id, name: message.name, params: message.payload};
-    const context = this.createCallContext(request);
+    const request = this.createRequest({id, name: message.name, args: message.payload});
     try {
       if (id) {
         // call
-        await this.doCall(context);
-        if (!context.ended) {
-          await context.end(context.result);
+        await this.doCall(request);
+        if (!request.ended) {
+          await request.end(request.result);
         }
       } else {
         // signal
-        await this.doSignal(context);
+        await this.doSignal(request);
         await this.remote.handleSignal(request);
       }
     } catch (e) {
-      if (context.ended) {
+      if (request.ended) {
         throw e;
       }
-      await context.error(e);
+      await request.error(e);
     }
   }
 }

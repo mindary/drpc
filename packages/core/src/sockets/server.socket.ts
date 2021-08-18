@@ -5,11 +5,9 @@ import {Transport} from '../transport';
 import {nonce} from '../utils';
 import {ConnectMessage, HeartbeatMessage, OpenMessage} from '../messages';
 import {Remote} from '../remote';
-import {ConnectContext} from '../contexts';
+import {Request} from '../request';
 
-export type OnServerConnect<SOCKET extends ServerSocket = any> = (
-  context: ConnectContext<SOCKET>,
-) => ValueOrPromise<any>;
+export type OnServerConnect<SOCKET extends ServerSocket = any> = (request: Request<SOCKET>) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   onconnect?: OnServerConnect;
@@ -47,7 +45,7 @@ export class ServerSocket extends Socket {
   }
 
   protected createConnectContext() {
-    return new ConnectContext<this>(this);
+    return new Request<this>(this);
   }
 
   protected handleOpen(message: OpenMessage) {
@@ -56,17 +54,17 @@ export class ServerSocket extends Socket {
 
   protected async handleConnect(message: ConnectMessage) {
     this.metadata = message.payload ?? {};
-    const context = this.createConnectContext();
+    const request = this.createConnectContext();
 
     try {
-      await this.onconnect(context);
-      if (!context.ended) {
-        await context.end({sid: this.id});
+      await this.onconnect(request);
+      if (!request.ended) {
+        await request.end({sid: this.id});
       }
       this.handshake.sid = this.id;
       await this.doConnected();
     } catch (e) {
-      await context.error(e);
+      await request.error(e);
     }
   }
 

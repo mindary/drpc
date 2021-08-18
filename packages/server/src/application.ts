@@ -1,21 +1,12 @@
 import debugFactory from 'debug';
-import {
-  CallContext,
-  ConnectContext,
-  OnCall,
-  OnServerConnect,
-  OnSignal,
-  Registry,
-  Serializer,
-  Transport,
-} from '@remly/core';
+import {OnCall, OnServerConnect, OnSignal, Registry, Request, Serializer, Transport} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Interception} from '@remly/interception';
 import {Connection} from './connection';
 import {generateId} from './utils';
 import {MsgpackSerializer} from '../../serializer-msgpack';
 import {Server} from './server';
-import {ServerCallHandler, ServerConnectHandler} from './types';
+import {ServerRequestHandler} from './types';
 
 const debug = debugFactory('remly:server:application');
 
@@ -55,8 +46,8 @@ export class Application extends ApplicationEmittery {
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<ConnectContext<Connection>>();
-  protected incomingInterception = new Interception<CallContext<Connection>>();
+  protected connectInterception = new Interception<Request<Connection>>();
+  protected requestInterception = new Interception<Request<Connection>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -96,13 +87,13 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
-  addConnectInterceptor(interceptor: ServerConnectHandler) {
+  addConnectInterceptor(interceptor: ServerRequestHandler) {
     this.connectInterception.add(interceptor);
     return this;
   }
 
-  addIncomingInterceptor(interceptor: ServerCallHandler) {
-    this.incomingInterception.add(interceptor);
+  addRequestInterceptor(interceptor: ServerRequestHandler) {
+    this.requestInterception.add(interceptor);
     return this;
   }
 
@@ -111,27 +102,27 @@ export class Application extends ApplicationEmittery {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
-      onconnect: context => this.handleConnect(context),
-      oncall: context => this.handleCall(context),
-      onsignal: context => this.handleCall(context),
+      onconnect: request => this.handleConnect(request),
+      oncall: request => this.handleCall(request),
+      onsignal: request => this.handleCall(request),
     });
   }
 
-  protected async handleConnect(context: ConnectContext<Connection>) {
-    const {socket} = context;
+  protected async handleConnect(request: Request<Connection>) {
+    const {socket} = request;
     debug('adding connection', socket.id);
     try {
-      await this.connectInterception.invoke(context);
-      await this.doConnect(context);
+      await this.connectInterception.invoke(request);
+      await this.doConnect(request);
     } catch (e) {
-      await context.error(e);
+      await request.error(e);
     }
   }
 
-  protected async handleCall(context: CallContext<Connection>) {
+  protected async handleCall(request: Request<Connection>) {
     try {
       // Both "call" and "signal" will share same interceptors
-      await this.incomingInterception.invoke(context);
+      await this.requestInterception.invoke(request);
 
       //
       // The reason we need to handle "call" and "signal" separately is that "call" needs to ensure that the service
@@ -139,25 +130,25 @@ export class Application extends ApplicationEmittery {
       //
       // But "signal" does not perform such a check.
       //
-      if (context.id) {
-        await this.doCall(context);
+      if (request.id) {
+        await this.doCall(request);
       } else {
-        await this.doSignal(context);
+        await this.doSignal(request);
       }
     } catch (e) {
-      await context.error(e);
+      await request.error(e);
     }
   }
 
-  protected async doConnect(context: ConnectContext<Connection>) {
-    const {socket} = context;
+  protected async doConnect(request: Request<Connection>) {
+    const {socket} = request;
 
     if (!socket.isOpen()) {
       return debug('socket has been closed - cancel connect');
     }
 
     if (this.onconnect) {
-      await this.onconnect(context);
+      await this.onconnect(request);
     }
 
     this.connections.set(socket.id, socket);
@@ -167,16 +158,16 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doCall(context: CallContext<Connection>) {
+  protected async doCall(request: Request<Connection>) {
     if (this.oncall) {
-      await this.oncall(context);
+      await this.oncall(request);
     }
-    return respond(context);
+    return respond(request);
   }
 
-  protected async doSignal(context: CallContext<Connection>) {
+  protected async doSignal(request: Request<Connection>) {
     if (this.onsignal) {
-      await this.onsignal(context);
+      await this.onsignal(request);
     }
   }
 
@@ -199,9 +190,9 @@ export class Application extends ApplicationEmittery {
   }
 }
 
-export function respond(context: CallContext<Connection>) {
-  const result = context.result;
-  if (!context.ended) {
-    return context.end(result);
+export function respond(request: Request<Connection>) {
+  const result = request.result;
+  if (!request.ended) {
+    return request.end(result);
   }
 }

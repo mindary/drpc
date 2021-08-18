@@ -36,22 +36,22 @@ describe('Core - RPC', function () {
 
       describe(`call`, function () {
         it('call and return with ack', async () => {
-          serverSocket.oncall = context => context.end(context.params);
+          serverSocket.oncall = request => request.end(request.args);
           const result = await clientSocket.remote.call('echo', 'hello');
           expect(result).eql('hello');
         });
 
         it('call and throw an error', async () => {
           serverSocket.oncall = () => {
-            throw new Error('invalid params');
+            throw new Error('invalid args');
           };
-          await expect(clientSocket.remote.call('echo', 'hello')).rejectedWith('invalid params');
+          await expect(clientSocket.remote.call('echo', 'hello')).rejectedWith('invalid args');
         });
 
         it('calling timeout', async () => {
-          serverSocket.oncall = async context => {
+          serverSocket.oncall = async request => {
             await delay(serverSocket.requestTimeout * 3);
-            await context.end();
+            await request.end();
           };
           const result = clientSocket.remote.call('echo', 'hello');
           await clock.tickAsync(serverSocket.requestTimeout * 2);
@@ -75,11 +75,11 @@ describe('Core - RPC', function () {
       });
 
       describe('service', function () {
-        const Invoker: OnCall = context => {
-          if (context.name === 'monster.add') {
-            return context.end(context.params[0] + context.params[1]);
+        const Invoker: OnCall = request => {
+          if (request.name === 'monster.add') {
+            return request.end(request.args[0] + request.args[1]);
           }
-          throw new Error('Unknown method ' + context.name);
+          throw new Error('Unknown method ' + request.name);
         };
 
         it('invoke successfully', async () => {

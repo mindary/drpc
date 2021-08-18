@@ -1,8 +1,8 @@
+import {AddressInfo} from 'net';
 import {Constructor, ValueOrPromise} from '@remly/types';
 import {Emittery} from '@libit/emittery';
 import {Transport} from '@remly/core';
 import {Application} from './application';
-import {AddressInfo} from 'net';
 
 export interface ServerEvents {
   transport: Transport;

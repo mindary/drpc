@@ -19,7 +19,7 @@ describe('RegistryMixin', () => {
   it('register server and can invoke method', async () => {
     const app = new ApplicationWithRegistry();
     app.register(monster);
-    const result = await app.invokeWithRegistry({name: 'add', params: [1, 2]});
+    const result = await app.invokeWithRegistry({name: 'add', args: [1, 2]});
     expect(result).equal(3);
   });
 

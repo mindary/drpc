@@ -1,4 +1,4 @@
-import {CallContext, ClientSocket, ClientSocketOptions, OnCall, OnSignal, Remote} from '@remly/core';
+import {ClientSocket, ClientSocketOptions, OnCall, OnSignal, Remote, Request} from '@remly/core';
 import {Interception, InterceptionHandler} from '@remly/interception';
 
 import 'ts-essentials';
@@ -14,28 +14,28 @@ export class Client extends ClientSocket {
   public oncall?: OnCall<Client>;
   public onsignal?: OnSignal<Client>;
 
-  protected incomingInterception = new Interception<CallContext<Client>>();
+  protected incomingInterception = new Interception<Request<Client>>();
 
   constructor(options?: Partial<ClientOptions>) {
     super(options);
   }
 
-  addIncomingInterceptor(handler: InterceptionHandler<CallContext<Client>>) {
+  addIncomingInterceptor(handler: InterceptionHandler<Request<Client>>) {
     this.incomingInterception.add(handler);
     return this;
   }
 
-  protected async doCall(context: CallContext<Client>) {
-    await this.invokeCallInterceptors(context);
-    await this.oncall?.(context);
+  protected async doCall(request: Request<Client>) {
+    await this.invokeCallInterceptors(request);
+    await this.oncall?.(request);
   }
 
-  protected async doSignal(context: CallContext<Client>) {
-    await this.invokeCallInterceptors(context);
-    await this.onsignal?.(context);
+  protected async doSignal(request: Request<Client>) {
+    await this.invokeCallInterceptors(request);
+    await this.onsignal?.(request);
   }
 
-  protected async invokeCallInterceptors(context: CallContext<Client>) {
-    await this.incomingInterception.invoke(context);
+  protected async invokeCallInterceptors(request: Request<Client>) {
+    await this.incomingInterception.invoke(request);
   }
 }

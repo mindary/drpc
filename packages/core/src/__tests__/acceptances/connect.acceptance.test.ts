@@ -67,8 +67,8 @@ describe('Core - Connect', function () {
     it('should allow', async () => {
       const AUTH = {token: 'hello'};
       clientSocket.metadata.auth = AUTH;
-      serverSocket.onconnect = context => {
-        const {auth} = context.socket.handshake.metadata;
+      serverSocket.onconnect = request => {
+        const {auth} = request.socket.handshake.metadata;
         if (auth?.token !== AUTH.token) {
           throw new Error('Unauthorized');
         }

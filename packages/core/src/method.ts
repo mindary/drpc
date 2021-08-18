@@ -1,16 +1,15 @@
-import {ValueOrPromise} from '@remly/types';
-
 export type Handler = (...args: any[]) => any;
 
 export class Method {
-  constructor(public handler: Handler, public scope?: any) {}
+  constructor(public handler: Handler, public scope?: any) {
+  }
 
-  invoke(params: any): Promise<any> {
-    if (params == null) {
-      params = [];
-    } else if (!Array.isArray(params)) {
-      params = [params];
+  invoke(args: any): Promise<any> {
+    if (args == null) {
+      args = [];
+    } else if (!Array.isArray(args)) {
+      args = [args];
     }
-    return this.handler.call(this.scope, ...params);
+    return this.handler.call(this.scope, ...args);
   }
 }

@@ -9,7 +9,7 @@ export class Interception<C> {
     this.handlers.push(handler);
   }
 
-  invoke(context: C, finalHandler?: Next) {
-    return new GenericInterceptorChain(context, this.handlers).invokeInterceptors(finalHandler);
+  invoke(request: C, finalHandler?: Next) {
+    return new GenericInterceptorChain(request, this.handlers).invokeInterceptors(finalHandler);
   }
 }

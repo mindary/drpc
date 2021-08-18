@@ -12,7 +12,7 @@ const debug = debugFactory('remly:core:registry');
 
 export interface ServiceInvokeRequest {
   name: string;
-  params?: any;
+  args?: any;
 }
 
 export interface Registrable {
@@ -34,7 +34,7 @@ export interface Registry extends Registrable {
 
   get(name: string): Method;
 
-  call(name: string, params: any): Promise<any>;
+  call(name: string, args: any): Promise<any>;
 
   invoke(request: ServiceInvokeRequest): Promise<any>;
 }
@@ -101,13 +101,13 @@ export class DefaultRegistry implements Registry {
     return method;
   }
 
-  call(name: string, params: any): Promise<any> {
-    return this.get(name).invoke(params);
+  call(name: string, args: any): Promise<any> {
+    return this.get(name).invoke(args);
   }
 
   async invoke(request: ServiceInvokeRequest) {
-    const {name, params} = request;
-    return this.call(name, params);
+    const {name, args} = request;
+    return this.call(name, args);
   }
 }
 

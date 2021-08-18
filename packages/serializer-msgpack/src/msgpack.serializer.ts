@@ -23,15 +23,15 @@ export class MsgpackSerializer<ContextType = undefined> implements Serializer {
     this.codecs.register(codec);
   }
 
-  deserialize<T = unknown>(input: Raw, context?: ContextType): T {
+  deserialize<T = unknown>(input: Raw, request?: ContextType): T {
     if (input == null) {
       return input as any;
     }
 
-    return <T>decode(input, <any>{extensionCodec: this.codecs, context});
+    return <T>decode(input, <any>{extensionCodec: this.codecs, request});
   }
 
-  serialize<T = any>(input: T, context?: ContextType): Buffer {
-    return Buffer.from(encode(input, <any>{extensionCodec: this.codecs, context}));
+  serialize<T = any>(input: T, request?: ContextType): Buffer {
+    return Buffer.from(encode(input, <any>{extensionCodec: this.codecs, request}));
   }
 }

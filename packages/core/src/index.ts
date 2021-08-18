@@ -14,7 +14,7 @@ export * from './method';
 export * from './mixins';
 export * from './transport';
 export * from './sockets';
-export * from './contexts';
+export * from './request';
 export * from './remote-service';
 export * from './remote-emitter';
 export * from './remote';

@@ -8,7 +8,7 @@ import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
 import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
-import {CallRequest} from './types';
+import {RequestInfo} from './types';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -62,14 +62,14 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
    * Call remote method
    *
    * @param method
-   * @param params
+   * @param args
    * @param timeout
    */
-  async call(method: string, params?: any, timeout?: number) {
+  async call(method: string, args?: any, timeout?: number) {
     assert(typeof method === 'string', 'Event must be a string.');
     await this.assertOrWaitConnected();
     const req = this.requests.acquire(timeout ?? this.socket.requestTimeout);
-    await this.socket.send('call', {id: req.id, name: method, payload: params});
+    await this.socket.send('call', {id: req.id, name: method, payload: args});
     return req.promise;
   }
 
@@ -85,9 +85,9 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     await this.socket.send('signal', {name: event, payload: data});
   }
 
-  async handleSignal(request: CallRequest) {
-    const {name, params} = request;
-    await this.emitter.emit(name, params);
+  async handleSignal(request: RequestInfo) {
+    const {name, args} = request;
+    await this.emitter.emit(name, args);
   }
 
   protected bind() {

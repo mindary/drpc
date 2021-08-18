@@ -8,13 +8,13 @@ export interface Service {
 }
 
 export interface Callable {
-  call(name: string, params?: any[], timeout?: number): ValueOrPromise<any>;
+  call(name: string, args?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export interface CallRequest {
+export interface RequestInfo {
   id?: number;
   name: string;
-  params: any;
+  args?: any;
 }
 
 export interface Metadata extends Record<string, any> {

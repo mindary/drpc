@@ -37,7 +37,7 @@ export const ErrorMessages: Record<ErrorCode, string> = {
   [ErrorCode.CONNECTION_STALL]: 'Connection stall',
   [ErrorCode.INVALID_PAYLOAD]: 'Invalid payload',
   [ErrorCode.UNIMPLEMENTED]: 'Method not found',
-  [ErrorCode.INVALID_PARAMS]: 'Invalid params',
+  [ErrorCode.INVALID_PARAMS]: 'Invalid args',
   [ErrorCode.CALL_TIMEOUT]: 'Call timeout',
   [ErrorCode.INTERNAL_ERROR]: 'Internal error',
 };

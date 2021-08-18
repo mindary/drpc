@@ -14,7 +14,7 @@ export namespace RpcSuite {
 
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    app.oncall = async context => (context.result = await registry.invoke(context.request));
+    app.oncall = async request => (request.result = await registry.invoke(request));
 
     app.on('connection', setupSocket);
     return app;
@@ -23,7 +23,7 @@ export namespace RpcSuite {
   export function setupClient(client: Client) {
     const registry = new DefaultRegistry();
     registry.register(Monster.name, monster);
-    client.oncall = async context => (context.result = await registry.invoke(context.request));
+    client.oncall = async request => (request.result = await registry.invoke(request));
 
     setupSocket(client);
   }
