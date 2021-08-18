@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.7.4...@remly/testsuite@0.8.0) (2021-08-18)
+
+
+### Features
+
+* combine oncall and onsignal to onrequest ([f869043](https://gitr.net/mindary/remly/commits/f869043438070e3188c06dfdea94b093ed984685))
+* replace Context with Request and keep request simple ([0e8e71c](https://gitr.net/mindary/remly/commits/0e8e71c0d086d46c1b70a5a951224970bc4d2105))
+
+
+
+
+
 ## [0.7.4](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.7.3...@remly/testsuite@0.7.4) (2021-08-17)
 
 **Note:** Version bump only for package @remly/testsuite

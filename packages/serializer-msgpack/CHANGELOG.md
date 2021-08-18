@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://gitr.net/mindary/remly/compare/@remly/serializer-msgpack@0.7.1...@remly/serializer-msgpack@0.8.0) (2021-08-18)
+
+
+### Features
+
+* replace Context with Request and keep request simple ([0e8e71c](https://gitr.net/mindary/remly/commits/0e8e71c0d086d46c1b70a5a951224970bc4d2105))
+
+
+
+
+
 ## [0.7.1](https://gitr.net/mindary/remly/compare/@remly/serializer-msgpack@0.7.0...@remly/serializer-msgpack@0.7.1) (2021-08-16)
 
 **Note:** Version bump only for package @remly/serializer-msgpack
