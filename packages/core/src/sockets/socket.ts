@@ -31,7 +31,7 @@ const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
-export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<void>;
+export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<any>;
 
 export interface SocketEvents {
   tick: undefined;
