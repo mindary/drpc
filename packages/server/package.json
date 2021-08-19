@@ -1,7 +1,7 @@
 {
   "name": "@remly/server",
   "description": "The remly abstract server",
-  "version": "0.11.3",
+  "version": "0.12.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,7 +43,7 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/client": "^0.6.3",
+    "@remly/client": "^0.7.0",
     "@remly/testlab": "^0.10.7",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.6.1",

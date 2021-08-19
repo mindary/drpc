@@ -1,7 +1,7 @@
 {
   "name": "@remly/testsuite",
   "description": "The test suite for remly transports",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,9 +23,9 @@
     "verify": "npm pack && tar xf remly-testsuite*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.6.3",
+    "@remly/client": "^0.7.0",
     "@remly/core": "^0.13.3",
-    "@remly/server": "^0.11.3",
+    "@remly/server": "^0.12.0",
     "@remly/testlab": "^0.10.7",
     "@remly/types": "^0.4.1",
     "delay": "^5.0.0",

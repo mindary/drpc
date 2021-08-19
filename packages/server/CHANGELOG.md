@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/mindary/remly/compare/@remly/server@0.11.3...@remly/server@0.12.0) (2021-08-19)
+
+
+### Features
+
+* refactor incoming and outgoing ([54f963a](https://github.com/mindary/remly/commit/54f963ac12c3e3c2140ae3dd5e183f860271f268))
+
+
+
+
+
 ## [0.11.3](https://github.com/mindary/remly/compare/@remly/server@0.11.2...@remly/server@0.11.3) (2021-08-18)
 
 **Note:** Version bump only for package @remly/server
