@@ -49,8 +49,8 @@ export class Application extends ApplicationEmittery {
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
   protected connectInterception = new Interception<ServerRequest>();
-  protected requestInterception = new Interception<ServerRequest>();
-  protected dispatchInterception = new Interception<ServerRequest>();
+  protected incomingInterception = new Interception<ServerRequest>();
+  protected outgoingInterception = new Interception<ServerRequest>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -97,13 +97,13 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
-  addRequestInterceptor(interceptor: ServerRequestHandler) {
-    this.requestInterception.add(interceptor);
+  addIncomingInterceptor(interceptor: ServerRequestHandler) {
+    this.incomingInterception.add(interceptor);
     return this;
   }
 
-  addDispatchInterceptor(interceptor: ServerDispatchHandler) {
-    this.dispatchInterception.add(interceptor);
+  addOutgoingInterceptor(interceptor: ServerDispatchHandler) {
+    this.outgoingInterception.add(interceptor);
     return this;
   }
 
@@ -112,9 +112,9 @@ export class Application extends ApplicationEmittery {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
-      dispatch: (request, next) => this.handleDispatch(request, next),
+      dispatch: (request, next) => this.handleOutgoing(request, next),
       onconnect: request => this.handleConnect(request),
-      onrequest: request => this.handleRequest(request),
+      onrequest: request => this.handleIncoming(request),
     });
   }
 
@@ -128,16 +128,16 @@ export class Application extends ApplicationEmittery {
     }
   }
 
-  protected async handleRequest(request: ServerRequest) {
+  protected async handleIncoming(request: ServerRequest) {
     try {
-      return this.requestInterception.invoke(request, () => this.doRequest(request));
+      return this.incomingInterception.invoke(request, () => this.doRequest(request));
     } catch (e) {
       await request.error(e);
     }
   }
 
-  protected async handleDispatch(request: ServerRequest, next: Next) {
-    return this.dispatchInterception.invoke(request, next);
+  protected async handleOutgoing(request: ServerRequest, next: Next) {
+    return this.outgoingInterception.invoke(request, next);
   }
 
   protected async doConnect(request: ServerRequest) {
