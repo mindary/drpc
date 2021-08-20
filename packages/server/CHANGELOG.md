@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/mindary/remly/compare/@remly/server@0.12.0...@remly/server@0.13.0) (2021-08-20)
+
+
+### Features
+
+* refactor ([ea39beb](https://github.com/mindary/remly/commit/ea39bebef040ff8e0cfba515742776b8bfb9bc5e))
+
+
+
+
+
 # [0.12.0](https://github.com/mindary/remly/compare/@remly/server@0.11.3...@remly/server@0.12.0) (2021-08-19)
 
 

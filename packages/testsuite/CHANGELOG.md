@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.8.4...@remly/testsuite@0.9.0) (2021-08-20)
+
+
+### Features
+
+* refactor ([ea39beb](https://gitr.net/mindary/remly/commits/ea39bebef040ff8e0cfba515742776b8bfb9bc5e))
+
+
+
+
+
 ## [0.8.4](https://gitr.net/mindary/remly/compare/@remly/testsuite@0.8.3...@remly/testsuite@0.8.4) (2021-08-19)
 
 **Note:** Version bump only for package @remly/testsuite

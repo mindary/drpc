@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://gitr.net/mindary/remly/compare/@remly/client@0.7.0...@remly/client@0.8.0) (2021-08-20)
+
+
+### Features
+
+* refactor ([ea39beb](https://gitr.net/mindary/remly/commits/ea39bebef040ff8e0cfba515742776b8bfb9bc5e))
+
+
+
+
+
 # [0.7.0](https://gitr.net/mindary/remly/compare/@remly/client@0.6.3...@remly/client@0.7.0) (2021-08-19)
 
 
