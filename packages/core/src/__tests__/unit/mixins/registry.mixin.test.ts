@@ -1,6 +1,6 @@
 import {expect} from '@loopback/testlab';
+import {OnRequest} from '../../..';
 import {RegistryMixin} from '../../../mixins';
-import {OnRequest} from '../../../sockets';
 import {monster} from '../../fixtures/monster.service';
 
 describe('RegistryMixin', () => {
@@ -13,7 +13,7 @@ describe('RegistryMixin', () => {
   it('mixed class has .registry and .invoke()', function () {
     const app = new ApplicationWithRegistry();
     expect(app.registry).type('object');
-    expect(app.onrequest).type('function');
+    expect(app.onincoming).type('function');
   });
 
   it('register server and can invoke method', async () => {
@@ -24,7 +24,7 @@ describe('RegistryMixin', () => {
   });
 
   class Application {
-    onrequest: OnRequest;
+    onincoming: OnRequest;
   }
 
   class ApplicationWithRegistry extends RegistryMixin(Application) {}

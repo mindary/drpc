@@ -8,8 +8,8 @@ import {Packet} from './packet';
 import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
 import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
-import {GenericInterceptor} from '@libit/interceptor';
 import {OutgoingRequest, RequestContent} from './request';
+import {OnRequest} from './types';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -18,21 +18,19 @@ export interface RemoteEvents {
   [p: string]: any;
 }
 
-export type Dispatch = GenericInterceptor<OutgoingRequest>;
-
 export interface RemoteOptions extends Options<any> {
-  dispatch?: Dispatch;
+  onoutgoing?: OnRequest;
 }
 
 export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
-  public dispatch: Dispatch;
+  public onoutgoing: OnRequest;
 
   protected requests: RequestRegistry = new RequestRegistry();
   protected unsubs: UnsubscribeFn[] = [];
 
   constructor(public socket: SOCKET, options: RemoteOptions = {}) {
     super(options);
-    this.dispatch = options?.dispatch ?? ((request, next) => next());
+    this.onoutgoing = options?.onoutgoing ?? ((request, next) => next());
     this.bind();
   }
 
@@ -81,7 +79,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     const req = this.requests.acquire(timeout ?? this.socket.requestTimeout);
     const request = new OutgoingRequest(this.socket, {id: req.id, name: method, params: args});
 
-    return this.dispatch(request, async () => {
+    return this.onoutgoing(request, async () => {
       await this.socket.send('call', {id: req.id, name: request.name, payload: request.params});
       request.end().catch(err => this.socket.emit('error', err));
       return req.promise;
@@ -98,7 +96,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     assert(typeof event === 'string', 'Event must be a string.');
     const request = new OutgoingRequest(this.socket, {name: event, params: data});
     await this.assertOrWaitConnected();
-    await this.dispatch(request, async () => {
+    await this.onoutgoing(request, async () => {
       await this.socket.send('signal', {name: request.name, payload: request.params});
       request.end().catch(err => this.socket.emit('error', err));
     });
@@ -158,7 +156,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
       return;
     }
 
-    this.requests.reject(id, new RemoteError(code, msg, payload));
+    this.requests.reject(id, new RemoteError(code, msg).payload(payload));
   }
 
   protected async assertOrWaitConnected() {

@@ -7,9 +7,16 @@ import {toError} from '@libit/error/utils';
 import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
 import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {ConnectionStallError, ConnectTimeoutError, InvalidPayloadError, makeRemoteError, RemoteError} from '../errors';
+import {
+  ConnectionStallError,
+  ConnectTimeoutError,
+  InvalidPayloadError,
+  makeRemoteError,
+  RemoteError,
+  UnimplementedError,
+} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {Metadata, NetAddress} from '../types';
+import {Metadata, NetAddress, OnRequest} from '../types';
 import {Alive} from '../alive';
 import {
   CallMessage,
@@ -22,16 +29,14 @@ import {
 } from '../messages';
 import {Packet} from '../packet';
 import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
-import {Dispatch, Remote} from '../remote';
-import {IncomingRequest, Request, RequestContent} from '../request';
+import {Remote} from '../remote';
+import {IncomingRequest, RequestContent} from '../request';
 
 const debug = debugFactory('remly:core:socket');
 
 const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
-
-export type OnRequest<SOCKET extends Socket = any> = (request: Request<SOCKET>) => ValueOrPromise<any>;
 
 export interface SocketEvents {
   tick: undefined;
@@ -56,8 +61,8 @@ export interface SocketOptions {
   connectTimeout?: number;
   requestTimeout?: number;
   transport?: Transport;
-  onrequest?: OnRequest;
-  dispatch?: Dispatch;
+  onincoming?: OnRequest;
+  onoutgoing?: OnRequest;
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
@@ -79,7 +84,7 @@ export abstract class Socket extends SocketEmittery {
   public transport: Transport;
   public state: SocketState;
   public serializer: Serializer;
-  public onrequest?: OnRequest;
+  public onincoming?: OnRequest;
   public readonly remote: Remote;
   public readonly handshake: Handshake;
 
@@ -105,9 +110,9 @@ export abstract class Socket extends SocketEmittery {
     this.requestTimeout = this.options.requestTimeout!;
 
     this.serializer = options.serializer ?? new MsgpackSerializer();
-    this.onrequest = options.onrequest;
+    this.onincoming = options.onincoming;
 
-    this.remote = new Remote(this, {dispatch: options.dispatch});
+    this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
 
     this.handshake = {sid: '', metadata: {}};
 
@@ -434,9 +439,9 @@ export abstract class Socket extends SocketEmittery {
     return new IncomingRequest<this>(this, content);
   }
 
-  protected async doRequest(request: IncomingRequest<this>) {
-    return this.onrequest?.(request);
-  }
+  // protected async doRequest(request: IncomingRequest<this>) {
+  //   return this.onincoming?.(request);
+  // }
 
   private async handleConnectError(message: ErrorMessage) {
     await this.emit('connect_error', toError(message));
@@ -448,7 +453,13 @@ export abstract class Socket extends SocketEmittery {
     const id = (message as CallMessage).id;
     const request = this.createRequest({id, name: message.name, params: message.payload});
     try {
-      const result = await this.doRequest(request);
+      const result = await this.onincoming?.(request, () => {
+        if (request.isCall()) {
+          throw new UnimplementedError();
+        }
+        // signal will ignore returns
+        return true;
+      });
       if (id) {
         // call
         if (!request.ended) {

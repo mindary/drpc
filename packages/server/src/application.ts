@@ -39,7 +39,7 @@ export class Application extends ApplicationEmittery {
   public readonly connections: Map<string, Connection> = new Map();
 
   public onconnect?: OnServerConnect;
-  public onrequest?: OnRequest;
+  public onincoming?: OnRequest;
   public oncall?: OnRequest;
   public onsignal?: OnRequest;
 
@@ -59,7 +59,8 @@ export class Application extends ApplicationEmittery {
     this.serializer = this.options.serializer ?? new MsgpackSerializer();
     this.onTransport = transport => this.handle(transport);
 
-    this.onrequest = request => (request.isCall() ? this.oncall?.(request) : this.onsignal?.(request));
+    this.onincoming = (request, next) =>
+      request.isCall() ? this.oncall?.(request, next) : this.onsignal?.(request, next);
   }
 
   private _connectTimeout: number;
@@ -112,9 +113,9 @@ export class Application extends ApplicationEmittery {
       serializer: this.serializer,
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
-      dispatch: (request, next) => this.handleOutgoing(request, next),
       onconnect: request => this.handleConnect(request),
-      onrequest: request => this.handleIncoming(request),
+      onincoming: (request, next) => this.handleIncoming(request, next),
+      onoutgoing: (request, next) => this.handleOutgoing(request, next),
     });
   }
 
@@ -128,9 +129,9 @@ export class Application extends ApplicationEmittery {
     }
   }
 
-  protected async handleIncoming(request: ServerRequest) {
+  protected async handleIncoming(request: ServerRequest, next: Next) {
     try {
-      return this.incomingInterception.invoke(request, () => this.doRequest(request));
+      return this.incomingInterception.invoke(request, () => this.doRequest(request, next));
     } catch (e) {
       await request.error(e);
     }
@@ -158,10 +159,11 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doRequest(request: ServerRequest) {
-    if (this.onrequest) {
-      return this.onrequest(request);
+  protected async doRequest(request: ServerRequest, next: Next) {
+    if (this.onincoming) {
+      return this.onincoming(request, next);
     }
+    return next();
   }
 
   protected async _connected(connection: Connection) {

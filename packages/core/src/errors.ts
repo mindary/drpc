@@ -1,5 +1,5 @@
 import {Exception} from '@libit/error/exception';
-import {ErrorLike, isErrorLike} from '@libit/error/types';
+import {ErrorLike} from '@libit/error/types';
 
 export enum ErrorCode {
   /**
@@ -44,67 +44,99 @@ export const ErrorMessages: Record<ErrorCode, string> = {
 
 export class RemoteError extends Exception {
   code: number;
-  payload?: any;
+  #payload?: any;
 
-  constructor(cause: ErrorLike, payload?: any);
-  constructor(code?: number, message?: string, payload?: any);
-  constructor(code?: any, message?: any, payload?: any) {
+  constructor(cause: ErrorLike);
+  constructor(code: number, cause?: ErrorLike);
+  constructor(code: number | ErrorLike, cause?: ErrorLike) {
     super();
-    if (isErrorLike(code)) {
-      payload = message;
-      if (typeof code === 'string') {
-        message = code;
-        code = undefined;
-      } else {
-        message = code.message;
-        code = (code as any).code;
-      }
-      code = code ?? ErrorCode.INTERNAL_ERROR;
+    let message: string | undefined;
+    if (typeof code !== 'number') {
+      cause = code;
+      code = ErrorCode.UNKNOWN;
     }
+
+    code = code ?? (cause as any)?.code;
+    if (typeof code !== 'number') {
+      code = ErrorCode.INTERNAL_ERROR;
+    }
+
+    if (typeof cause === 'string') {
+      message = cause;
+    } else if (cause) {
+      message = cause.message;
+    }
+
+    message = message ?? ErrorMessages[<ErrorCode>code] ?? ErrorMessages[ErrorCode.UNKNOWN];
+
     this.code = code;
-    this.message = message ?? ErrorMessages[<ErrorCode>this.code] ?? ErrorMessages[ErrorCode.UNKNOWN];
-    this.payload = payload;
+    this.message = message;
+  }
+
+  getPayload() {
+    return this.#payload;
+  }
+
+  payload(payload: any) {
+    this.#payload = payload;
+    return this;
   }
 
   toJSON() {
     return {
       code: this.code,
       message: this.message,
-      payload: this.payload,
+      payload: this.#payload,
     };
   }
 }
 
 export class ConnectTimeoutError extends RemoteError {
-  code = ErrorCode.CONNECT_TIMEOUT;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.CONNECT_TIMEOUT, cause);
+  }
 }
 
 export class ConnectionStallError extends RemoteError {
-  code = ErrorCode.CONNECTION_STALL;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.CONNECTION_STALL, cause);
+  }
 }
 
 export class InvalidPayloadError extends RemoteError {
-  code = ErrorCode.INVALID_PAYLOAD;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.INVALID_PAYLOAD, cause);
+  }
 }
 
 export class UnimplementedError extends RemoteError {
-  code = ErrorCode.UNIMPLEMENTED;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.UNIMPLEMENTED, cause);
+  }
 }
 
 export class InvalidParamsError extends RemoteError {
-  code = ErrorCode.INVALID_PARAMS;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.INVALID_PARAMS, cause);
+  }
 }
 
 export class CallTimeoutError extends RemoteError {
-  code = ErrorCode.CALL_TIMEOUT;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.CALL_TIMEOUT, cause);
+  }
 }
 
 export class InternalError extends RemoteError {
-  code: ErrorCode.INTERNAL_ERROR;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.INTERNAL_ERROR, cause);
+  }
 }
 
 export class UnknownError extends RemoteError {
-  code: ErrorCode.UNKNOWN;
+  constructor(cause?: ErrorLike) {
+    super(ErrorCode.UNKNOWN, cause);
+  }
 }
 
 export function makeRemoteError(source: any): RemoteError {

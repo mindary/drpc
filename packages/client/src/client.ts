@@ -11,7 +11,7 @@ export interface ClientOptions extends ClientSocketOptions {}
 export class Client extends Emittery<SocketEvents> {
   public socket: ClientSocket;
 
-  public onrequest?: OnRequest<ClientSocket>;
+  public onincoming?: OnRequest<ClientSocket>;
   public oncall?: OnRequest<ClientSocket>;
   public onsignal?: OnRequest<ClientSocket>;
 
@@ -22,7 +22,8 @@ export class Client extends Emittery<SocketEvents> {
     super();
     this.options = options ?? {};
     this.socket = this.createSocket();
-    this.onrequest = request => (request.isCall() ? this.oncall?.(request) : this.onsignal?.(request));
+    this.onincoming = (request, next) =>
+      request.isCall() ? this.oncall?.(request, next) : this.onsignal?.(request, next);
   }
 
   get id() {
@@ -54,8 +55,8 @@ export class Client extends Emittery<SocketEvents> {
   protected createSocket() {
     const socket = new ClientSocket({
       ...this.options,
-      onrequest: request => this.handleIncoming(request),
-      dispatch: (request, next) => this.handleOutgoing(request, next),
+      onincoming: (request, next) => this.handleIncoming(request, next),
+      onoutgoing: (request, next) => this.handleOutgoing(request, next),
     });
     this.bind(socket);
     return socket;
@@ -72,8 +73,8 @@ export class Client extends Emittery<SocketEvents> {
     }
   }
 
-  protected async handleIncoming(request: ClientRequest) {
-    return this.incomingInterception.invoke(request, async () => this.onrequest?.(request));
+  protected async handleIncoming(request: ClientRequest, next: Next) {
+    return this.incomingInterception.invoke(request, async () => this.onincoming?.(request, next));
   }
 
   protected async handleOutgoing(request: ClientRequest, next: Next) {

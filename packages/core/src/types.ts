@@ -1,5 +1,7 @@
 import {ValueOrPromise} from '@remly/types';
-import * as Buffer from 'buffer';
+import {GenericInterceptor} from '@libit/interceptor';
+import {Request} from './request';
+import {Socket} from './sockets';
 
 export type SignalName = string | symbol;
 
@@ -27,3 +29,5 @@ export interface NetAddress {
   readonly remoteAddress?: string;
   readonly remotePort?: number;
 }
+
+export type OnRequest<SOCKET extends Socket = any> = GenericInterceptor<Request<SOCKET>>;

@@ -1,11 +1,11 @@
 import {assert} from 'ts-essentials';
+import {OnRequest} from '..';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, Registrable, Registry} from '../registry';
-import {OnRequest} from '../sockets';
 import {RequestContent} from '../request';
 
 export interface WithOnRequest {
-  onrequest?: OnRequest;
+  onincoming?: OnRequest;
 }
 
 export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: T) {
@@ -14,16 +14,17 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
      * Server or Client service registry
      */
     registry: Registry;
-    onrequest?: OnRequest;
+    onincoming?: OnRequest;
 
     constructor(...args: any[]) {
       super(...args);
 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
-      this.onrequest = async request => {
+      this.onincoming = async (request, next) => {
         if (request.isCall()) {
           return this.invokeWithRegistry(request);
         }
+        return next();
       };
     }
 
