@@ -1,0 +1,50 @@
+{
+  "name": "@remly/client-ws",
+  "description": "The WebSocket client connector",
+  "version": "0.1.0",
+  "keywords": [],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=14"
+  },
+  "author": "Yuan Tao",
+  "license": "MIT",
+  "scripts": {
+    "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "lb-tsc",
+    "clean": "lb-clean remly-client-ws*.tgz dist *.tsbuildinfo package",
+    "pretest": "npm run clean && npm run build",
+    "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
+    "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
+    "verify": "npm pack && tar xf remly-client-ws*.tgz && tree package && npm run clean"
+  },
+  "dependencies": {
+    "@remly/client": "^0.8.0",
+    "@remly/transport-ws": "^0.1.0",
+    "debug": "^4.3.2",
+    "tily": "^2.8.3",
+    "ts-essentials": "^8.1.0",
+    "ws": "^8.2.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.0",
+    "@loopback/eslint-config": "^11.0.0",
+    "@loopback/testlab": "^3.4.2",
+    "@remly/server": "^0.13.0",
+    "@remly/testsuite": "^0.9.0",
+    "@types/debug": "^4.1.7",
+    "@types/node": "^16.7.10",
+    "@types/ws": "^7.4.7",
+    "a-callback": "^0.1.1"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ],
+  "browser": {
+    "./dist/ws.js": "./dist/ws-browser.js"
+  }
+}

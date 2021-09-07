@@ -1,7 +1,8 @@
 import {ValueOrPromise} from '@remly/types';
 import {GenericInterceptor} from '@libit/interceptor';
-import {Request} from './request';
 import {Socket} from './sockets';
+import {Carrier} from './carrier';
+import {Request} from './request';
 
 export type SignalName = string | symbol;
 
@@ -13,15 +14,6 @@ export interface Callable {
   call(name: string, args?: any[], timeout?: number): ValueOrPromise<any>;
 }
 
-export interface Metadata extends Record<string, any> {
-  auth?: {
-    sid?: string; // ecdsa public key as sid
-    tok?: string | Buffer; // token
-    sig?: Buffer; // signature
-    [key: string]: any;
-  };
-}
-
 export interface NetAddress {
   readonly localAddress: string;
   readonly localPort: number;
@@ -30,4 +22,5 @@ export interface NetAddress {
   readonly remotePort?: number;
 }
 
-export type OnRequest<SOCKET extends Socket = any> = GenericInterceptor<Request<SOCKET>>;
+export type OnIncoming<SOCKET extends Socket = any> = GenericInterceptor<Carrier<SOCKET>>;
+export type OnOutgoing<SOCKET extends Socket = any> = GenericInterceptor<Request<SOCKET>>;

@@ -1,5 +1,3 @@
-import {Raw} from '@remly/serializer';
-
 export const MAX_SAFE_INTEGER = 9007199254740991;
 
 /**
@@ -25,7 +23,7 @@ export function isArrayLike(value: any): value is ArrayLike<any> {
   return value != null && typeof value !== 'function' && isLength(value.length);
 }
 
-export function rawLength(raw?: Raw) {
+export function rawLength(raw?: ArrayLike<number> | ArrayBuffer) {
   if (raw == null) {
     return 0;
   }
@@ -95,4 +93,8 @@ export async function readBinary(data: Buffer | ArrayBuffer | Blob | string): Pr
   }
 
   throw new Error('Bad data object');
+}
+
+export function nextTick(fn: (...args: any[]) => void) {
+  return process?.nextTick ? process.nextTick(fn) : setImmediate(fn);
 }

@@ -11,10 +11,7 @@
   ],
   "references": [
     {
-      "path": "../serializer-msgpack/tsconfig.json"
-    },
-    {
-      "path": "../serializer/tsconfig.json"
+      "path": "../packet/tsconfig.json"
     },
     {
       "path": "../types/tsconfig.json"

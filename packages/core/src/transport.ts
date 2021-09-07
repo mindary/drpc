@@ -3,9 +3,8 @@ import {ValueOrPromise} from '@remly/types';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {ErrorLike} from '@libit/error/types';
 import {ChainedError} from '@libit/error/chained';
-import {Decoder, StandardDecoder} from './decoders';
-import {Packet} from './packet';
 import {NetAddress} from './types';
+import {Packet, Parser} from '@remly/packet';
 
 const debug = debugFactory('remly:core:transport');
 
@@ -25,20 +24,20 @@ export interface TransportEvents {
 }
 
 export interface TransportOptions {
-  decoder?: Decoder;
+  parser?: Parser;
 }
 
 export abstract class Transport extends Emittery<TransportEvents> {
   public sid: string;
   public state?: TransportState;
-  public decoder: Decoder;
+  public parser: Parser;
   public socket?: any;
   private unsubs: UnsubscribeFn[] = [];
 
   protected constructor(options?: TransportOptions) {
     super();
     options = options ?? {};
-    this.decoder = options.decoder ?? new StandardDecoder();
+    this.parser = options.parser ?? new Parser();
     this.setup();
   }
 
@@ -80,15 +79,14 @@ export abstract class Transport extends Emittery<TransportEvents> {
 
   protected setup() {
     this.unsubs.push(
-      this.decoder.on('packet', this.onPacket.bind(this)),
-      this.decoder.on('error', this.onError.bind(this)),
+      this.parser.on('packet', this.onPacket.bind(this)),
+      this.parser.on('error', this.onError.bind(this)),
     );
   }
 
   protected open() {
     this.state = 'open';
-    // eslint-disable-next-line no-void
-    void this.emit('open');
+    this.emit('open').catch(() => {});
   }
 
   protected async onPacket(packet: Packet) {
@@ -107,7 +105,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
 
   protected onData(data: Buffer): ValueOrPromise<void> {
     if (this.isOpen()) {
-      return this.decoder.feed(data);
+      return this.parser.feed(data);
     }
   }
 

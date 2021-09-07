@@ -1,29 +1,39 @@
 import 'ts-essentials';
 import '@libit/interceptor';
 
-import {ClientSocket, ClientSocketOptions, Emittery, OnRequest, Remote, SocketEvents} from '@remly/core';
-import {Interception} from '@remly/interception';
 import {Next} from '@libit/interceptor';
-import {CLIENT_UNSUBS, ClientOutgoingHandler, ClientRequest, ClientRequestHandler} from './types';
-
-export interface ClientOptions extends ClientSocketOptions {}
+import {Interception} from '@remly/interception';
+import {Carrier, ClientSocket, Emittery, Metadata, OnIncoming, Remote, SocketEvents, Transport} from '@remly/core';
+import {ClientOptions, ClientOutgoingHandler, ClientRequest, ClientIncomingHandler, WrappedConnect} from './types';
 
 export class Client extends Emittery<SocketEvents> {
   public socket: ClientSocket;
+  public onincoming?: OnIncoming<ClientSocket>;
+  public oncall?: OnIncoming<ClientSocket>;
+  public onsignal?: OnIncoming<ClientSocket>;
+  public metadata: Metadata;
+  public _reconnectCount: number;
 
-  public onincoming?: OnRequest<ClientSocket>;
-  public oncall?: OnRequest<ClientSocket>;
-  public onsignal?: OnRequest<ClientSocket>;
-
-  protected incomingInterception = new Interception<ClientRequest>();
+  protected incomingInterception = new Interception<Carrier>();
   protected outgoingInterception = new Interception<ClientRequest>();
 
-  constructor(public options?: ClientOptions) {
+  readonly #connect: WrappedConnect;
+  readonly #options: ClientOptions;
+
+  static async connect(connect: WrappedConnect, options: ClientOptions) {
+    return new this(connect, options).connect();
+  }
+
+  protected constructor(connect: WrappedConnect, options: ClientOptions) {
     super();
-    this.options = options ?? {};
-    this.socket = this.createSocket();
-    this.onincoming = (request, next) =>
-      request.isCall() ? this.oncall?.(request, next) : this.onsignal?.(request, next);
+    this.#connect = connect;
+    this.#options = options;
+    this.onincoming = (carrier, next) =>
+      carrier.isCall() ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
+
+    this.metadata = options.metadata ? Metadata.from(options.metadata) : new Metadata();
+
+    this._reconnectCount = 0;
   }
 
   get id() {
@@ -38,7 +48,7 @@ export class Client extends Emittery<SocketEvents> {
     return this.socket.ready();
   }
 
-  addIncomingInterceptor(handler: ClientRequestHandler) {
+  addIncomingInterceptor(handler: ClientIncomingHandler) {
     this.incomingInterception.add(handler);
     return this;
   }
@@ -52,29 +62,31 @@ export class Client extends Emittery<SocketEvents> {
     return this.socket.close();
   }
 
-  protected createSocket() {
+  protected async connect() {
+    this.socket = this.createSocket(this.#connect(this));
+    return this;
+  }
+
+  protected createSocket(transport?: Transport) {
     const socket = new ClientSocket({
-      ...this.options,
-      onincoming: (request, next) => this.handleIncoming(request, next),
+      ...this.#options,
+      metadata: this.#options.metadata ? Metadata.from(this.#options.metadata) : undefined,
+      onincoming: (carrier, next) => this.handleIncoming(carrier, next),
       onoutgoing: (request, next) => this.handleOutgoing(request, next),
     });
-    this.bind(socket);
+
+    const unsub = socket.onAny((event, data) => this.emit(event, data));
+    socket
+      .once('close')
+      .then(unsub)
+      .catch(() => {});
+
+    if (transport) socket.setTransport(transport);
     return socket;
   }
 
-  protected bind(socket: ClientSocket) {
-    (socket as any)[CLIENT_UNSUBS] = [socket.onAny((event, data) => this.emit(event, data))];
-  }
-
-  protected unbind(socket: ClientSocket) {
-    const unsubs = (socket as any)[CLIENT_UNSUBS];
-    while (unsubs?.length) {
-      unsubs.shift()();
-    }
-  }
-
-  protected async handleIncoming(request: ClientRequest, next: Next) {
-    return this.incomingInterception.invoke(request, async () => this.onincoming?.(request, next));
+  protected async handleIncoming(carrier: Carrier, next: Next) {
+    return this.incomingInterception.invoke(carrier, async () => this.onincoming?.(carrier, next));
   }
 
   protected async handleOutgoing(request: ClientRequest, next: Next) {

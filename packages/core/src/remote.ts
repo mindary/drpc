@@ -1,15 +1,13 @@
 import {assert} from 'ts-essentials';
 import {Options, UnsubscribeFn} from '@libit/emittery';
-import {RequestRegistry} from './reqreg';
+import {AckMessageType, ErrorMessageType, Packet} from '@remly/packet';
+import {Store} from './store';
 import {Socket} from './sockets';
-import {AckMessage, ErrorMessage} from './messages';
 import {RemoteError} from './errors';
-import {Packet} from './packet';
-import {PacketType} from './packet-types';
 import {RemoteEmitter} from './remote-emitter';
 import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
-import {OutgoingRequest, RequestContent} from './request';
-import {OnRequest} from './types';
+import {OnOutgoing} from './types';
+import {Request, RequestMessage} from './request';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -19,13 +17,13 @@ export interface RemoteEvents {
 }
 
 export interface RemoteOptions extends Options<any> {
-  onoutgoing?: OnRequest;
+  onoutgoing?: OnOutgoing;
 }
 
 export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
-  public onoutgoing: OnRequest;
+  public onoutgoing: OnOutgoing;
 
-  protected requests: RequestRegistry = new RequestRegistry();
+  protected store: Store = new Store();
   protected unsubs: UnsubscribeFn[] = [];
 
   constructor(public socket: SOCKET, options: RemoteOptions = {}) {
@@ -76,13 +74,15 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
   async call(method: string, args?: any, timeout?: number) {
     assert(typeof method === 'string', 'Event must be a string.');
     await this.assertOrWaitConnected();
-    const req = this.requests.acquire(timeout ?? this.socket.requestTimeout);
-    const request = new OutgoingRequest(this.socket, {id: req.id, name: method, params: args});
+    const r = this.store.acquire(timeout ?? this.socket.requestTimeout);
+    const request = new Request(this.socket, 'call', {
+      metadata: this.socket.metadata,
+      message: {id: r.id, name: method, params: args},
+    });
 
     return this.onoutgoing(request, async () => {
-      await this.socket.send('call', {id: req.id, name: request.name, payload: request.params});
-      request.end().catch(err => this.socket.emit('error', err));
-      return req.promise;
+      await this.socket.send('call', {id: r.id, name: request.name, payload: request.params}, request.metadata);
+      return r.promise;
     });
   }
 
@@ -94,16 +94,19 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
    */
   async signal(event: string, data?: any) {
     assert(typeof event === 'string', 'Event must be a string.');
-    const request = new OutgoingRequest(this.socket, {name: event, params: data});
+    const request = new Request(this.socket, 'signal', {
+      metadata: this.socket.metadata,
+      message: {name: event, params: data},
+    });
+
     await this.assertOrWaitConnected();
     await this.onoutgoing(request, async () => {
-      await this.socket.send('signal', {name: request.name, payload: request.params});
-      request.end().catch(err => this.socket.emit('error', err));
+      await this.socket.send('signal', {name: request.name, payload: request.params}, request.metadata);
     });
   }
 
-  async emit(content: RequestContent) {
-    const {name, params} = content;
+  async emit(message: RequestMessage) {
+    const {name, params} = message;
     await this.emitter.emit(name, params);
   }
 
@@ -114,7 +117,7 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
           await this.emitter.emit('disconnect');
           this.dispose();
         }),
-        this.socket.on('tick', () => this.requests.tick()),
+        this.socket.on('tick', () => this.store.check()),
         this.socket.on('response', packet => this.handleReply(packet)),
       );
     }
@@ -128,35 +131,35 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
 
   protected async handleReply(packet: Packet) {
     switch (packet.type) {
-      case PacketType.ack:
-        await this.handleAck(packet.message);
+      case 'ack':
+        await this.handleAck((packet as Packet<'ack'>).message);
         break;
-      case PacketType.error:
-        await this.handleError(packet.message);
+      case 'error':
+        await this.handleError((packet as Packet<'error'>).message);
         break;
     }
   }
 
-  protected async handleAck(message: AckMessage) {
+  protected async handleAck(message: AckMessageType) {
     const {id, payload} = message;
 
-    if (!this.requests.has(id)) {
+    if (!this.store.has(id)) {
       await this.signal('noreq', {type: 'ack', id});
       return;
     }
 
-    this.requests.resolve(id, payload);
+    this.store.resolve(id, payload);
   }
 
-  protected async handleError(message: ErrorMessage) {
-    const {id, code, message: msg, payload} = message;
+  protected async handleError(message: ErrorMessageType) {
+    const {id, code, message: msg} = message;
 
-    if (!this.requests.has(id)) {
+    if (!this.store.has(id)) {
       await this.signal('noreq', {type: 'error', id});
       return;
     }
 
-    this.requests.reject(id, new RemoteError(code, msg).payload(payload));
+    this.store.reject(id, new RemoteError(code, msg));
   }
 
   protected async assertOrWaitConnected() {

@@ -1,8 +1,9 @@
-import {Request} from '@remly/core';
+import {Carrier, Request} from '@remly/core';
 import {GenericInterceptor} from '@libit/interceptor';
 import {Connection} from './connection';
 
 export type ServerRequest = Request<Connection>;
+export type ServerCarrier = Carrier<Connection>;
 
-export type ServerRequestHandler = GenericInterceptor<ServerRequest>;
-export type ServerDispatchHandler = GenericInterceptor<ServerRequest>;
+export type ServerIncomingHandler = GenericInterceptor<ServerCarrier>;
+export type ServerOutgoingHandler = GenericInterceptor<ServerRequest>;

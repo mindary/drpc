@@ -1,5 +1,0 @@
-{
-  "name": "remly-channel-throwing",
-  "version": "1.0.0",
-  "description": "A dummy channel that throws at initiation time."
-}

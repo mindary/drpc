@@ -37,7 +37,7 @@
     "prettier:cli": "lb-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
     "prettier:check": "npm run prettier:cli -- --check",
     "prettier:fix": "npm run prettier:cli -- --write",
-    "clean": "lerna run clean && lb-clean \\\"packages/*/dist\\\" \\\"extensions/*/dist\\\" \\\"channels/*/dist\\\" \\\"examples/*/dist\\\"",
+    "clean": "lerna run clean && lb-clean \"packages/*/dist\" \"extensions/*/dist\" \"channels/*/dist\" \"examples/*/dist\"",
     "clean:lerna": "lerna clean",
     "prebuild": "npm run prettier:fix",
     "build": "lb-tsc -b",
@@ -45,8 +45,8 @@
     "pretest": "npm run clean && npm run build",
     "test": "lb-nyc npm run mocha",
     "test:ci": "lb-nyc npm run mocha:ci",
-    "mocha": "lb-mocha --lang en_US.UTF-8 \\\"packages/*/dist/__tests__/**/*.test.js\\\" \\\"channels/*/dist/__tests__/**/*.test.js\\\" \\\"examples/*/dist/__tests__/**/*.test.js\\\"",
-    "mocha:ci": "lb-mocha --lang en_US.UTF-8 \\\"packages/*/dist/__tests__/**/*.test.js\\\" \\\"channels/*/dist/__tests__/**/*.test.js\\\"",
+    "mocha": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"channels/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
+    "mocha:ci": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"channels/*/dist/__tests__/**/*.test.js\"",
     "posttest": "npm run lint"
   },
   "devDependencies": {
@@ -57,8 +57,8 @@
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@types/mocha": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.29.1",
-    "@typescript-eslint/parser": "^4.29.1",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
     "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
@@ -66,16 +66,16 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-eslint-plugin": "^3.5.3",
     "eslint-plugin-mocha": "^9.0.0",
-    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "fs-extra": "^10.0.0",
-    "husky": "^7.0.1",
+    "husky": "^7.0.2",
     "if-env": "^1.0.4",
     "lerna": "^4.0.0",
     "lint-staged": "^11.1.2",
     "markdown-table": "^3.0.1",
-    "open-cli": "^7.0.0",
+    "open-cli": "^7.0.1",
     "prettier": "^2.3.2",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.2"
   },
   "husky": {
     "hooks": {

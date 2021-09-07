@@ -1,7 +1,6 @@
 import {givenMemoryTransportPair, Monster, monster} from '@remly/testlab';
 import {expect} from '@loopback/testlab';
-import {RegistryMixin, Transport} from '@remly/core';
-import {Client} from '@remly/client';
+import {ClientSocket, RegistryMixin, Transport} from '@remly/core';
 import {Application} from '../../application';
 
 describe('Application', function () {
@@ -34,10 +33,10 @@ describe('Application', function () {
 
   class ApplicationWithRegistry extends RegistryMixin(Application) {}
 
-  function givenSocketPair(): [Client, Transport] {
+  function givenSocketPair(): [ClientSocket, Transport] {
     const [t1, t2] = givenMemoryTransportPair();
-    const client = new Client();
-    client.socket.setTransport(t1);
+    const client = new ClientSocket();
+    client.setTransport(t1);
     return [client, t2];
   }
 });

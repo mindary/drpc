@@ -1,5 +1,5 @@
 import {expect} from '@loopback/testlab';
-import {OnRequest} from '../../..';
+import {OnIncoming} from '../../..';
 import {RegistryMixin} from '../../../mixins';
 import {monster} from '../../fixtures/monster.service';
 
@@ -24,7 +24,7 @@ describe('RegistryMixin', () => {
   });
 
   class Application {
-    onincoming: OnRequest;
+    onincoming: OnIncoming;
   }
 
   class ApplicationWithRegistry extends RegistryMixin(Application) {}

@@ -7,8 +7,9 @@ coverage
 .nyc_output
 **/*.tgz
 packages/*/dist
-extensions/*/dist
+transports/*/dist
 channels/*/dist
+clients/*/dist
 examples/*/dist
 **/package
 .sandbox

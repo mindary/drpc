@@ -4,37 +4,18 @@ import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
-import {Serializer} from '@remly/serializer';
 import {ValueOrPromise} from '@remly/types';
-import {MsgpackSerializer} from '@remly/serializer-msgpack';
-import {
-  ConnectionStallError,
-  ConnectTimeoutError,
-  InvalidPayloadError,
-  makeRemoteError,
-  RemoteError,
-  UnimplementedError,
-} from '../errors';
+import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@remly/packet';
+import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {Metadata, NetAddress, OnRequest} from '../types';
+import {NetAddress, OnIncoming, OnOutgoing} from '../types';
 import {Alive} from '../alive';
-import {
-  CallMessage,
-  ConnectMessage,
-  ErrorMessage,
-  HeartbeatMessage,
-  OpenMessage,
-  PacketMessages,
-  SignalMessage,
-} from '../messages';
-import {Packet} from '../packet';
-import {PacketType, PacketTypeKeyType, PacketTypeMap} from '../packet-types';
 import {Remote} from '../remote';
-import {IncomingRequest, RequestContent} from '../request';
+import {Request} from '../request';
+import {Response} from '../response';
+import {Carrier} from '../carrier';
 
 const debug = debugFactory('remly:core:socket');
-
-const DUMMY = Buffer.allocUnsafe(0);
 
 export type SocketState = TransportState | 'connected';
 
@@ -55,27 +36,21 @@ export interface SocketEvents {
 
 export interface SocketOptions {
   id?: string;
-  serializer?: Serializer;
   interval?: number;
   keepalive?: number;
   connectTimeout?: number;
   requestTimeout?: number;
   transport?: Transport;
-  onincoming?: OnRequest;
-  onoutgoing?: OnRequest;
+  onincoming?: OnIncoming;
+  onoutgoing?: OnOutgoing;
 }
 
 const DEFAULT_OPTIONS: SocketOptions = {
-  interval: 5 * 1000,
-  keepalive: 10 * 1000,
-  connectTimeout: 20 * 1000,
-  requestTimeout: 10 * 1000,
+  interval: 5,
+  keepalive: 10,
+  connectTimeout: 20,
+  requestTimeout: 10,
 };
-
-export interface Handshake {
-  sid: string;
-  metadata: Metadata;
-}
 
 export class SocketEmittery extends Emittery<SocketEvents> {}
 
@@ -83,16 +58,15 @@ export abstract class Socket extends SocketEmittery {
   public id?: string;
   public transport: Transport;
   public state: SocketState;
-  public serializer: Serializer;
-  public onincoming?: OnRequest;
-  public readonly remote: Remote;
-  public readonly handshake: Handshake;
-
-  public readonly options: SocketOptions;
+  public onincoming?: OnIncoming;
   public interval: number;
   public keepalive: number;
   public connectTimeout: number;
   public requestTimeout: number;
+  public metadata: Metadata;
+
+  public readonly options: SocketOptions;
+  public readonly remote: Remote;
 
   protected unsubs: UnsubscribeFn[] = [];
   protected timer: IntervalTimer | null;
@@ -109,24 +83,13 @@ export abstract class Socket extends SocketEmittery {
     this.connectTimeout = this.options.connectTimeout!;
     this.requestTimeout = this.options.requestTimeout!;
 
-    this.serializer = options.serializer ?? new MsgpackSerializer();
     this.onincoming = options.onincoming;
 
     this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
 
-    this.handshake = {sid: '', metadata: {}};
-
     if (this.options.transport) {
       this.setTransport(this.options.transport);
     }
-  }
-
-  get metadata(): Metadata {
-    return this.handshake.metadata;
-  }
-
-  set metadata(metadata: Metadata | undefined) {
-    this.handshake.metadata = metadata ?? {};
   }
 
   get address(): NetAddress {
@@ -176,8 +139,11 @@ export abstract class Socket extends SocketEmittery {
       this.transport.on('close', this.doClose.bind(this)),
       this.transport.on('packet', this.handlePacket.bind(this)),
     );
-
-    this.setup();
+    // this.setup();
+    this.transport
+      .ready()
+      .then(() => this.setup())
+      .catch(e => this.emit('error', e));
     return this;
   }
 
@@ -200,21 +166,10 @@ export abstract class Socket extends SocketEmittery {
     this.alive?.touch();
 
     const {type, message} = packet;
-    if (message.payload) {
-      try {
-        message.payload = this.serializer.deserialize(message.payload);
-      } catch (e) {
-        if (debug.enabled) {
-          debug(`deserialize error for packet "${PacketTypeMap[type] ?? 'unknown'}"`, e);
-        }
-        await this.sendError(new InvalidPayloadError(e.message));
-        return;
-      }
-    }
 
     // export packet event
     if (debug.enabled) {
-      debug(`received packet "${PacketTypeMap[type] ?? 'unknown'}"`);
+      debug(`received packet "${type ?? 'unknown'}"`);
     }
     try {
       await this.emit('packet', packet);
@@ -224,38 +179,37 @@ export abstract class Socket extends SocketEmittery {
 
       // handle connect error first
       // id of 0 or null or undefined means connect error
-      if (type === PacketType.error && !message.id) {
-        await this.handleConnectError(message);
+      if (type === 'error' && !(message as ErrorMessageType).id) {
+        await this.handleConnectError(packet as any);
         return;
       }
 
       switch (type) {
-        case PacketType.open:
-          await this.handleOpen(message);
+        case 'ping':
+          await this.handlePing(packet as any);
           break;
-        case PacketType.ping:
-          await this.handlePing(message);
+        case 'pong':
+          await this.handlePong(packet as any);
           break;
-        case PacketType.pong:
-          await this.handlePong(message);
+        case 'connect':
+          await this.handleConnect(packet as any);
           break;
-        case PacketType.connect:
-          await this.handleConnect(message);
+        case 'connack':
+          await this.handleConnack(packet as any);
           break;
-
         default:
           if (!this.isConnected()) {
             return debug('packet received with not connected socket');
           }
 
           switch (type) {
-            case PacketType.call:
-            case PacketType.signal:
-              await this.handleRequest(message);
+            case 'call':
+            case 'signal':
+              await this.handleRequest(packet as any);
               break;
             // call response
-            case PacketType.ack:
-            case PacketType.error:
+            case 'ack':
+            case 'error':
               // notify to handle call responses
               await this.emit('response', packet);
               break;
@@ -263,39 +217,22 @@ export abstract class Socket extends SocketEmittery {
 
           return;
       }
-    } catch (e) {
+    } catch (e: any) {
       await this.emit('error', e);
     }
   }
 
-  async send<T extends PacketTypeKeyType>(type: T, message: PacketMessages[T]) {
-    if (this.isOpen()) {
-      debug('sending packet "%s"', type, message);
-      const payload = message.payload == null ? DUMMY : message.payload;
-      message = {
-        ...message,
-        payload: this.serializer.serialize(payload),
-      };
-
-      const packet = Packet.create(type, message);
-      await this.emit('packet_create', packet);
-      try {
-        await this.transport.send(packet.frame());
-      } catch (e) {
-        // TODO why no exception throw up and terminate the process
-        console.error(e);
-      }
+  async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
+    await this.transport.ready();
+    debug('sending packet "%s"', type, message);
+    const packet: Packet<T> = {type, message, metadata};
+    await this.emit('packet_create', packet);
+    try {
+      await this.transport.send(packer.pack(packet));
+    } catch (e) {
+      // TODO why no exception throw up and terminate the process
+      console.error(e);
     }
-  }
-
-  async sendError(error: RemoteError): Promise<void>;
-  async sendError(id: number, error: RemoteError): Promise<void>;
-  async sendError(id: number | RemoteError, error?: RemoteError) {
-    if (typeof id !== 'number') {
-      error = id;
-      id = 0;
-    }
-    await this.send('error', {id, ...makeRemoteError(error)});
   }
 
   protected async doClose(reason: string | Error) {
@@ -318,21 +255,22 @@ export abstract class Socket extends SocketEmittery {
   }
 
   /**
-   * Open packet handler.
-   * client should send connect request
-   * server should handle as error and close the connection
+   * Connect packet handler.
+   * client deny it
+   * server should authenticate the client and send back connack packet for allowed and connect_error for denied.
+   * @param packet
    * @protected
    */
-  protected abstract handleOpen(message: OpenMessage): ValueOrPromise<void>;
+  protected abstract handleConnect(packet: Packet<'connect'>): ValueOrPromise<void>;
 
   /**
-   * Connect packet handler.
-   * client should change state to connected
-   * server should authenticate the client and send back connect packet for allowed and connect_error for denied.
-   * @param message
+   * Connack packet handler.
+   * client change state to connected
+   * server deny it
+   * @param packet
    * @protected
    */
-  protected abstract handleConnect(message: ConnectMessage): ValueOrPromise<void>;
+  protected abstract handleConnack(packet: Packet<'connack'>): ValueOrPromise<void>;
 
   /**
    * Handle keepalive expired
@@ -347,12 +285,12 @@ export abstract class Socket extends SocketEmittery {
    * Ping packet handler.
    * client should send back heartbeat payload
    * server should handle as error and close the connection
-   * @param message
+   * @param packet
    * @protected
    */
-  protected abstract handlePing(message: HeartbeatMessage): ValueOrPromise<void>;
+  protected abstract handlePing(packet: Packet<'ping'>): ValueOrPromise<void>;
 
-  protected async handlePong(message: HeartbeatMessage) {
+  protected async handlePong({message}: Packet<'pong'>) {
     await this.alive.update(message.payload);
   }
 
@@ -362,7 +300,7 @@ export abstract class Socket extends SocketEmittery {
 
     this.connectTimer.cancel();
 
-    this.alive = new Alive(this.keepalive);
+    this.alive = new Alive(this.keepalive * 1000);
     this.unsubs.push(
       this.alive.on('expired', nonce => this.handleAliveExpired(nonce)),
       this.alive.on('error', () => this.handleAliveError()),
@@ -396,8 +334,8 @@ export abstract class Socket extends SocketEmittery {
 
   protected startStall() {
     if (!this.timer) {
-      debug(`start stall with interval ${this.interval}ms`);
-      this.timer = IntervalTimer.start(() => this.maybeStall(), this.interval);
+      debug(`start stall with interval ${this.interval}s`);
+      this.timer = IntervalTimer.start(() => this.maybeStall(), this.interval * 1000);
     } else {
       debug('start stall - already start stall');
     }
@@ -419,59 +357,66 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async handleAliveError() {
-    debug('close for heartbeat timeout in', this.alive.timeout);
+    debug(`close for heartbeat timeout in ${this.alive.timeout}ms`);
     await this.emit('connect_error', new ConnectionStallError('Connection is stalling (ping)'));
     await this.close();
   }
 
   protected setup() {
+    debug('setup');
     this.state = 'open';
 
     this.connectTimer?.cancel();
     this.connectTimer = new TimeoutTimer(async () => {
       debug('connect timeout, close the client');
-      await this.emit('connect_error', new ConnectTimeoutError('Timed out waiting for connection'));
+      await this.emit('connect_error', new ConnectTimeoutError('Timed out waiting for connecting'));
       await this.close();
-    }, this.connectTimeout);
+    }, this.connectTimeout * 1000);
   }
 
-  protected createRequest(content: RequestContent) {
-    return new IncomingRequest<this>(this, content);
+  protected createCarrier({type, message, metadata}: Packet) {
+    const {id, name, payload} = message as any;
+    const request = new Request(this, type, {
+      message: {id, name, params: payload},
+      metadata,
+    });
+    const response = new Response(this, type, id);
+    request.response = response;
+    response.request = request;
+
+    return new Carrier(request, response);
   }
 
-  // protected async doRequest(request: IncomingRequest<this>) {
-  //   return this.onincoming?.(request);
-  // }
-
-  private async handleConnectError(message: ErrorMessage) {
-    await this.emit('connect_error', toError(message));
+  private async handleConnectError({message}: Packet<'error'>) {
+    await this.emit('connect_error', toError(message.message));
     await this.close();
   }
 
-  private async handleRequest(message: CallMessage | SignalMessage) {
+  private async handleRequest(packet: Packet<'signal' | 'call'>) {
+    const {type} = packet;
     // id of 0,null,undefined means signal
-    const id = (message as CallMessage).id;
-    const request = this.createRequest({id, name: message.name, params: message.payload});
+    const carrier = this.createCarrier(packet);
+
     try {
-      const result = await this.onincoming?.(request, () => {
-        if (request.isCall()) {
+      const result = await this.onincoming?.(carrier, () => {
+        if (carrier.isCall()) {
           throw new UnimplementedError();
         }
         // signal will ignore returns
         return true;
       });
-      if (id) {
+      if (type === 'call') {
         // call
-        if (!request.ended) {
-          await request.end(result);
+        if (!carrier.ended) {
+          await carrier.end(result);
         }
       } else {
         // signal
-        await this.remote.emit(request);
+        await this.remote.emit(carrier);
       }
-    } catch (e) {
-      if (!request.ended && e && e.message) {
-        await request.error(e);
+    } catch (e: any) {
+      if (!carrier.ended && e?.message) {
+        await carrier.error(e);
       } else {
         console.error(e);
       }

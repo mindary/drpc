@@ -30,13 +30,13 @@
     "@remly/core": "^0.14.0",
     "@remly/types": "^0.4.1",
     "delay": "^4.0.0",
-    "ts-essentials": "^7.0.3"
+    "ts-essentials": "^8.1.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.6.1",
+    "@types/node": "^16.7.10",
     "a-defer": "^0.1.1"
   },
   "files": [

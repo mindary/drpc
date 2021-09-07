@@ -1,15 +1,14 @@
 import debugFactory from 'debug';
-import {OnRequest, OnServerConnect, Registry, Serializer, Transport} from '@remly/core';
+import {Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@remly/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Next} from '@libit/interceptor';
 import {Interception} from '@remly/interception';
 import {Connection} from './connection';
-import {generateId} from './utils';
-import {MsgpackSerializer} from '../../serializer-msgpack';
-import {Server} from './server';
-import {ServerDispatchHandler, ServerRequest, ServerRequestHandler} from './types';
+import {ServerCarrier, ServerIncomingHandler, ServerOutgoingHandler, ServerRequest} from './types';
 
-const debug = debugFactory('remly:server:application');
+const debug = debugFactory('remly:application');
+
+export type OnConnect = (carrier: Carrier<Connection>) => ValueOrPromise<any>;
 
 export interface ApplicationEvents {
   error: Error;
@@ -20,7 +19,6 @@ export interface ApplicationEvents {
 
 export interface ApplicationOptions {
   registry?: Registry;
-  serializer?: Serializer;
   connectTimeout?: number;
   requestTimeout?: number;
 }
@@ -35,32 +33,38 @@ export class ApplicationEmittery extends Emittery<ApplicationEvents> {
 }
 
 export class Application extends ApplicationEmittery {
-  public readonly serializer: Serializer;
   public readonly connections: Map<string, Connection> = new Map();
+  public readonly handle: (transport: Transport) => void;
 
-  public onconnect?: OnServerConnect;
-  public onincoming?: OnRequest;
-  public oncall?: OnRequest;
-  public onsignal?: OnRequest;
+  public onconnect?: OnConnect;
+  public onincoming?: OnIncoming;
+  public oncall?: OnIncoming;
+  public onsignal?: OnIncoming;
 
   protected options: ApplicationOptions;
-  protected onTransport: (transport: Transport) => void;
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<ServerRequest>();
-  protected incomingInterception = new Interception<ServerRequest>();
+  protected connectInterception = new Interception<Carrier<Connection>>();
+  protected incomingInterception = new Interception<Carrier<Connection>>();
   protected outgoingInterception = new Interception<ServerRequest>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
     this.options = Object.assign({}, DEFAULT_APPLICATION_OPTIONS, options);
     this.connectTimeout = this.options.connectTimeout;
-    this.serializer = this.options.serializer ?? new MsgpackSerializer();
-    this.onTransport = transport => this.handle(transport);
 
-    this.onincoming = (request, next) =>
-      request.isCall() ? this.oncall?.(request, next) : this.onsignal?.(request, next);
+    this.handle = transport =>
+      new Connection(transport, {
+        connectTimeout: this.connectTimeout,
+        requestTimeout: this.requestTimeout,
+        onconnect: carrier => this.handleConnect(carrier),
+        onincoming: (carrier, next) => this.handleIncoming(carrier, next),
+        onoutgoing: (request, next) => this.handleOutgoing(request, next),
+      });
+
+    this.onincoming = (carrier, next) =>
+      carrier.isCall() ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
   }
 
   private _connectTimeout: number;
@@ -83,57 +87,36 @@ export class Application extends ApplicationEmittery {
     this._requestTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.requestTimeout;
   }
 
-  bind(server: Server<any, any>) {
-    server.on('transport', this.onTransport);
-    return this;
-  }
-
-  unbind(server: Server<any, any>) {
-    server.off('transport', this.onTransport);
-    return this;
-  }
-
-  addConnectInterceptor(interceptor: ServerRequestHandler) {
+  addConnectInterceptor(interceptor: ServerIncomingHandler) {
     this.connectInterception.add(interceptor);
     return this;
   }
 
-  addIncomingInterceptor(interceptor: ServerRequestHandler) {
+  addIncomingInterceptor(interceptor: ServerIncomingHandler) {
     this.incomingInterception.add(interceptor);
     return this;
   }
 
-  addOutgoingInterceptor(interceptor: ServerDispatchHandler) {
+  addOutgoingInterceptor(interceptor: ServerOutgoingHandler) {
     this.outgoingInterception.add(interceptor);
     return this;
   }
 
-  handle(transport: Transport) {
-    new Connection(generateId(), transport, {
-      serializer: this.serializer,
-      connectTimeout: this.connectTimeout,
-      requestTimeout: this.requestTimeout,
-      onconnect: request => this.handleConnect(request),
-      onincoming: (request, next) => this.handleIncoming(request, next),
-      onoutgoing: (request, next) => this.handleOutgoing(request, next),
-    });
-  }
-
-  protected async handleConnect(request: ServerRequest) {
-    const {socket} = request;
+  protected async handleConnect(carrier: ServerCarrier) {
+    const {socket} = carrier;
     debug('adding connection', socket.id);
     try {
-      await this.connectInterception.invoke(request, () => this.doConnect(request));
+      await this.connectInterception.invoke(carrier, () => this.doConnect(carrier));
     } catch (e) {
-      await request.error(e);
+      await carrier.error(e);
     }
   }
 
-  protected async handleIncoming(request: ServerRequest, next: Next) {
+  protected async handleIncoming(carrier: ServerCarrier, next: Next) {
     try {
-      return this.incomingInterception.invoke(request, () => this.doRequest(request, next));
+      return this.incomingInterception.invoke(carrier, () => this.doIncoming(carrier, next));
     } catch (e) {
-      await request.error(e);
+      await carrier.error(e);
     }
   }
 
@@ -141,15 +124,15 @@ export class Application extends ApplicationEmittery {
     return this.outgoingInterception.invoke(request, next);
   }
 
-  protected async doConnect(request: ServerRequest) {
-    const {socket} = request;
+  protected async doConnect(carrier: ServerCarrier) {
+    const {socket} = carrier;
 
     if (!socket.isOpen()) {
       return debug('socket has been closed - cancel connect');
     }
 
     if (this.onconnect) {
-      await this.onconnect(request);
+      await this.onconnect(carrier);
     }
 
     this.connections.set(socket.id, socket);
@@ -159,9 +142,9 @@ export class Application extends ApplicationEmittery {
     ]);
   }
 
-  protected async doRequest(request: ServerRequest, next: Next) {
+  protected async doIncoming(carrier: ServerCarrier, next: Next) {
     if (this.onincoming) {
-      return this.onincoming(request, next);
+      return this.onincoming(carrier, next);
     }
     return next();
   }

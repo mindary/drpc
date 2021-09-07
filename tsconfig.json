@@ -5,28 +5,10 @@
   },
   "references": [
     {
-      "path": "channels/tcp-client/tsconfig.json"
+      "path": "clients/tcp/tsconfig.json"
     },
     {
-      "path": "channels/tcp/tsconfig.json"
-    },
-    {
-      "path": "channels/threads-worker/tsconfig.json"
-    },
-    {
-      "path": "channels/threads/tsconfig.json"
-    },
-    {
-      "path": "channels/ws-client/tsconfig.json"
-    },
-    {
-      "path": "channels/ws/tsconfig.json"
-    },
-    {
-      "path": "examples/ecdsa-id/tsconfig.json"
-    },
-    {
-      "path": "packages/channel/tsconfig.json"
+      "path": "clients/ws/tsconfig.json"
     },
     {
       "path": "packages/client/tsconfig.json"
@@ -38,10 +20,10 @@
       "path": "packages/interception/tsconfig.json"
     },
     {
-      "path": "packages/serializer-msgpack/tsconfig.json"
+      "path": "packages/packet/tsconfig.json"
     },
     {
-      "path": "packages/serializer/tsconfig.json"
+      "path": "packages/resolver/tsconfig.json"
     },
     {
       "path": "packages/server/tsconfig.json"
@@ -54,6 +36,15 @@
     },
     {
       "path": "packages/types/tsconfig.json"
+    },
+    {
+      "path": "transports/tcp/tsconfig.json"
+    },
+    {
+      "path": "transports/worker/tsconfig.json"
+    },
+    {
+      "path": "transports/ws/tsconfig.json"
     }
   ],
   "files": []

@@ -1,6 +1,5 @@
 export * from './types';
 export * from './connection';
-export * from './server';
 export * from './application';
 export * from './registry.application';
 

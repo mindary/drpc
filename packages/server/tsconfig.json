@@ -11,16 +11,10 @@
   ],
   "references": [
     {
-      "path": "../client/tsconfig.json"
-    },
-    {
       "path": "../core/tsconfig.json"
     },
     {
       "path": "../interception/tsconfig.json"
-    },
-    {
-      "path": "../serializer-msgpack/tsconfig.json"
     },
     {
       "path": "../testlab/tsconfig.json"

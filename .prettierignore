@@ -1,7 +1,8 @@
 .github/
 /coverage
 packages/*/dist
-extensions/*/dist
+transports/*/dist
+clients/*/dist
 channels/*/dist
 examples/*/dist
 *.json
