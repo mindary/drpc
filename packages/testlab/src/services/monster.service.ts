@@ -1,5 +1,5 @@
 import delay from 'delay';
-import {RemoteError, rpc} from '@drpc/core';
+import {RemoteError, drpc} from '@drpc/core';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {MonsterType} from './monster.definition';
@@ -9,19 +9,19 @@ export class MonsterService implements MonsterType {
 
   prefix = 'Hello';
 
-  @rpc.method() greet(msg: string) {
+  @drpc.method() greet(msg: string) {
     return this.prefix + ' ' + msg;
   }
 
-  @rpc.method() error() {
+  @drpc.method() error() {
     throw new RemoteError({code: -1000, message: 'An error message'});
   }
 
-  @rpc.method() exception() {
+  @drpc.method() exception() {
     throw new Error('An exception message');
   }
 
-  @rpc.method() incrementCounterBy(counter: Counter, value: any) {
+  @drpc.method() incrementCounterBy(counter: Counter, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError({code: -1000, message: 'Argument not an instance of Counter'});
     }
@@ -29,30 +29,30 @@ export class MonsterService implements MonsterType {
     return counter;
   }
 
-  @rpc.method() add(a: number, b: number) {
+  @drpc.method() add(a: number, b: number) {
     return a + b;
   }
 
-  @rpc.method()
+  @drpc.method()
   async addSlow(a: number, b: number, isSlow?: boolean) {
     const result = a + b;
     if (isSlow) await delay(15);
     return result;
   }
 
-  @rpc.method()
+  @drpc.method()
   async sleep(ms: number) {
     await delay(ms);
     return ms;
   }
 
-  @rpc.method() empty() {}
+  @drpc.method() empty() {}
 
-  @rpc.method() noArgs(): boolean {
+  @drpc.method() noArgs(): boolean {
     return true;
   }
 
-  @rpc.method() invalidError() {
+  @drpc.method() invalidError() {
     return new InvalidError();
   }
 }

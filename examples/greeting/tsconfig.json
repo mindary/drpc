@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "@loopback/build/config/tsconfig.common.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../clients/tcp/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/tsconfig.json"
+    },
+    {
+      "path": "../../packages/server/tsconfig.json"
+    },
+    {
+      "path": "../../transports/tcp/tsconfig.json"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ export interface ApplicationOptions {
   registry?: Registry;
   connectTimeout?: number;
   requestTimeout?: number;
+  [p: string]: any;
 }
 
 export const DEFAULT_APPLICATION_OPTIONS = {

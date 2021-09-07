@@ -23,12 +23,12 @@
     "verify": "npm pack && tar xf drpc-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@libit/interceptor": "^0.2.1",
     "@drpc/core": "^0.14.0",
     "@drpc/interception": "^0.3.4",
     "@drpc/resolver": "^0.1.0",
     "@drpc/transport-tcp": "^0.1.0",
     "@drpc/transport-ws": "^0.1.0",
+    "@libit/interceptor": "^0.2.1",
     "debug": "^4.3.2",
     "once-promise": "^2.0.0",
     "parse-url": "^5.0.7",
@@ -41,7 +41,7 @@
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
     "@types/debug": "^4.1.7",
-    "@types/node": "^16.7.11",
+    "@types/node": "^16.7.13",
     "@types/ws": "^7.4.7"
   },
   "files": [

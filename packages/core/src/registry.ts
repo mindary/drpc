@@ -4,7 +4,7 @@ import toArray from 'tily/array/toArray';
 import debugFactory from 'debug';
 import {Method} from './method';
 import {UnimplementedError} from './errors';
-import {getAllRpcMethodMetadata} from './decorators';
+import {getAllRpcMethodMetadata, getDrpcMetadata} from './decorators';
 import flatten from 'tily/array/flatten';
 import uniq from 'tily/array/uniq';
 
@@ -51,7 +51,12 @@ export class DefaultRegistry implements Registry {
   register<SERVICE extends object>(service: SERVICE, scope?: object): void;
   register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
   register(a: any, b?: any, c?: any, d?: any) {
-    const {namespace, service, names, scope} = resolveRegisterArgs(a, b, c, d);
+    // eslint-disable-next-line prefer-const
+    let {namespace, service, names, scope} = resolveRegisterArgs(a, b, c, d);
+    if (namespace == null) {
+      namespace = getDrpcMetadata(service.constructor)?.namespace ?? '';
+    }
+
     // Using a fresh meta but not use direct MetadataMap for avoid poison the original metadata store
     const meta = Object.assign({}, getAllRpcMethodMetadata(service.constructor));
     if (names?.length) {
@@ -121,12 +126,12 @@ function resolveRegisterArgs(
   c?: any,
   d?: any,
 ): {
-  namespace: string;
+  namespace: string | undefined;
   service: any;
   names?: string[];
   scope?: any;
 } {
-  let namespace = '';
+  let namespace = undefined;
   let names: string[] | undefined;
   if (typeof a === 'string') {
     namespace = a;

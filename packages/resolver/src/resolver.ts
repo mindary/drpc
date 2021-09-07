@@ -2,16 +2,16 @@ import debugFactory from 'debug';
 
 const debug = debugFactory('drpc:resolver');
 
-export type Loader = (name: string) => any;
+export type Loader = (name: string) => Promise<any>;
 
-export function resolveModule(name: string, loader?: Loader) {
+export async function resolveModule(name: string, loader?: Loader) {
   const names = channelModuleNames(name);
-  const module = tryModules(names, loader);
+  const module = await tryModules(names, loader);
   let error = null;
   if (!module) {
-    error = `WARNING: {{DRPC}} server channel "${name}" is not installed  as any of the following modules:\n\n ${names.join(
+    error = `WARNING: DRPC channel "${name}" is not installed  as any of the following modules:\n\n ${names.join(
       '\n',
-    )}\n\nTo fix, run:\n\n    {{npm install ${names[names.length - 1]}} --save}}\n`;
+    )}\n\nTo fix, run:\n\n    npm install ${names[names.length - 1]} --save\n`;
   }
   return {
     module: module?.default ?? module,
@@ -33,12 +33,12 @@ function channelModuleNames(name: string) {
 }
 
 // testable with DI
-function tryModules(names: string[], loader?: Loader) {
+async function tryModules(names: string[], loader?: Loader) {
   let mod;
-  loader = loader || require;
+  loader = loader ?? (async name => import(name));
   for (const item of names) {
     try {
-      mod = loader(item);
+      mod = await loader(item);
     } catch (e: any) {
       const notFound = e.code === 'MODULE_NOT_FOUND' && e.message && e.message.indexOf(item) > 0;
 

@@ -5,7 +5,7 @@ import {protoKeys} from '../../utils';
 import {Method} from '../../method';
 import {UnimplementedError} from '../../errors';
 import {Monster} from '../fixtures/monster.definition';
-import {getAllRpcMethodMetadata} from '../../decorators';
+import {drpc, getAllRpcMethodMetadata} from '../../decorators';
 
 describe('registry', function () {
   describe('register', function () {
@@ -125,6 +125,24 @@ describe('registry', function () {
       registry.register(monster, scope);
       const result = await registry.call('greet', 'Tom');
       expect(result).equal('您好 Tom');
+    });
+  });
+
+  describe('@drpc decorator', function () {
+
+    @drpc('greeting')
+    class Greeting {
+      @drpc.method()
+      greet(name: string) {
+        return 'Hello, ' + name;
+      }
+    }
+
+    it('register with decorated namespace', function () {
+      const greeting = new Greeting();
+      const registry = new DefaultRegistry();
+      registry.register(greeting);
+      expect(Object.keys(registry.methods)).deepEqual(['greeting.greet']);
     });
   });
 });

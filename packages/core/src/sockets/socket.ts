@@ -5,7 +5,7 @@ import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
 import {ValueOrPromise} from '@drpc/types';
-import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
+import {CallMessageType, ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
 import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
 import {NetAddress, OnIncoming, OnOutgoing} from '../types';
@@ -374,8 +374,9 @@ export abstract class Socket extends SocketEmittery {
     }, this.connectTimeout * 1000);
   }
 
-  protected createCarrier({type, message, metadata}: Packet) {
-    const {id, name, payload} = message as any;
+  protected createCarrier({type, message, metadata}: Packet<'call' | 'signal'>) {
+    const id = type === 'call' ? (message as CallMessageType).id : 0;
+    const {name, payload} = message;
     const request = new Request(this, type, {
       message: {id, name, params: payload},
       metadata,

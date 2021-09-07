@@ -81,7 +81,7 @@ export async function connect(brokerUrlOrOptions: string | ClientOptions, option
   }
 
   if (!defaultChannel) {
-    const resolved = resolveModule(protocolPath ?? protocols[opts.protocol]);
+    const resolved = await resolveClientChannel(protocolPath ?? protocols[opts.protocol]);
     if (resolved.error) {
       throw new Error(resolved.error);
     }
@@ -91,24 +91,26 @@ export async function connect(brokerUrlOrOptions: string | ClientOptions, option
 
   assert(defaultChannel, 'channel is not resolved');
 
-  const servers = opts.servers?.map(s => {
-    const protocol = s.protocol ?? defaultProtocol;
-    const channel =
-      protocol === defaultProtocol
-        ? defaultChannel
-        : protocols[protocol]
-        ? resolveModule(protocols[protocol]).module ?? defaultChannel
-        : defaultChannel;
-    return {
-      ...s,
-      protocol,
-      channel,
-    };
-  });
+  const servers = await Promise.all(
+    opts.servers?.map(async s => {
+      const protocol = s.protocol ?? defaultProtocol;
+      const channel =
+        protocol === defaultProtocol
+          ? defaultChannel
+          : protocols[protocol]
+          ? (await resolveClientChannel(protocols[protocol])).module ?? defaultChannel
+          : defaultChannel;
+      return {
+        ...s,
+        protocol,
+        channel,
+      };
+    }) ?? [],
+  );
 
   function wrapper(client: Client) {
     let channel = defaultChannel!;
-    if (servers) {
+    if (servers?.length > 0) {
       if (client._reconnectCount >= servers.length) {
         client._reconnectCount = 0;
       }
@@ -143,4 +145,15 @@ function parseAuthOptions(opts: ClientOptions) {
       opts.username = opts.auth;
     }
   }
+}
+
+async function resolveClientChannel(name: string) {
+  if (!name.match(/^[\/.@]/) && !name.startsWith('@') && !name.startsWith('client-')) {
+    const answer = await resolveModule(`client-${name}`, require);
+    if (answer.module && !answer.error) {
+      return answer;
+    }
+  }
+
+  return resolveModule(name, require);
 }

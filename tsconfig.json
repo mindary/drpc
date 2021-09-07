@@ -11,6 +11,12 @@
       "path": "clients/ws/tsconfig.json"
     },
     {
+      "path": "examples/ecdsa/tsconfig.json"
+    },
+    {
+      "path": "examples/greeting/tsconfig.json"
+    },
+    {
       "path": "packages/client/tsconfig.json"
     },
     {

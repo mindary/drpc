@@ -19,8 +19,7 @@ export const Greeter = {
 ```ts
 // main.ts
 import {Application} from '@drpc/server';
-import {TCPServer} from '@drpc/tcp';
-import {TCPClient} from '@drpc/tcp-client';
+import {tcp} from '@drpc/transport-tcp';
 import {Greeter} from './greeter.definition';
 
 async function main() {
@@ -28,24 +27,22 @@ async function main() {
   // Setup Server
   // *******************
   // prepare applicaiton
-  const remapp = new Application();
+  const app = new Application();
   // register all methods of the service with '*' name filter
-  remapp.register(Greeter.name, {greet: name => `Hello, ${name}!`}, '*');
+  app.register(Greeter.name, {greet: name => `Hello, ${name}!`}, '*');
   // signal every client on connected
-  remapp.on('connection', async connection => {
+  app.on('connection', async connection => {
     await connection.signal('message', 'Welcome');
   });
 
   // setup server (tcp, websocket or worker)
-  const server = new TCPServer(remapp, {
-    port: 3000,
-  });
-  await server.start();
+  const server = net.createServer(tcp(app.handle));
+  server.listen(3000);
 
   // *******************
   // Setup Client
   // *******************
-  const client = TCPClient.connect(3000);
+  const client = connect('tcp://localhost:3000');
   // subscribe "message" signal
   client.remote.on('message', message => {
     console.log(message); // => Welcome

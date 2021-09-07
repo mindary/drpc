@@ -36,12 +36,9 @@ export class ServerSocket extends Socket {
   }
 
   protected async handleConnect(packet: Packet<'connect'>) {
-    const carrier = this.createCarrier(packet);
+    const carrier = this.createCarrier(packet as any);
 
     const {message} = packet;
-
-    // check message.protocolId ?
-    // check message.protocolVersion ?
 
     if (message.keepalive > 120) {
       await carrier.error(new RemoteError('Invalid keepalive'));
@@ -49,9 +46,7 @@ export class ServerSocket extends Socket {
 
     try {
       this.id = message.clientId ?? this.generateId();
-
       await this.onconnect(carrier);
-
       this.keepalive = message.keepalive;
 
       if (!carrier.ended) {
