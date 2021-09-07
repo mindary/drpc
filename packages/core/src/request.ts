@@ -1,33 +1,23 @@
 import {Socket} from './sockets';
-import {PacketType, Metadata, MetadataValue} from '@drpc/packet';
+import {MessageTypes, Metadata, MetadataValue} from '@drpc/packet';
 import {Response} from './response';
 
-export interface RequestMessage {
-  id?: number;
-  name: string;
-  params?: any;
-}
+export type RequestPacketType = 'connect' | 'signal' | 'call';
 
-export interface RequestPacket {
+export interface RequestPacket<T extends RequestPacketType> {
   metadata?: Metadata;
-  message?: RequestMessage;
+  message: MessageTypes[T];
 }
 
-const EMPTY_REQUEST_MESSAGE: RequestMessage = {
-  id: 0,
-  name: '',
-  params: undefined,
-};
-
-export class Request<SOCKET extends Socket = any> {
-  response: Response;
+export class Request<T extends RequestPacketType, SOCKET extends Socket = any> {
+  response: Response<T, SOCKET>;
 
   readonly metadata: Metadata;
-  readonly message: RequestMessage;
+  readonly message: MessageTypes[T];
 
-  constructor(public readonly socket: SOCKET, public readonly type: PacketType, packet?: RequestPacket) {
+  constructor(public readonly socket: SOCKET, public readonly type: T, packet: RequestPacket<T>) {
     this.metadata = packet?.metadata ?? new Metadata();
-    this.message = packet?.message ?? EMPTY_REQUEST_MESSAGE;
+    this.message = packet?.message;
   }
 
   get sid() {
@@ -36,22 +26,6 @@ export class Request<SOCKET extends Socket = any> {
 
   get address() {
     return this.socket.address;
-  }
-
-  get id(): number | undefined {
-    return this.message.id;
-  }
-
-  get name() {
-    return this.message.name;
-  }
-
-  set name(name) {
-    this.message.name = name;
-  }
-
-  get params() {
-    return this.message.params;
   }
 
   get(ket: string): MetadataValue[] {

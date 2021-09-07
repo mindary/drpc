@@ -14,10 +14,16 @@
       "path": "../../clients/tcp/tsconfig.json"
     },
     {
+      "path": "../../packages/client/tsconfig.json"
+    },
+    {
       "path": "../../packages/core/tsconfig.json"
     },
     {
       "path": "../../packages/server/tsconfig.json"
+    },
+    {
+      "path": "../../transports/tcp/tsconfig.json"
     }
   ]
 }

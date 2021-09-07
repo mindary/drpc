@@ -1,13 +1,13 @@
 import {assert} from 'ts-essentials';
 import {Options, UnsubscribeFn} from '@libit/emittery';
-import {AckMessageType, ErrorMessageType, Packet} from '@drpc/packet';
+import {AckMessageType, ErrorMessageType, Packet, SignalMessageType} from '@drpc/packet';
 import {Store} from './store';
 import {Socket} from './sockets';
 import {RemoteError} from './errors';
 import {RemoteEmitter} from './remote-emitter';
 import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from './remote-service';
 import {OnOutgoing} from './types';
-import {Request, RequestMessage} from './request';
+import {Request} from './request';
 
 export interface RemoteEvents {
   noreq: {type: 'ack' | 'error'; id: number};
@@ -17,11 +17,11 @@ export interface RemoteEvents {
 }
 
 export interface RemoteOptions extends Options<any> {
-  onoutgoing?: OnOutgoing;
+  onoutgoing?: OnOutgoing<'signal' | 'call'>;
 }
 
 export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
-  public onoutgoing: OnOutgoing;
+  public onoutgoing: OnOutgoing<'signal' | 'call'>;
 
   protected store: Store = new Store();
   protected unsubs: UnsubscribeFn[] = [];
@@ -76,12 +76,20 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
     await this.assertOrWaitConnected();
     const r = this.store.acquire(timeout ?? this.socket.requestTimeout);
     const request = new Request(this.socket, 'call', {
-      metadata: this.socket.metadata,
-      message: {id: r.id, name: method, params: args},
+      // metadata: this.socket.metadata,
+      message: {id: r.id, name: method, payload: args},
     });
 
     return this.onoutgoing(request, async () => {
-      await this.socket.send('call', {id: r.id, name: request.name, payload: request.params}, request.metadata);
+      await this.socket.send(
+        'call',
+        {
+          id: r.id,
+          name: request.message.name,
+          payload: request.message.payload,
+        },
+        request.metadata,
+      );
       return r.promise;
     });
   }
@@ -94,20 +102,24 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
    */
   async signal(event: string, data?: any) {
     assert(typeof event === 'string', 'Event must be a string.');
-    const request = new Request(this.socket, 'signal', {
+    const request = new Request<'signal'>(this.socket, 'signal', {
       metadata: this.socket.metadata,
-      message: {name: event, params: data},
+      message: {name: event, payload: data},
     });
 
     await this.assertOrWaitConnected();
     await this.onoutgoing(request, async () => {
-      await this.socket.send('signal', {name: request.name, payload: request.params}, request.metadata);
+      await this.socket.send(
+        'signal',
+        {name: request.message.name, payload: request.message.payload},
+        request.metadata,
+      );
     });
   }
 
-  async emit(message: RequestMessage) {
-    const {name, params} = message;
-    await this.emitter.emit(name, params);
+  async emit(message: SignalMessageType) {
+    const {name, payload} = message;
+    await this.emitter.emit(name, payload);
   }
 
   protected bind() {

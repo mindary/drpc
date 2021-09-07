@@ -1,7 +1,7 @@
 import {Emittery} from '@libit/emittery';
 import {PickProperties} from 'ts-essentials';
-import {MetadataValue} from '@drpc/packet';
-import {Request} from './request';
+import {MessageTypes, MetadataValue} from '@drpc/packet';
+import {Request, RequestPacketType} from './request';
 import {Response} from './response';
 import {Socket} from './sockets';
 
@@ -10,24 +10,20 @@ export interface CarrierEvents {
   finished: undefined;
 }
 
-export class Carrier<SOCKET extends Socket = any>
+export class Carrier<T extends RequestPacketType, SOCKET extends Socket = any>
   extends Emittery<CarrierEvents>
-  implements PickProperties<Request, Function>, PickProperties<Response, Function>
+  implements PickProperties<Request<any>, Function>, PickProperties<Response<any>, Function>
 {
-  constructor(public readonly request: Request<SOCKET>, public readonly response: Response<SOCKET>) {
+  constructor(public readonly request: Request<T, SOCKET>, public readonly response: Response<T, SOCKET>) {
     super();
   }
 
-  get id(): number | undefined {
-    return this.request.id;
+  get type() {
+    return this.request.type;
   }
 
-  get name(): string {
-    return this.request.name;
-  }
-
-  get params(): any {
-    return this.request.params;
+  get message(): MessageTypes[T] {
+    return this.request.message;
   }
 
   get socket() {
@@ -42,8 +38,8 @@ export class Carrier<SOCKET extends Socket = any>
     return this.response.finished;
   }
 
-  get(ket: string): MetadataValue[] {
-    return this.request.get(ket);
+  get(key: string): MetadataValue[] {
+    return this.request.get(key);
   }
 
   getMap(): {[p: string]: MetadataValue} {

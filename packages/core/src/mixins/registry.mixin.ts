@@ -1,11 +1,10 @@
 import {assert} from 'ts-essentials';
-import {OnIncoming} from '..';
+import {CallablePacketType, OnIncoming, ServiceInvokeRequest} from '..';
 import {MixinTarget} from '../mixin-target';
 import {DefaultRegistry, Registrable, Registry} from '../registry';
-import {RequestMessage} from '../request';
 
 export interface WithOnRequest {
-  onincoming?: OnIncoming;
+  onincoming?: OnIncoming<CallablePacketType>;
 }
 
 export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: T) {
@@ -14,23 +13,26 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
      * Server or Client service registry
      */
     registry: Registry;
-    onincoming?: OnIncoming;
+    onincoming?: OnIncoming<CallablePacketType>;
 
     constructor(...args: any[]) {
       super(...args);
 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
       this.onincoming = async (request, next) => {
-        if (request.isCall()) {
-          return this.invokeWithRegistry(request);
+        if (request.type === 'call') {
+          return this.invokeWithRegistry({
+            name: request.message.name,
+            params: request.message.payload,
+          });
         }
         return next();
       };
     }
 
-    async invokeWithRegistry(content: RequestMessage) {
+    async invokeWithRegistry(request: ServiceInvokeRequest) {
       assert(this.registry, 'remote invoking is not supported for current socket');
-      return this.registry.invoke(content);
+      return this.registry.invoke(request);
     }
 
     register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;

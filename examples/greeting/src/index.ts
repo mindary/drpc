@@ -1,9 +1,6 @@
-import {setupServer} from "./server";
+import {setupServer} from './server';
 import {ServerOpts} from 'net';
 import {GreetingApplication} from './application';
-
-// import tcp client channel to support "tcp://[host:port]"
-import('@drpc/client-tcp');
 
 export async function main(opts: ServerOpts & {port?: number}) {
   const app = new GreetingApplication(opts);

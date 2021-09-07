@@ -13,6 +13,7 @@ const debug = debugFactory('drpc:core:registry');
 export interface ServiceInvokeRequest {
   name: string;
   params?: any;
+  payload?: any; // alias for params
 }
 
 export interface Registrable {
@@ -111,8 +112,8 @@ export class DefaultRegistry implements Registry {
   }
 
   async invoke(request: ServiceInvokeRequest) {
-    const {name, params} = request;
-    return this.call(name, params);
+    const {name, params, payload} = request;
+    return this.call(name, params ?? payload);
   }
 }
 

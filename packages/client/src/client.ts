@@ -3,18 +3,28 @@ import '@libit/interceptor';
 
 import {Next} from '@libit/interceptor';
 import {Interception} from '@drpc/interception';
-import {Carrier, ClientSocket, Emittery, Metadata, OnIncoming, Remote, SocketEvents, Transport} from '@drpc/core';
+import {
+  CallablePacketType,
+  Carrier,
+  ClientSocket,
+  Emittery,
+  Metadata,
+  OnIncoming,
+  Remote,
+  SocketEvents,
+  Transport,
+} from '@drpc/core';
 import {ClientOptions, ClientOutgoingHandler, ClientRequest, ClientIncomingHandler, WrappedConnect} from './types';
 
 export class Client extends Emittery<SocketEvents> {
   public socket: ClientSocket;
-  public onincoming?: OnIncoming<ClientSocket>;
-  public oncall?: OnIncoming<ClientSocket>;
-  public onsignal?: OnIncoming<ClientSocket>;
+  public onincoming?: OnIncoming<CallablePacketType, ClientSocket>;
+  public oncall?: OnIncoming<'call', ClientSocket>;
+  public onsignal?: OnIncoming<'signal', ClientSocket>;
   public metadata: Metadata;
   public _reconnectCount: number;
 
-  protected incomingInterception = new Interception<Carrier>();
+  protected incomingInterception = new Interception<Carrier<CallablePacketType>>();
   protected outgoingInterception = new Interception<ClientRequest>();
 
   readonly #connect: WrappedConnect;
@@ -29,7 +39,7 @@ export class Client extends Emittery<SocketEvents> {
     this.#connect = connect;
     this.#options = options;
     this.onincoming = (carrier, next) =>
-      carrier.isCall() ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
+      carrier.isCall() ? this.oncall?.(carrier as any, next) : this.onsignal?.(carrier as any, next);
 
     this.metadata = options.metadata ? Metadata.from(options.metadata) : new Metadata();
 
@@ -85,7 +95,7 @@ export class Client extends Emittery<SocketEvents> {
     return socket;
   }
 
-  protected async handleIncoming(carrier: Carrier, next: Next) {
+  protected async handleIncoming(carrier: Carrier<CallablePacketType>, next: Next) {
     return this.incomingInterception.invoke(carrier, async () => this.onincoming?.(carrier, next));
   }
 

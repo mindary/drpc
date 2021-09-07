@@ -22,5 +22,11 @@ export interface NetAddress {
   readonly remotePort?: number;
 }
 
-export type OnIncoming<SOCKET extends Socket = any> = GenericInterceptor<Carrier<SOCKET>>;
-export type OnOutgoing<SOCKET extends Socket = any> = GenericInterceptor<Request<SOCKET>>;
+export type CallablePacketType = 'signal' | 'call';
+
+export type OnIncoming<T extends CallablePacketType = CallablePacketType,
+  SOCKET extends Socket = any,
+  > = GenericInterceptor<Carrier<T, SOCKET>>;
+export type OnOutgoing<T extends CallablePacketType = CallablePacketType,
+  SOCKET extends Socket = any,
+  > = GenericInterceptor<Request<T, SOCKET>>;

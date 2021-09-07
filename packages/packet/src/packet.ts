@@ -28,7 +28,9 @@ export const ConnectMessageSchema = {
 
 export type ConnectMessageType = Modify<BTDDataType<typeof ConnectMessageSchema>, {}>;
 
-export const ConnackMessageSchema = {} as const;
+export const ConnackMessageSchema = {
+  nonce: 'buffer',
+} as const;
 
 export type ConnackMessageType = BTDDataType<typeof ConnackMessageSchema>;
 

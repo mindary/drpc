@@ -1,9 +1,10 @@
-import {Carrier, Request} from '@drpc/core';
+import {CallablePacketType, Carrier, Request, RequestPacketType} from '@drpc/core';
 import {GenericInterceptor} from '@libit/interceptor';
 import {Connection} from './connection';
 
-export type ServerRequest = Request<Connection>;
-export type ServerCarrier = Carrier<Connection>;
+export type ServerRequest<T extends RequestPacketType = RequestPacketType> = Request<T, Connection>;
+export type ServerCarrier<T extends RequestPacketType = RequestPacketType> = Carrier<T, Connection>;
 
-export type ServerIncomingHandler = GenericInterceptor<ServerCarrier>;
-export type ServerOutgoingHandler = GenericInterceptor<ServerRequest>;
+export type ConnectHandler = GenericInterceptor<ServerCarrier<'connect'>>;
+export type ServerIncomingHandler = GenericInterceptor<ServerCarrier<CallablePacketType>>;
+export type ServerOutgoingHandler = GenericInterceptor<ServerRequest<CallablePacketType>>;

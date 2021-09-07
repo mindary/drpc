@@ -1,25 +1,36 @@
 import {expect} from '@loopback/testlab';
-import * as net from 'net';
-import {AddressInfo} from 'net';
+import net, {AddressInfo} from 'net';
 import {Client, connect} from '@drpc/client';
-import {GreetingApplication} from '../../application';
-import {Greeting} from '../../services/greeting.def';
+import {Identity, Signer} from '@libit/josa';
 import {setupServer} from '../../server';
+import {EcdsaApplication} from '../../application';
+import {Greeting} from '../../services/greeting.def';
 
-describe('GreetingApplication', function () {
-  let app: GreetingApplication;
+describe('EcdsaApplication', function () {
+  const signer = new Signer();
+  let app: EcdsaApplication;
   let server: net.Server;
   let port: number;
   let client: Client;
+  let identity: Identity;
 
   before(givenRunningApplication);
   after(() => server.close());
 
   before(async () => {
+    identity = signer.createIdentity();
     client = await connect(`tcp://localhost:${port}`, {
-      // TODO find a way to dynamic load channel by protocol
-      // in mono-project, dependencies are added with link, it affect requiring to find proper channel module
       channel: await import('@drpc/client-tcp'),
+      clientId: identity.id,
+      metadata: {
+        auth: 'ecdsa',
+      },
+    });
+    client.on('error', console.error);
+    client.on('connect_error', console.error);
+    client.addOutgoingInterceptor((request, next) => {
+      request.metadata.set('sig-bin', signer.signAndPack(client.socket.nonce, identity));
+      return next();
     });
   });
 
@@ -30,7 +41,7 @@ describe('GreetingApplication', function () {
   });
 
   async function givenRunningApplication() {
-    app = new GreetingApplication();
+    app = new EcdsaApplication();
     server = await setupServer(app);
     port = (server.address() as AddressInfo).port;
   }

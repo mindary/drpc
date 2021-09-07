@@ -129,7 +129,6 @@ describe('registry', function () {
   });
 
   describe('@drpc decorator', function () {
-
     @drpc('greeting')
     class Greeting {
       @drpc.method()

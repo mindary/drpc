@@ -23,7 +23,7 @@ describe('Core - RPC', function () {
 
   describe(`call`, function () {
     it('call and return with ack', async () => {
-      serverSocket.onincoming = request => request.params;
+      serverSocket.onincoming = request => request.message.payload;
       const result = await clientSocket.remote.call('echo', 'hello');
       expect(result).eql('hello');
     });
@@ -62,8 +62,8 @@ describe('Core - RPC', function () {
 
   describe('service', function () {
     const Invoker: OnIncoming = (request, next) => {
-      if (request.name === 'monster.add') {
-        return request.params[0] + request.params[1];
+      if (request.message.name === 'monster.add') {
+        return request.message.payload[0] + request.message.payload[1];
       }
       return next();
     };

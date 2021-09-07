@@ -1,14 +1,14 @@
 import debugFactory from 'debug';
-import {Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@drpc/core';
+import {CallablePacketType, Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@drpc/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Next} from '@libit/interceptor';
 import {Interception} from '@drpc/interception';
 import {Connection} from './connection';
-import {ServerCarrier, ServerIncomingHandler, ServerOutgoingHandler, ServerRequest} from './types';
+import {ConnectHandler, ServerCarrier, ServerIncomingHandler, ServerOutgoingHandler, ServerRequest} from './types';
 
 const debug = debugFactory('drpc:application');
 
-export type OnConnect = (carrier: Carrier<Connection>) => ValueOrPromise<any>;
+export type OnConnect = (carrier: Carrier<'connect', Connection>) => ValueOrPromise<any>;
 
 export interface ApplicationEvents {
   error: Error;
@@ -21,6 +21,7 @@ export interface ApplicationOptions {
   registry?: Registry;
   connectTimeout?: number;
   requestTimeout?: number;
+
   [p: string]: any;
 }
 
@@ -46,9 +47,9 @@ export class Application extends ApplicationEmittery {
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<Carrier<Connection>>();
-  protected incomingInterception = new Interception<Carrier<Connection>>();
-  protected outgoingInterception = new Interception<ServerRequest>();
+  protected connectInterception = new Interception<Carrier<'connect', Connection>>();
+  protected incomingInterception = new Interception<Carrier<CallablePacketType, Connection>>();
+  protected outgoingInterception = new Interception<ServerRequest<CallablePacketType>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
@@ -88,7 +89,7 @@ export class Application extends ApplicationEmittery {
     this._requestTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.requestTimeout;
   }
 
-  addConnectInterceptor(interceptor: ServerIncomingHandler) {
+  addConnectInterceptor(interceptor: ConnectHandler) {
     this.connectInterception.add(interceptor);
     return this;
   }
@@ -103,29 +104,21 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
-  protected async handleConnect(carrier: ServerCarrier) {
+  protected async handleConnect(carrier: ServerCarrier<'connect'>) {
     const {socket} = carrier;
     debug('adding connection', socket.id);
-    try {
-      await this.connectInterception.invoke(carrier, () => this.doConnect(carrier));
-    } catch (e) {
-      await carrier.error(e);
-    }
+    await this.connectInterception.invoke(carrier, () => this.doConnect(carrier));
   }
 
-  protected async handleIncoming(carrier: ServerCarrier, next: Next) {
-    try {
-      return this.incomingInterception.invoke(carrier, () => this.doIncoming(carrier, next));
-    } catch (e) {
-      await carrier.error(e);
-    }
+  protected async handleIncoming(carrier: ServerCarrier<CallablePacketType>, next: Next) {
+    return this.incomingInterception.invoke(carrier, () => this.doIncoming(carrier, next));
   }
 
-  protected async handleOutgoing(request: ServerRequest, next: Next) {
+  protected async handleOutgoing(request: ServerRequest<CallablePacketType>, next: Next) {
     return this.outgoingInterception.invoke(request, next);
   }
 
-  protected async doConnect(carrier: ServerCarrier) {
+  protected async doConnect(carrier: ServerCarrier<'connect'>) {
     const {socket} = carrier;
 
     if (!socket.isOpen()) {
@@ -136,22 +129,30 @@ export class Application extends ApplicationEmittery {
       await this.onconnect(carrier);
     }
 
-    this.connections.set(socket.id, socket);
-    this.connectionsUnsubs.set(socket.id, [
-      socket.on('connected', () => this._connected(socket)),
-      socket.on('close', () => this._remove(socket)),
-    ]);
+    await this.registerConnection(socket);
   }
 
-  protected async doIncoming(carrier: ServerCarrier, next: Next) {
+  protected async doIncoming(carrier: ServerCarrier<CallablePacketType>, next: Next) {
     if (this.onincoming) {
       return this.onincoming(carrier, next);
     }
     return next();
   }
 
-  protected async _connected(connection: Connection) {
-    await this.emit('connection', connection);
+  protected async registerConnection(conn: Connection) {
+    if (this.connections.has(conn.id)) {
+      await this.connections.get(conn.id)!.close();
+    }
+
+    this._add(conn);
+  }
+
+  protected _add(conn: Connection) {
+    this.connections.set(conn.id, conn);
+    this.connectionsUnsubs.set(conn.id, [
+      conn.on('connected', () => this._connected(conn)),
+      conn.on('close', () => this._remove(conn)),
+    ]);
   }
 
   protected async _remove(connection: Connection) {
@@ -166,5 +167,9 @@ export class Application extends ApplicationEmittery {
     } else {
       debug('ignoring remove for connection %s', connection.id);
     }
+  }
+
+  protected async _connected(connection: Connection) {
+    await this.emit('connection', connection);
   }
 }

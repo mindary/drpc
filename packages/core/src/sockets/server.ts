@@ -1,14 +1,17 @@
 import {noop} from 'ts-essentials';
 import {ValueOrPromise} from '@drpc/types';
-import {Packet} from '@drpc/packet';
+import {Metadata, Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
 import {Transport} from '../transport';
 import {Remote} from '../remote';
 import {Carrier} from '../carrier';
 import {RemoteError} from '../errors';
+import {nonce} from '../utils';
 
-export type OnServerConnect<SOCKET extends ServerSocket = any> = (carrier: Carrier<SOCKET>) => ValueOrPromise<any>;
+export type OnServerConnect<SOCKET extends ServerSocket = any> = (
+  carrier: Carrier<'connect', SOCKET>,
+) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   onconnect?: OnServerConnect;
@@ -24,7 +27,7 @@ export class ServerSocket extends Socket {
   public remote: Remote;
 
   public id: string;
-  public challenge: Buffer;
+  public nonce: Buffer;
   public onconnect: OnServerConnect;
 
   protected generateId: () => string;
@@ -36,7 +39,7 @@ export class ServerSocket extends Socket {
   }
 
   protected async handleConnect(packet: Packet<'connect'>) {
-    const carrier = this.createCarrier(packet as any);
+    const carrier = this.createCarrier(packet);
 
     const {message} = packet;
 
@@ -44,13 +47,17 @@ export class ServerSocket extends Socket {
       await carrier.error(new RemoteError('Invalid keepalive'));
     }
 
+    this.nonce = nonce();
+    this.id = message.clientId ?? this.generateId();
+
     try {
-      this.id = message.clientId ?? this.generateId();
-      await this.onconnect(carrier);
       this.keepalive = message.keepalive;
+      this.metadata = packet.metadata ?? new Metadata();
+
+      await this.onconnect(carrier);
 
       if (!carrier.ended) {
-        await carrier.end();
+        await carrier.end(this.nonce);
       }
       await this.doConnected();
     } catch (e) {

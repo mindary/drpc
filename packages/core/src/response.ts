@@ -1,7 +1,7 @@
 import {Emittery} from '@libit/emittery';
 import {MessageTypes, Metadata, MetadataValue, PacketType} from '@drpc/packet';
 import {Socket} from './sockets';
-import {Request} from './request';
+import {Request, RequestPacketType} from './request';
 import {makeRemoteError} from './errors';
 
 export interface ResponseEvents {
@@ -9,15 +9,15 @@ export interface ResponseEvents {
   finished: undefined;
 }
 
-export class Response<SOCKET extends Socket = any> extends Emittery<ResponseEvents> {
-  request: Request;
+export class Response<T extends RequestPacketType, SOCKET extends Socket = any> extends Emittery<ResponseEvents> {
+  request: Request<T>;
 
   public readonly metadata: Metadata;
 
   protected _ended: boolean;
   protected _finished: boolean;
 
-  constructor(public readonly socket: SOCKET, public readonly type: PacketType, public readonly id?: number) {
+  constructor(public readonly socket: SOCKET, public readonly type: T, public readonly id?: number) {
     super();
     this.metadata = new Metadata();
   }
@@ -52,7 +52,7 @@ export class Response<SOCKET extends Socket = any> extends Emittery<ResponseEven
 
   async end(payload?: any) {
     if (this.type === 'connect') {
-      return this.sendAndEnd('connack', {});
+      return this.sendAndEnd('connack', {nonce: payload});
     }
 
     if (this.type === 'call') {
@@ -69,7 +69,7 @@ export class Response<SOCKET extends Socket = any> extends Emittery<ResponseEven
     return this.sendAndEnd('error', {id: this.id ?? 0, ...makeRemoteError(err)});
   }
 
-  protected async sendAndEnd<T extends PacketType>(type: T, message: MessageTypes[T]) {
+  protected async sendAndEnd<K extends PacketType>(type: K, message: MessageTypes[K]) {
     if (this._ended) {
       throw new Error('socket is ended');
     }
@@ -80,7 +80,7 @@ export class Response<SOCKET extends Socket = any> extends Emittery<ResponseEven
     await this.emit('finished');
   }
 
-  private async send<T extends PacketType>(type: T, message: MessageTypes[T]) {
+  private async send<K extends PacketType>(type: K, message: MessageTypes[K]) {
     await this.socket.send(type, message, this.metadata);
   }
 }

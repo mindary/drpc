@@ -1,12 +1,20 @@
 import {ClientRequestArgs} from 'http';
 import {KeyObject} from 'tls';
 import {GenericInterceptor} from '@libit/interceptor';
-import {Carrier, ClientSocket, ClientSocketOptions, Request, Transport, TransportOptions} from '@drpc/core';
+import {
+  Carrier,
+  ClientSocket,
+  ClientSocketOptions,
+  Request,
+  RequestPacketType,
+  Transport,
+  TransportOptions,
+} from '@drpc/core';
 import {Client} from './client';
 
-export type ClientRequest = Request<ClientSocket>;
+export type ClientRequest = Request<RequestPacketType, ClientSocket>;
 
-export type ClientIncomingHandler = GenericInterceptor<Carrier>;
+export type ClientIncomingHandler = GenericInterceptor<Carrier<RequestPacketType>>;
 export type ClientOutgoingHandler = GenericInterceptor<ClientRequest>;
 
 export type ProtocolType = 'ws' | 'wss' | 'tcp' | 'tls' | 'ssl';
@@ -83,16 +91,7 @@ export interface ClientOptions
     protocol?: ProtocolType;
   }>;
   transformWsUrl?: (url: string, options: ClientOptions, client: Client) => string;
-  metadata?: {
-    sessionExpiryInterval?: number;
-    receiveMaximum?: number;
-    maximumPacketSize?: number;
-    topicAliasMaximum?: number;
-    requestResponseInformation?: boolean;
-    requestProblemInformation?: boolean;
-    authenticationMethod?: string;
-    authenticationData?: Buffer;
-  };
+  metadata?: Record<string, any>;
 }
 
 export type WrappedConnect = (client: Client) => Transport;

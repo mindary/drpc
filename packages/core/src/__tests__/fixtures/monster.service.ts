@@ -53,8 +53,7 @@ export class MonsterService implements MonsterType {
   }
 
   @drpc.method()
-  empty() {
-  }
+  empty() {}
 
   @drpc.method()
   noArgs(): boolean {

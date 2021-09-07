@@ -5,13 +5,13 @@ import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
 import {ValueOrPromise} from '@drpc/types';
-import {CallMessageType, ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
+import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
 import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
 import {NetAddress, OnIncoming, OnOutgoing} from '../types';
 import {Alive} from '../alive';
 import {Remote} from '../remote';
-import {Request} from '../request';
+import {Request, RequestPacketType} from '../request';
 import {Response} from '../response';
 import {Carrier} from '../carrier';
 
@@ -374,14 +374,12 @@ export abstract class Socket extends SocketEmittery {
     }, this.connectTimeout * 1000);
   }
 
-  protected createCarrier({type, message, metadata}: Packet<'call' | 'signal'>) {
-    const id = type === 'call' ? (message as CallMessageType).id : 0;
-    const {name, payload} = message;
+  protected createCarrier<T extends RequestPacketType>({type, message, metadata}: Packet<T>) {
     const request = new Request(this, type, {
-      message: {id, name, params: payload},
+      message,
       metadata,
     });
-    const response = new Response(this, type, id);
+    const response = new Response(this, type, (message as any)?.id);
     request.response = response;
     response.request = request;
 
@@ -413,7 +411,7 @@ export abstract class Socket extends SocketEmittery {
         }
       } else {
         // signal
-        await this.remote.emit(carrier);
+        await this.remote.emit(packet.message);
       }
     } catch (e: any) {
       if (!carrier.ended && e?.message) {

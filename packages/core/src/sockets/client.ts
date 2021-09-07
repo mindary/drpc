@@ -28,6 +28,7 @@ const normalizeClientSocketOptions = (options?: Partial<ClientSocketOptions>) =>
 
 export class ClientSocket extends Socket {
   public readonly options: ClientSocketOptions;
+  public nonce: Buffer;
 
   constructor(options?: Partial<ClientSocketOptions>) {
     super(normalizeClientSocketOptions(options));
@@ -53,6 +54,7 @@ export class ClientSocket extends Socket {
   }
 
   protected async handleConnack({message}: Packet<'connack'>) {
+    this.nonce = message.nonce;
     await this.doConnected();
   }
 

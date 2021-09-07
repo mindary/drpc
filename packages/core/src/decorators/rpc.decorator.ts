@@ -1,4 +1,10 @@
-import {ClassDecoratorFactory, MetadataAccessor, MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
+import {
+  ClassDecoratorFactory,
+  MetadataAccessor,
+  MetadataInspector,
+  MetadataMap,
+  MethodDecoratorFactory,
+} from '@loopback/metadata';
 import {Constructor} from '@drpc/types';
 
 export interface DrpcMetadata {
@@ -6,7 +12,6 @@ export interface DrpcMetadata {
 }
 
 export const DRPC_METADATA = MetadataAccessor.create<DrpcMetadata, ClassDecorator>('drpc');
-
 
 export type DrpcMethodMetadata = {
   name?: string;
@@ -34,7 +39,6 @@ export function drpc(spec: DrpcMetadata | string = {}) {
 export function getDrpcMetadata(controllerClass: Constructor<unknown>) {
   return MetadataInspector.getClassMetadata(DRPC_METADATA, controllerClass);
 }
-
 
 export namespace drpc {
   export function method(metadata?: DrpcMethodMetadata | string) {

@@ -1,4 +1,21 @@
-export function add(a: number, b: number) {
-  return a + b;
+import {ServerOpts} from 'net';
+import {EcdsaApplication} from './application';
+import {setupServer} from './server';
+
+export async function main(opts: ServerOpts & {port?: number}) {
+  const app = new EcdsaApplication(opts);
+  await setupServer(app, opts);
+  console.log('The service is running');
 }
 
+if (require.main === module) {
+  // Run the application
+  const config = {
+    port: +(process.env.PORT ?? 3000),
+    host: process.env.HOST ?? 'localhost',
+  };
+  main(config).catch(err => {
+    console.error('Cannot start the application.', err);
+    process.exit(1);
+  });
+}
