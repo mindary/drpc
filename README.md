@@ -1,4 +1,4 @@
-# remly
+# drpc
 
 An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker and so on.
 
@@ -18,9 +18,9 @@ export const Greeter = {
 
 ```ts
 // main.ts
-import {Application} from '@remly/server';
-import {TCPServer} from '@remly/tcp';
-import {TCPClient} from '@remly/tcp-client';
+import {Application} from '@drpc/server';
+import {TCPServer} from '@drpc/tcp';
+import {TCPClient} from '@drpc/tcp-client';
 import {Greeter} from './greeter.definition';
 
 async function main() {

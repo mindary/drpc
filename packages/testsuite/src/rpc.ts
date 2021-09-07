@@ -1,9 +1,9 @@
 import {assert} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
-import {DefaultRegistry, Socket, ValueOrPromise} from '@remly/core';
-import {Application, ApplicationOptions} from '@remly/server';
-import {Client} from '@remly/client';
-import {Monster, monster} from '@remly/testlab';
+import {DefaultRegistry, Socket, ValueOrPromise} from '@drpc/core';
+import {Application, ApplicationOptions} from '@drpc/server';
+import {Client} from '@drpc/client';
+import {Monster, monster} from '@drpc/testlab';
 import {PrepareFn} from './types';
 
 export namespace RpcSuite {

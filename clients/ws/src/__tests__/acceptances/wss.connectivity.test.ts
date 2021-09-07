@@ -2,10 +2,10 @@ import {fromCallback} from 'a-callback';
 import {AddressInfo} from 'net';
 import * as http from 'http';
 import WS from 'ws';
-import {Application} from '@remly/server';
-import {ConnectivitySuite} from '@remly/testsuite';
-import {ws} from '@remly/transport-ws';
-import {connect} from '@remly/client';
+import {Application} from '@drpc/server';
+import {ConnectivitySuite} from '@drpc/testsuite';
+import {ws} from '@drpc/transport-ws';
+import {connect} from '@drpc/client';
 import * as channel from '../..';
 
 ConnectivitySuite.run('WebSocket', async () => {

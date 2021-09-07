@@ -1,3 +1,3 @@
-# @remly/interception
+# @drpc/interception
 
 > The interception mixin

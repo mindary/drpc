@@ -1,6 +1,6 @@
 {
-  "name": "@remly/packet",
-  "description": "Encode and Decode Remly packets",
+  "name": "@drpc/packet",
+  "description": "Encode and Decode DRPC packets",
   "version": "0.1.0",
   "keywords": [],
   "main": "dist/index.js",
@@ -13,18 +13,18 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-packet*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-packet*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-packet*.tgz && tree package && npm run clean",
+    "verify": "npm pack && tar xf drpc-packet*.tgz && tree package && npm run clean",
     "benchmark": "node benchmark/benchmark",
     "prebenchmark": "npm run clean && npm run build"
   },
   "dependencies": {
     "@libit/bufio": "^0.4.2",
     "@libit/emittery": "^0.10.1",
-    "@remly/types": "^0.4.1",
+    "@drpc/types": "^0.4.1",
     "binio": "^0.3.0",
     "msgpackr": "^1.4.3",
     "mutable-buffer": "^4.0.2",

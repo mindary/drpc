@@ -1,5 +1,5 @@
 import {MetadataAccessor, MetadataInspector, MetadataMap, MethodDecoratorFactory} from '@loopback/metadata';
-import {Constructor} from '@remly/types';
+import {Constructor} from '@drpc/types';
 
 export type RpcMethodMetadata = {
   name?: string;

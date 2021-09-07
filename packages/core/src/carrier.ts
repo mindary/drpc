@@ -1,6 +1,6 @@
 import {Emittery} from '@libit/emittery';
 import {PickProperties} from 'ts-essentials';
-import {MetadataValue} from '@remly/packet';
+import {MetadataValue} from '@drpc/packet';
 import {Request} from './request';
 import {Response} from './response';
 import {Socket} from './sockets';

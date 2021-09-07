@@ -1,6 +1,6 @@
 {
-  "name": "@remly/testsuite",
-  "description": "The test suite for remly transports",
+  "name": "@drpc/testsuite",
+  "description": "The test suite for drpc transports",
   "version": "0.9.0",
   "keywords": [],
   "main": "dist/index.js",
@@ -16,18 +16,18 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-testsuite*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-testsuite*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-testsuite*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-testsuite*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.8.0",
-    "@remly/core": "^0.14.0",
-    "@remly/server": "^0.13.0",
-    "@remly/testlab": "^0.10.8",
-    "@remly/types": "^0.4.1",
+    "@drpc/client": "^0.8.0",
+    "@drpc/core": "^0.14.0",
+    "@drpc/server": "^0.13.0",
+    "@drpc/testlab": "^0.10.8",
+    "@drpc/types": "^0.4.1",
     "delay": "^5.0.0",
     "ts-essentials": "^8.1.0"
   },

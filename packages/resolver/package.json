@@ -1,5 +1,5 @@
 {
-  "name": "@remly/resolver",
+  "name": "@drpc/resolver",
   "description": "The server or client channel implementation resolver",
   "version": "0.1.0",
   "keywords": [],
@@ -13,11 +13,11 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-resolver*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-resolver*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-resolver*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-resolver*.tgz && tree package && npm run clean"
   },
   "dependencies": {
     "debug": "^4.3.2"

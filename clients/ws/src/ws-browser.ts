@@ -1,4 +1,4 @@
-import {Client, ClientOptions} from '@remly/client';
+import {Client, ClientOptions} from '@drpc/client';
 import {buildUrl, setDefaultOpts} from './common';
 
 export interface BrowserWSClientOptions extends ClientOptions {
@@ -37,7 +37,7 @@ export function setDefaultBrowserOpts(opts: ClientOptions): BrowserWSClientOptio
 }
 
 export function createWebSocket(client: Client, opts: BrowserWSClientOptions) {
-  const websocketSubProtocol = opts.protocolId ?? 'remly';
+  const websocketSubProtocol = opts.protocolId ?? 'drpc';
 
   const url = buildUrl(opts, client);
   /* global WebSocket */

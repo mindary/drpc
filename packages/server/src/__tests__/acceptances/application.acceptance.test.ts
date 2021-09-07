@@ -1,6 +1,6 @@
-import {givenMemoryTransportPair, Monster, monster} from '@remly/testlab';
+import {givenMemoryTransportPair, Monster, monster} from '@drpc/testlab';
 import {expect} from '@loopback/testlab';
-import {ClientSocket, RegistryMixin, Transport} from '@remly/core';
+import {ClientSocket, RegistryMixin, Transport} from '@drpc/core';
 import {Application} from '../../application';
 
 describe('Application', function () {

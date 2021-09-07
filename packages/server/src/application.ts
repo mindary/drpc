@@ -1,12 +1,12 @@
 import debugFactory from 'debug';
-import {Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@remly/core';
+import {Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@drpc/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {Next} from '@libit/interceptor';
-import {Interception} from '@remly/interception';
+import {Interception} from '@drpc/interception';
 import {Connection} from './connection';
 import {ServerCarrier, ServerIncomingHandler, ServerOutgoingHandler, ServerRequest} from './types';
 
-const debug = debugFactory('remly:application');
+const debug = debugFactory('drpc:application');
 
 export type OnConnect = (carrier: Carrier<Connection>) => ValueOrPromise<any>;
 

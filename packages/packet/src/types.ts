@@ -1,6 +1,6 @@
 import * as Buffer from 'buffer';
 import {ValueOf} from 'ts-essentials';
-import {ReverseMap} from '@remly/types';
+import {ReverseMap} from '@drpc/types';
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
 

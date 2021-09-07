@@ -1,11 +1,11 @@
 import debugFactory from 'debug';
-import {ValueOrPromise} from '@remly/types';
-import {Metadata, Packet} from '@remly/packet';
+import {ValueOrPromise} from '@drpc/types';
+import {Metadata, Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
 import {nextTick} from '../utils';
 
-const debug = debugFactory('remly:core:socket:client');
+const debug = debugFactory('drpc:core:socket:client');
 
 export interface ClientSocketOptions extends SocketOptions {
   protocolId: string;
@@ -16,7 +16,7 @@ export interface ClientSocketOptions extends SocketOptions {
 }
 
 const DefaultClientSocketOptions: Partial<ClientSocketOptions> = {
-  protocolId: 'REM',
+  protocolId: 'drpc',
   protocolVersion: 1,
   keepalive: 30,
 };
@@ -32,7 +32,7 @@ export class ClientSocket extends Socket {
   constructor(options?: Partial<ClientSocketOptions>) {
     super(normalizeClientSocketOptions(options));
     this.metadata = this.options.metadata ?? new Metadata();
-    this.options.clientId = this.options.clientId ?? 'remly_' + uniqid();
+    this.options.clientId = this.options.clientId ?? 'drpc_' + uniqid();
   }
 
   get clientId() {

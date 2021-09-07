@@ -1,4 +1,4 @@
-import {OnIncoming, Remote, ServerSocket, ServerSocketOptions, Transport} from '@remly/core';
+import {OnIncoming, Remote, ServerSocket, ServerSocketOptions, Transport} from '@drpc/core';
 
 export interface ConnectionOptions extends ServerSocketOptions {
   onincoming?: OnIncoming<Connection>;

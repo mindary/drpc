@@ -1,4 +1,4 @@
-import {ValueOrPromise} from '@remly/types';
+import {ValueOrPromise} from '@drpc/types';
 import {Callable} from './types';
 
 export type ValueType<T> = T extends PromiseLike<infer U> ? U : T extends ValueOrPromise<infer U> ? U : T;

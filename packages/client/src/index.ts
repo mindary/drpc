@@ -4,4 +4,4 @@ export * from './connect';
 export * from './client';
 export * from './utils';
 
-export * from '@remly/interception';
+export * from '@drpc/interception';

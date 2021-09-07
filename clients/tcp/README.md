@@ -1,3 +1,3 @@
-# @remly/client-tcp
+# @drpc/client-tcp
 
 > The TCP client connector

@@ -1,12 +1,12 @@
 import debugFactory from 'debug';
-import {ValueOrPromise} from '@remly/types';
+import {ValueOrPromise} from '@drpc/types';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {ErrorLike} from '@libit/error/types';
 import {ChainedError} from '@libit/error/chained';
 import {NetAddress} from './types';
-import {Packet, Parser} from '@remly/packet';
+import {Packet, Parser} from '@drpc/packet';
 
-const debug = debugFactory('remly:core:transport');
+const debug = debugFactory('drpc:core:transport');
 
 export type TransportState = 'open' | 'closing' | 'closed';
 

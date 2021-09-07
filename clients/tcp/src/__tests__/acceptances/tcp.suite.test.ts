@@ -1,8 +1,8 @@
 import {fromCallback} from 'a-callback';
-import {RpcSuite} from '@remly/testsuite';
-import {tcp} from '@remly/transport-tcp';
-import {connect} from '@remly/client';
-import {createTcpServer} from '@remly/testlab';
+import {RpcSuite} from '@drpc/testsuite';
+import {tcp} from '@drpc/transport-tcp';
+import {connect} from '@drpc/client';
+import {createTcpServer} from '@drpc/testlab';
 import * as channel from '../..';
 
 describe('TCP - suite', function () {

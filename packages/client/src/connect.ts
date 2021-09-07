@@ -1,17 +1,17 @@
 import debugFactory from 'debug';
 import {assert} from 'ts-essentials';
 import parseUrl from 'parse-url';
-import {resolveModule} from '@remly/resolver';
+import {resolveModule} from '@drpc/resolver';
 import {Client} from './client';
 import {ClientChannel, ClientOptions, ProtocolType} from './types';
 import {protocols} from './protocols';
 
-const debug = debugFactory('remly:client:connect');
+const debug = debugFactory('drpc:client:connect');
 
 export async function connect(brokerUrl: string, options?: ClientOptions): Promise<Client>;
 export async function connect(options: ClientOptions): Promise<Client>;
 export async function connect(brokerUrlOrOptions: string | ClientOptions, options?: ClientOptions): Promise<Client> {
-  debug('connecting to an remly broker...');
+  debug('connecting to an drpc broker...');
   let brokerUrl: string | undefined;
 
   if (typeof brokerUrlOrOptions === 'string') {

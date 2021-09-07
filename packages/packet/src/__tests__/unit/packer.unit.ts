@@ -26,7 +26,7 @@ describe('Packer', function () {
     testPackUnpack(
       'connect',
       {
-        protocolId: 'remly',
+        protocolId: 'drpc',
         protocolVersion: 1,
         keepalive: 30,
         clientId: 'test',

@@ -1,5 +1,5 @@
 import {Emittery} from '@libit/emittery';
-import {MessageTypes, Metadata, MetadataValue, PacketType} from '@remly/packet';
+import {MessageTypes, Metadata, MetadataValue, PacketType} from '@drpc/packet';
 import {Socket} from './sockets';
 import {Request} from './request';
 import {makeRemoteError} from './errors';

@@ -1,9 +1,9 @@
 import * as tls from 'tls';
-import {Certs, createTlsServer} from '@remly/testlab';
-import {Application} from '@remly/server';
-import {RpcSuite} from '@remly/testsuite';
-import {tcp} from '@remly/transport-tcp';
-import {connect} from '@remly/client';
+import {Certs, createTlsServer} from '@drpc/testlab';
+import {Application} from '@drpc/server';
+import {RpcSuite} from '@drpc/testsuite';
+import {tcp} from '@drpc/transport-tcp';
+import {connect} from '@drpc/client';
 import * as channel from '../..';
 import {expect} from '@loopback/testlab';
 

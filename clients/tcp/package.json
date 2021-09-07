@@ -1,5 +1,5 @@
 {
-  "name": "@remly/client-tcp",
+  "name": "@drpc/client-tcp",
   "description": "The TCP client connector",
   "version": "0.1.0",
   "keywords": [],
@@ -13,15 +13,15 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-client-tcp*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-client-tcp*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-client-tcp*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-client-tcp*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/client": "^0.8.0",
-    "@remly/transport-tcp": "^0.1.0",
+    "@drpc/client": "^0.8.0",
+    "@drpc/transport-tcp": "^0.1.0",
     "debug": "^4.3.2",
     "ts-essentials": "^8.1.0"
   },
@@ -29,9 +29,9 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@remly/server": "^0.13.0",
-    "@remly/testsuite": "^0.9.0",
-    "@remly/testlab": "^0.10.8",
+    "@drpc/server": "^0.13.0",
+    "@drpc/testsuite": "^0.9.0",
+    "@drpc/testlab": "^0.10.8",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.7.10",
     "a-callback": "^0.1.1"

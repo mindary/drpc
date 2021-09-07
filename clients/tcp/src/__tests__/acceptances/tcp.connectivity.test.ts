@@ -1,9 +1,9 @@
 import {fromCallback} from 'a-callback';
-import {tcp} from '@remly/transport-tcp';
-import {Application} from '@remly/server';
-import {connect} from '@remly/client';
-import {ConnectivitySuite} from '@remly/testsuite';
-import {createTcpServer} from '@remly/testlab';
+import {tcp} from '@drpc/transport-tcp';
+import {Application} from '@drpc/server';
+import {connect} from '@drpc/client';
+import {ConnectivitySuite} from '@drpc/testsuite';
+import {createTcpServer} from '@drpc/testlab';
 import * as channel from '../..';
 
 describe('TCP - connectivity', function () {

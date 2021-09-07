@@ -17,5 +17,5 @@ export * from './remote-emitter';
 export * from './remote';
 
 export * from '@libit/emittery';
-export * from '@remly/types';
-export * from '@remly/packet';
+export * from '@drpc/types';
+export * from '@drpc/packet';

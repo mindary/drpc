@@ -2,7 +2,7 @@
 import net from 'net';
 import tls from 'tls';
 import pick from 'tily/object/pick';
-import {NetAddress, Transport, TransportOptions} from '@remly/core';
+import {NetAddress, Transport, TransportOptions} from '@drpc/core';
 
 export class TCPTransport extends Transport {
   protected unbind: () => void;

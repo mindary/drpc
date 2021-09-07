@@ -3,7 +3,7 @@ import delay from 'delay';
 import {givenSocketPair, onceConnected} from '../support';
 import {ClientSocket, ServerSocket} from '../../sockets';
 import {ConnectTimeoutError} from '../../errors';
-import {Packet} from '@remly/packet';
+import {Packet} from '@drpc/packet';
 
 describe('Core - Connect', function () {
   describe('connect handshake', function () {
@@ -133,7 +133,7 @@ describe('Core - Connect', function () {
     });
 
     it('client should keep keepalive with server when open', async () => {
-      const [s, c] = givenSocketPair('test', {client: {keepalive: 99}});
+      const [, c] = givenSocketPair('test', {client: {keepalive: 99}});
       await onceConnected(c);
       expect(c.keepalive).equal(99);
     });

@@ -1,10 +1,10 @@
 import {fromCallback} from 'a-callback';
 import {AddressInfo} from 'net';
-import {RpcSuite} from '@remly/testsuite';
+import {RpcSuite} from '@drpc/testsuite';
 import http from 'http';
 import WS from 'ws';
-import {ws} from '@remly/transport-ws';
-import {connect} from '@remly/client';
+import {ws} from '@drpc/transport-ws';
+import {connect} from '@drpc/client';
 import * as channel from '../..';
 
 describe('WebSocket - Suite', function () {

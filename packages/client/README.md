@@ -1,3 +1,3 @@
-# @remly/client
+# @drpc/client
 
-> The remly abstract client
+> The drpc abstract client

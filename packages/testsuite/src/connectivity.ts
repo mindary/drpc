@@ -1,6 +1,6 @@
 import {CloseFn, PrepareFn} from './types';
-import {Application} from '@remly/server';
-import {ClientSocket, ServerSocket, Socket} from '@remly/core';
+import {Application} from '@drpc/server';
+import {ClientSocket, ServerSocket, Socket} from '@drpc/core';
 import {expect} from '@loopback/testlab';
 
 export namespace ConnectivitySuite {

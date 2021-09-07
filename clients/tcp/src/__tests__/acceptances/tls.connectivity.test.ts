@@ -1,9 +1,9 @@
-import {ConnectivitySuite} from '@remly/testsuite';
-import {Application} from '@remly/server';
-import {tcp} from '@remly/transport-tcp';
-import {connect} from '@remly/client';
+import {ConnectivitySuite} from '@drpc/testsuite';
+import {Application} from '@drpc/server';
+import {tcp} from '@drpc/transport-tcp';
+import {connect} from '@drpc/client';
 import {fromCallback} from 'a-callback';
-import {Certs, createTlsServer} from '@remly/testlab';
+import {Certs, createTlsServer} from '@drpc/testlab';
 import * as channel from '../../index';
 
 describe('TLS - connectivity', function () {

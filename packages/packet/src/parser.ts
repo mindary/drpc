@@ -1,6 +1,6 @@
 import {assert} from 'ts-essentials';
 import {Emittery} from '@libit/emittery';
-import {ValueOrPromise} from '@remly/types';
+import {ValueOrPromise} from '@drpc/types';
 import {HeaderCodec} from './codec';
 import {HeaderType, Packet} from './packet';
 import {packer} from './packer';
@@ -87,7 +87,6 @@ export class Parser extends Emittery<{
 
   /**
    * Parse a fully-buffered chunk.
-   * @param {Buffer} chunk
    */
   protected async decode(chunk: Buffer) {
     assert(chunk.length <= this.maxPacketSize);

@@ -1,3 +1,3 @@
-# @remly/testlab
+# @drpc/testlab
 
-> A collection of test utilities we use to write remly tests
+> A collection of test utilities we use to write drpc tests

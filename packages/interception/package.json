@@ -1,5 +1,5 @@
 {
-  "name": "@remly/interception",
+  "name": "@drpc/interception",
   "description": "The interception mixin",
   "version": "0.3.4",
   "keywords": [],
@@ -16,18 +16,18 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-interception*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-interception*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-interception*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-interception*.tgz && tree package && npm run clean"
   },
   "peerDependencies": {
     "@libit/interceptor": "^0.2.1"
   },
   "dependencies": {
-    "@remly/core": "^0.14.0",
-    "@remly/types": "^0.4.1",
+    "@drpc/core": "^0.14.0",
+    "@drpc/types": "^0.4.1",
     "debug": "^4.3.2",
     "ts-essentials": "^8.1.0"
   },

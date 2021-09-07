@@ -8,7 +8,7 @@ import {getAllRpcMethodMetadata} from './decorators';
 import flatten from 'tily/array/flatten';
 import uniq from 'tily/array/uniq';
 
-const debug = debugFactory('remly:core:registry');
+const debug = debugFactory('drpc:core:registry');
 
 export interface ServiceInvokeRequest {
   name: string;

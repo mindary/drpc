@@ -1,3 +1,3 @@
-# @remly/server
+# @drpc/server
 
-> The remly abstract server
+> The drpc abstract server

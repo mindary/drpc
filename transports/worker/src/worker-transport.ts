@@ -1,4 +1,4 @@
-import {Transport, ValueOrPromise} from '@remly/core';
+import {Transport, ValueOrPromise} from '@drpc/core';
 import {listenPort, MessagePort} from './port';
 
 export class WorkerTransport extends Transport {

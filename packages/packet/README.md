@@ -1,3 +1,3 @@
-# @remly/packet
+# @drpc/packet
 
-> Encode and Decode Remly packets
+> Encode and Decode DRPC packets

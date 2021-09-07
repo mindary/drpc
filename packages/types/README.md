@@ -1,3 +1,3 @@
-# @remly/types
+# @drpc/types
 
-> Common types shared in remly packages
+> Common types shared in drpc packages

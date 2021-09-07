@@ -1,5 +1,5 @@
-import {Application} from '@remly/server';
-import {ClientSocket, ServerSocket, ValueOrPromise} from '@remly/core';
+import {Application} from '@drpc/server';
+import {ClientSocket, ServerSocket, ValueOrPromise} from '@drpc/core';
 
 export type CloseFn = () => ValueOrPromise<void>;
 

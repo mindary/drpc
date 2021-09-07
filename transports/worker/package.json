@@ -1,5 +1,5 @@
 {
-  "name": "@remly/transport-worker",
+  "name": "@drpc/transport-worker",
   "description": "The Worker transport",
   "version": "0.1.0",
   "keywords": [],
@@ -13,14 +13,14 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-transport-worker*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-transport-worker*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-transport-worker*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-transport-worker*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.14.0"
+    "@drpc/core": "^0.14.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",

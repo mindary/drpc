@@ -2,10 +2,10 @@ import net from 'net';
 import tls from 'tls';
 import debugFactory from 'debug';
 import {MarkRequired} from 'ts-essentials';
-import {TCPTransport} from '@remly/transport-tcp';
-import {Client, ClientOptions} from '@remly/client';
+import {TCPTransport} from '@drpc/transport-tcp';
+import {Client, ClientOptions} from '@drpc/client';
 
-const debug = debugFactory('remly:client:tcp');
+const debug = debugFactory('drpc:client:tcp');
 
 export function connect(client: Client, opts: ClientOptions & {servername?: string}) {
   opts.port = opts.port ?? 1999;

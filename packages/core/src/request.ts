@@ -1,5 +1,5 @@
 import {Socket} from './sockets';
-import {PacketType, Metadata, MetadataValue} from '@remly/packet';
+import {PacketType, Metadata, MetadataValue} from '@drpc/packet';
 import {Response} from './response';
 
 export interface RequestMessage {

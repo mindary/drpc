@@ -1,6 +1,6 @@
 import {noop} from 'ts-essentials';
-import {ValueOrPromise} from '@remly/types';
-import {Packet} from '@remly/packet';
+import {ValueOrPromise} from '@drpc/types';
+import {Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
 import {Transport} from '../transport';

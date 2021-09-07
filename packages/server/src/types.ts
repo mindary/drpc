@@ -1,4 +1,4 @@
-import {Carrier, Request} from '@remly/core';
+import {Carrier, Request} from '@drpc/core';
 import {GenericInterceptor} from '@libit/interceptor';
 import {Connection} from './connection';
 

@@ -1,3 +1,3 @@
-# @remly/transport-worker
+# @drpc/transport-worker
 
 > The Worker transport

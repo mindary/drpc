@@ -1,3 +1,3 @@
-# @remly/transport-ws
+# @drpc/transport-ws
 
 > The WebSocket transport

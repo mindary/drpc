@@ -1,3 +1,3 @@
-# @remly/testsuite
+# @drpc/testsuite
 
-> The test suite for remly transports
+> The test suite for drpc transports

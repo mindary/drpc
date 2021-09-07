@@ -1,6 +1,6 @@
 {
-  "name": "@remly/client",
-  "description": "The remly abstract client",
+  "name": "@drpc/client",
+  "description": "The drpc abstract client",
   "version": "0.8.0",
   "keywords": [],
   "main": "dist/index.js",
@@ -16,19 +16,19 @@
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-client*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-client*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs  \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha --allow-console-logs  \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-client*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-client*.tgz && tree package && npm run clean"
   },
   "dependencies": {
     "@libit/interceptor": "^0.2.1",
-    "@remly/core": "^0.14.0",
-    "@remly/interception": "^0.3.4",
-    "@remly/resolver": "^0.1.0",
-    "@remly/transport-tcp": "^0.1.0",
-    "@remly/transport-ws": "^0.1.0",
+    "@drpc/core": "^0.14.0",
+    "@drpc/interception": "^0.3.4",
+    "@drpc/resolver": "^0.1.0",
+    "@drpc/transport-tcp": "^0.1.0",
+    "@drpc/transport-ws": "^0.1.0",
     "debug": "^4.3.2",
     "once-promise": "^2.0.0",
     "parse-url": "^5.0.7",

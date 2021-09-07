@@ -1,6 +1,6 @@
-// import {ValueOrPromise} from '@remly/types';
-// import {Connection} from '@remly/core';
-// import {Server} from '@remly/server';
+// import {ValueOrPromise} from '@drpc/types';
+// import {Connection} from '@drpc/core';
+// import {Server} from '@drpc/server';
 //
 // export interface ServerAndClient<C extends Connection = Connection> {
 //   server: Server<C>;

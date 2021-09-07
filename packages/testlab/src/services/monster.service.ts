@@ -1,5 +1,5 @@
 import delay from 'delay';
-import {RemoteError, rpc} from '@remly/core';
+import {RemoteError, rpc} from '@drpc/core';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {MonsterType} from './monster.definition';

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import {NetAddress, Transport, TransportOptions} from '@remly/core';
+import {NetAddress, Transport, TransportOptions} from '@drpc/core';
 import pick from 'tily/object/pick';
 import WebSocket from './websocket';
 

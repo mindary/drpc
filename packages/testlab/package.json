@@ -1,6 +1,6 @@
 {
-  "name": "@remly/testlab",
-  "description": "A collection of test utilities we use to write remly tests",
+  "name": "@drpc/testlab",
+  "description": "A collection of test utilities we use to write drpc tests",
   "version": "0.10.8",
   "keywords": [],
   "main": "dist/index.js",
@@ -15,20 +15,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mindary/remly"
+    "url": "https://github.com/mindary/drpc"
   },
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-tests*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-tests*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
     "test": "lb-mocha \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-tests*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-tests*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@remly/core": "^0.14.0",
-    "@remly/types": "^0.4.1",
+    "@drpc/core": "^0.14.0",
+    "@drpc/types": "^0.4.1",
     "delay": "^4.0.0",
     "ts-essentials": "^8.1.0"
   },

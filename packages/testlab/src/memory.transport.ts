@@ -1,4 +1,4 @@
-import {Transport, TransportOptions} from '@remly/core';
+import {Transport, TransportOptions} from '@drpc/core';
 
 export interface MemoryTransportOptions extends TransportOptions {
   closeSensitive?: boolean;

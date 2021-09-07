@@ -1,7 +1,7 @@
 import {ClientRequestArgs} from 'http';
 import {KeyObject} from 'tls';
 import {GenericInterceptor} from '@libit/interceptor';
-import {Carrier, ClientSocket, ClientSocketOptions, Request, Transport, TransportOptions} from '@remly/core';
+import {Carrier, ClientSocket, ClientSocketOptions, Request, Transport, TransportOptions} from '@drpc/core';
 import {Client} from './client';
 
 export type ClientRequest = Request<ClientSocket>;

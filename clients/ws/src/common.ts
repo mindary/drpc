@@ -1,4 +1,4 @@
-import {Client, ClientOptions, isBrowser} from '@remly/client';
+import {Client, ClientOptions, isBrowser} from '@drpc/client';
 import merge from 'tily/object/merge';
 import pick from 'tily/object/pick';
 

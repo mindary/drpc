@@ -1,5 +1,5 @@
 {
-  "name": "remly",
+  "name": "drpc",
   "version": "0.1.0",
   "description": "An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker and so on.",
   "engines": {
@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mindary/remly"
+    "url": "https://github.com/mindary/drpc"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",

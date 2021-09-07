@@ -1,5 +1,5 @@
 {
-  "name": "@remly/core",
+  "name": "@drpc/core",
   "description": "A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.",
   "version": "0.14.0",
   "keywords": [],
@@ -15,16 +15,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mindary/remly"
+    "url": "https://github.com/mindary/drpc"
   },
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
     "build": "lb-tsc",
-    "clean": "lb-clean remly-core*.tgz dist *.tsbuildinfo package",
+    "clean": "lb-clean drpc-core*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
     "test": "lb-mocha \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
-    "verify": "npm pack && tar xf remly-core*.tgz && tree package && npm run clean"
+    "verify": "npm pack && tar xf drpc-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
     "@libit/bufio": "^0.4.2",
@@ -33,8 +33,8 @@
     "@libit/interceptor": "^0.2.1",
     "@libit/timer": "^0.2.8",
     "@loopback/metadata": "^3.3.2",
-    "@remly/packet": "^0.1.0",
-    "@remly/types": "^0.4.1",
+    "@drpc/packet": "^0.1.0",
+    "@drpc/types": "^0.4.1",
     "clean-stack": "^4.1.0",
     "debug": "^4.3.2",
     "micromatch": "^4.0.4",

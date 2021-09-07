@@ -1,6 +1,6 @@
-# Remly Specification
+# DRPC Specification
 
-The Remly protocol is a _efficient_ RPC protocol designed to be used over some form of bidirectional communication (e.g.
+The DRPC protocol is a _efficient_ RPC protocol designed to be used over some form of bidirectional communication (e.g.
 tcp sockets or web sockets).
 
 ## Message Serialization
@@ -48,10 +48,10 @@ typedef struct {
 } packet_header_t;
 ```
 
-Every Remly message consists of a 9 byte header which includes the message type, the body size (not including the 9 byte
+Every DRPC message consists of a 9 byte header which includes the message type, the body size (not including the 9 byte
 header itself), as well as a 32 bit crc.
 
-There is no Remly handshake, as the client and server both know to wait for a 9 byte header. If the message `type` is
+There is no DRPC handshake, as the client and server both know to wait for a 9 byte header. If the message `type` is
 undefined, the client SHOULD treat the remote node as misbehaving and disconnect.
 
 If the message payload itself does not match the message header size. The client SHOULD disconnect from the remote node.
@@ -207,11 +207,11 @@ TODO
 
 TODO
 
-## Remly over TCP sockets
+## DRPC over TCP sockets
 
 TODO
 
-## Remly over WebSockets
+## DRPC over WebSockets
 
 TODO
 

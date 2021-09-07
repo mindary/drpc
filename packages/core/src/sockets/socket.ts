@@ -4,8 +4,8 @@ import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
-import {ValueOrPromise} from '@remly/types';
-import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@remly/packet';
+import {ValueOrPromise} from '@drpc/types';
+import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
 import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
 import {NetAddress, OnIncoming, OnOutgoing} from '../types';
@@ -15,7 +15,7 @@ import {Request} from '../request';
 import {Response} from '../response';
 import {Carrier} from '../carrier';
 
-const debug = debugFactory('remly:core:socket');
+const debug = debugFactory('drpc:core:socket');
 
 export type SocketState = TransportState | 'connected';
 

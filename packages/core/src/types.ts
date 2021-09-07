@@ -1,4 +1,4 @@
-import {ValueOrPromise} from '@remly/types';
+import {ValueOrPromise} from '@drpc/types';
 import {GenericInterceptor} from '@libit/interceptor';
 import {Socket} from './sockets';
 import {Carrier} from './carrier';

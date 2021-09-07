@@ -1,6 +1,6 @@
 import debugFactory from 'debug';
 
-const debug = debugFactory('remly:resolver');
+const debug = debugFactory('drpc:resolver');
 
 export type Loader = (name: string) => any;
 
@@ -9,7 +9,7 @@ export function resolveModule(name: string, loader?: Loader) {
   const module = tryModules(names, loader);
   let error = null;
   if (!module) {
-    error = `WARNING: {{Remly}} server channel "${name}" is not installed  as any of the following modules:\n\n ${names.join(
+    error = `WARNING: {{DRPC}} server channel "${name}" is not installed  as any of the following modules:\n\n ${names.join(
       '\n',
     )}\n\nTo fix, run:\n\n    {{npm install ${names[names.length - 1]}} --save}}\n`;
   }
@@ -24,10 +24,10 @@ function channelModuleNames(name: string) {
   const names = []; // Check the name as is
   if (!name.match(/^[\/.@]/) && !name.startsWith('@')) {
     names.push('./channels/' + name); // Check built-in channels
-    if (name.indexOf('remly-') !== 0) {
-      names.push('remly-' + name); // Try remly-channel-<name>
+    if (name.indexOf('drpc-') !== 0) {
+      names.push('drpc-' + name); // Try drpc-channel-<name>
     }
-    names.push('@remly/' + name); // Try @remly/channel-<name>
+    names.push('@drpc/' + name); // Try @drpc/channel-<name>
   }
   return names;
 }

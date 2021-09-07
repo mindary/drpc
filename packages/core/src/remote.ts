@@ -1,6 +1,6 @@
 import {assert} from 'ts-essentials';
 import {Options, UnsubscribeFn} from '@libit/emittery';
-import {AckMessageType, ErrorMessageType, Packet} from '@remly/packet';
+import {AckMessageType, ErrorMessageType, Packet} from '@drpc/packet';
 import {Store} from './store';
 import {Socket} from './sockets';
 import {RemoteError} from './errors';

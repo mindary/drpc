@@ -2,8 +2,8 @@ import 'ts-essentials';
 import '@libit/interceptor';
 
 import {Next} from '@libit/interceptor';
-import {Interception} from '@remly/interception';
-import {Carrier, ClientSocket, Emittery, Metadata, OnIncoming, Remote, SocketEvents, Transport} from '@remly/core';
+import {Interception} from '@drpc/interception';
+import {Carrier, ClientSocket, Emittery, Metadata, OnIncoming, Remote, SocketEvents, Transport} from '@drpc/core';
 import {ClientOptions, ClientOutgoingHandler, ClientRequest, ClientIncomingHandler, WrappedConnect} from './types';
 
 export class Client extends Emittery<SocketEvents> {
