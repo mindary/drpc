@@ -34,7 +34,7 @@
     "@drpc/server": "^0.13.0",
     "@drpc/testsuite": "^0.9.0",
     "@types/debug": "^4.1.7",
-    "@types/node": "^16.7.10",
+    "@types/node": "^16.7.11",
     "@types/ws": "^7.4.7",
     "a-callback": "^0.1.1"
   },
