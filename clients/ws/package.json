@@ -21,17 +21,18 @@
   },
   "dependencies": {
     "@drpc/client": "^0.8.0",
+    "@drpc/transport-ws": "^0.1.0",
     "debug": "^4.3.2",
     "tily": "^2.8.3",
     "ts-essentials": "^8.1.0",
     "ws": "^8.2.1"
   },
   "devDependencies": {
+    "@drpc/server": "^0.13.0",
+    "@drpc/testsuite": "^0.9.0",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@drpc/server": "^0.13.0",
-    "@drpc/testsuite": "^0.9.0",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.7.13",
     "@types/ws": "^7.4.7",
