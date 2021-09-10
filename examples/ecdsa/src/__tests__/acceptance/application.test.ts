@@ -26,10 +26,10 @@ describe('EcdsaApplication', function () {
         authmethod: 'ecdsa',
       },
       onauth: carrier => {
-        const [data] = carrier.getAsBuffer('authdata-bin');
+        const [data] = carrier.getAsBuffer('authdata');
         const authdata = signer.signAndPack(data, identity);
         carrier.set('authmethod', 'ecdsa');
-        carrier.set('authdata-bin', authdata);
+        carrier.set('authdata', authdata);
         carrier.respond = 'auth';
       },
     });

@@ -3,7 +3,7 @@ const LEGAL_NON_BINARY_VALUE_REGEX = /^[ -~]*$/;
 
 export type MetadataValue = string | Buffer;
 export type MetadataObject = Map<string, MetadataValue[]>;
-export type CompatibleMetadataValue = MetadataValue | number | boolean;
+export type CompatibleMetadataValue = MetadataValue;
 
 function isLegalKey(key: string): boolean {
   return LEGAL_KEY_REGEX.test(key);
@@ -35,10 +35,10 @@ function validate(key: string, value?: MetadataValue): void {
         throw new Error("keys that end with '-bin' must have Buffer values");
       }
     } else {
-      if (value instanceof Buffer) {
-        throw new Error("keys that don't end with '-bin' must have String values");
-      }
-      if (!isLegalNonBinaryValue(value)) {
+      // if (value instanceof Buffer) {
+      //   throw new Error("keys that don't end with '-bin' must have String values");
+      // }
+      if (typeof value === 'string' && !isLegalNonBinaryValue(value)) {
         throw new Error('Metadata string value "' + value + '" contains illegal characters');
       }
     }
@@ -99,10 +99,10 @@ export class Metadata {
           } else {
             if (Array.isArray(value)) {
               value.forEach(v => {
-                md.add(key, v.toString());
+                md.add(key, v);
               });
             } else if (value !== undefined) {
-              md.add(key, value.toString());
+              md.add(key, value);
             }
           }
         } catch (e) {
@@ -239,12 +239,12 @@ export class Metadata {
     });
   }
 
-  toObject(): Record<string, string[]> {
-    const result: Record<string, string[]> = {};
+  export(): Record<string, Buffer[]> {
+    const result: Record<string, Buffer[]> = {};
     this.data.forEach((values, key) => {
       // We assume that the user's interaction with this object is limited to
       // through its public API (i.e. keys and values are already validated).
-      result[key] = values.map(value => (Buffer.isBuffer(value) ? value.toString('base64') : value));
+      result[key] = values.map(value => (Buffer.isBuffer(value) ? value : Buffer.from(value)));
     });
     return result;
   }

@@ -12,7 +12,7 @@ export type HeaderType = BTDDataType<typeof HeaderSchema>;
 
 export const MetaItemSchema = {
   key: 'string',
-  values: ['string'],
+  values: ['buffer'],
 } as const;
 
 export const MetaSchema = [MetaItemSchema] as const;

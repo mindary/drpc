@@ -68,12 +68,13 @@ describe('Core - Connect', function () {
       clientSocket.metadata.set('authmethod', 'token');
       clientSocket.metadata.set('authdata', token);
       serverSocket.onauth = carrier => {
-        const [method] = carrier.get('authmethod');
-        const [data] = carrier.get('authdata');
+        const [method] = carrier.getAsString('authmethod');
+        const [data] = carrier.getAsString('authdata');
         if (method !== 'token' || data !== 'hello') {
           throw new Error('Unauthorized');
         }
       };
+      clientSocket.on('connect_error', console.error);
       await onceConnected(serverSocket, clientSocket);
     });
 

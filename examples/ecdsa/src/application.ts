@@ -28,12 +28,12 @@ export class EcdsaApplication extends RegistryMixin(Application) {
         // authentication stage 1
         // generate challenge
         const data = (socket.session.nonce = random(32));
-        carrier.set('authdata-bin', data);
+        carrier.set('authdata', data);
         carrier.set('authmethod', 'ecdsa');
         carrier.respond = 'auth';
       } else {
         // authentication stage 2
-        const [data] = carrier.getAsBuffer('authdata-bin');
+        const [data] = carrier.getAsBuffer('authdata');
         const ticket = this.signer.unpackAndVerify(data);
         // check identity
         if (!ticket.identities.includes(socket.id)) {

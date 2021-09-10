@@ -22,12 +22,12 @@ export class Packer {
   pack<T extends PacketType>(
     type: T,
     message: MessageTypes[T],
-    metadata?: Metadata | Record<string, string | string[]>,
+    metadata?: Metadata | Record<string, Buffer | Buffer[]>,
   ): Buffer;
   pack<T extends PacketType>(
     type: T | Packet<T>,
     message?: MessageTypes[T],
-    metadata?: Metadata | Record<string, string | string[]>,
+    metadata?: Metadata | Record<string, Buffer | Buffer[]>,
   ): Buffer {
     if (typeof type === 'object' && type.type != null) {
       metadata = type.metadata;
@@ -45,9 +45,8 @@ export class Packer {
         payload: this.payloadPacker.encode((message as any).payload),
       };
     }
-
     // encode metadata
-    const metaObject = (metadata instanceof Metadata ? metadata?.toObject() : metadata) ?? {};
+    const metaObject = (metadata instanceof Metadata ? metadata?.export() : metadata) ?? {};
     const meta: MetaType = [];
     for (const key in metaObject) {
       const value = metaObject[key];

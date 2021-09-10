@@ -250,7 +250,7 @@ describe('Metadata', () => {
       metadata.add('key-bin', Buffer.from(range(0, 16)));
       metadata.add('key-bin', Buffer.from(range(16, 32)));
       metadata.add('key-bin', Buffer.from(range(0, 32)));
-      const headers = metadata.toObject();
+      const headers = metadata.export();
       assert.deepStrictEqual(headers, {
         key1: ['value1'],
         key2: ['value2'],
@@ -264,7 +264,7 @@ describe('Metadata', () => {
     });
 
     it('creates an empty header object from empty Metadata', () => {
-      assert.deepStrictEqual(metadata.toObject(), {});
+      assert.deepStrictEqual(metadata.export(), {});
     });
   });
 
