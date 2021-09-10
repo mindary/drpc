@@ -17,6 +17,9 @@
       "path": "../core/tsconfig.json"
     },
     {
+      "path": "../registry/tsconfig.json"
+    },
+    {
       "path": "../server/tsconfig.json"
     },
     {

@@ -11,10 +11,19 @@
   ],
   "references": [
     {
+      "path": "../../transports/tcp/tsconfig.json"
+    },
+    {
+      "path": "../../transports/ws/tsconfig.json"
+    },
+    {
       "path": "../core/tsconfig.json"
     },
     {
       "path": "../interception/tsconfig.json"
+    },
+    {
+      "path": "../registry/tsconfig.json"
     },
     {
       "path": "../testlab/tsconfig.json"

@@ -159,6 +159,12 @@ export class Metadata {
     this.data.delete(key);
   }
 
+  has(key: string) {
+    key = normalizeKey(key);
+    validate(key);
+    return this.data.has(key);
+  }
+
   /**
    * Gets a list of all values associated with the key. Normalizes the key.
    * @param key The key whose value should be retrieved.
@@ -168,6 +174,14 @@ export class Metadata {
     key = normalizeKey(key);
     validate(key);
     return this.data.get(key) || [];
+  }
+
+  getAsString(key: string, encoding?: BufferEncoding): string[] {
+    return this.get(key).map(v => (typeof v === 'string' ? v : v.toString(encoding ?? 'utf-8')));
+  }
+
+  getAsBuffer(key: string, encoding?: BufferEncoding): Buffer[] {
+    return this.get(key).map(v => (Buffer.isBuffer(v) ? v : Buffer.from(v, encoding ?? 'base64')));
   }
 
   /**
@@ -181,7 +195,7 @@ export class Metadata {
     this.data.forEach((values, key) => {
       if (values.length > 0) {
         const v = values[0];
-        result[key] = v instanceof Buffer ? v.slice() : v;
+        result[key] = Buffer.isBuffer(v) ? v.slice() : v;
       }
     });
     return result;

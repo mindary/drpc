@@ -3,8 +3,8 @@ import {AddressInfo} from 'net';
 import {RpcSuite} from '@drpc/testsuite';
 import http from 'http';
 import WS from 'ws';
-import {ws} from '@drpc/transport-ws';
 import {connect} from '@drpc/client';
+import {ws} from '@drpc/server';
 import * as channel from '../..';
 
 describe('WebSocket - Suite', function () {

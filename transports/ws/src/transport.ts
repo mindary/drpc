@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import {NetAddress, Transport, TransportOptions} from '@drpc/core';
 import pick from 'tily/object/pick';
 import WebSocket from './websocket';
@@ -23,21 +22,19 @@ export class WebSocketTransport extends Transport {
 
   protected bind() {
     const onopen = () => this.open();
-    const onerror = (error: Error) => this.onError(error);
+    const onerror = (event: WebSocket.ErrorEvent) => this.onError(event.error);
     const onclose = () => this.doClose('connection lost');
-    const onmessage = (message: any) => this.onData(message);
-
-    this.socket.on('open', onopen);
-    this.socket.on('error', onerror);
-    this.socket.on('close', onclose);
-    this.socket.on('message', onmessage);
-
-    this.unbind = () => {
-      this.socket.off('open', onopen);
-      this.socket.off('error', onerror);
-      this.socket.off('close', onclose);
-      this.socket.off('message', onmessage);
+    const onmessage = (event: WebSocket.MessageEvent) => {
+      // TODO event.data cloud be ArrayBuffer and Buffer[], we need find a way to deal with it
+      this.onData(event.data as any).catch(err => this.onError(err));
     };
+
+    this.socket.onopen = onopen;
+    this.socket.onerror = onerror;
+    this.socket.onclose = onclose;
+    this.socket.onmessage = onmessage;
+
+    this.unbind = () => {};
   }
 
   protected doSend(data: Buffer) {
@@ -53,8 +50,20 @@ export class WebSocketTransport extends Transport {
   }
 }
 
-export function ws(handler: (transport: Transport) => any, options?: TransportOptions) {
-  return (socket: WebSocket) => {
-    handler(new WebSocketTransport(socket, options));
-  };
+function isWebSocket(x: any): x is WebSocket {
+  return (
+    x &&
+    (x instanceof WebSocket ||
+      ('readyState' in x && 'protocol' in x && typeof x.close === 'function' && typeof x.send === 'function'))
+  );
+}
+
+export function ws(handle: (transport: Transport) => any, options?: TransportOptions) {
+  return (socket: WebSocket) => handle(new WebSocketTransport(socket, options));
+}
+
+export function accept(socket: any, options?: TransportOptions) {
+  if (isWebSocket(socket)) {
+    return new WebSocketTransport(socket, options);
+  }
 }

@@ -1,10 +1,10 @@
 import {assert} from 'ts-essentials';
-import {CallablePacketType, OnIncoming, ServiceInvokeRequest} from '..';
+import {ActionPacketType, OnIncoming} from '@drpc/core';
 import {MixinTarget} from '../mixin-target';
-import {DefaultRegistry, Registrable, Registry} from '../registry';
+import {DefaultRegistry, Registrable, Registry, ServiceInvokeRequest} from '../registry';
 
 export interface WithOnRequest {
-  onincoming?: OnIncoming<CallablePacketType>;
+  onincoming?: OnIncoming;
 }
 
 export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: T) {
@@ -13,7 +13,7 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
      * Server or Client service registry
      */
     registry: Registry;
-    onincoming?: OnIncoming<CallablePacketType>;
+    onincoming?: OnIncoming<ActionPacketType>;
 
     constructor(...args: any[]) {
       super(...args);

@@ -1,9 +1,9 @@
 import {fromCallback} from 'a-callback';
 import {RpcSuite} from '@drpc/testsuite';
-import {tcp} from '@drpc/transport-tcp';
 import {connect} from '@drpc/client';
-import * as channel from '../../index';
+import {tcp} from '@drpc/server';
 import {Certs, createTlsServer} from '@drpc/testlab';
+import * as channel from '../../index';
 
 describe('TLS - suite', function () {
   RpcSuite.run(async () => {

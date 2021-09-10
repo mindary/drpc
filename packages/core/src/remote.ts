@@ -17,11 +17,11 @@ export interface RemoteEvents {
 }
 
 export interface RemoteOptions extends Options<any> {
-  onoutgoing?: OnOutgoing<'signal' | 'call'>;
+  onoutgoing?: OnOutgoing;
 }
 
 export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEvents> {
-  public onoutgoing: OnOutgoing<'signal' | 'call'>;
+  public onoutgoing: OnOutgoing;
 
   protected store: Store = new Store();
   protected unsubs: UnsubscribeFn[] = [];
@@ -103,7 +103,6 @@ export class Remote<SOCKET extends Socket = any> extends RemoteEmitter<RemoteEve
   async signal(event: string, data?: any) {
     assert(typeof event === 'string', 'Event must be a string.');
     const request = new Request<'signal'>(this.socket, 'signal', {
-      metadata: this.socket.metadata,
       message: {name: event, payload: data},
     });
 

@@ -27,22 +27,25 @@
     "verify": "npm pack && tar xf drpc-server*.tgz && tree package && npm run clean"
   },
   "dependencies": {
+    "@drpc/core": "^0.14.0",
+    "@drpc/interception": "^0.3.4",
+    "@drpc/transport-tcp": "^0.1.0",
+    "@drpc/transport-ws": "^0.1.0",
+    "@drpc/types": "^0.4.1",
     "@libit/emittery": "^0.10.1",
     "@libit/error": "^0.3.6",
     "@libit/interceptor": "^0.2.1",
     "@libit/timer": "^0.2.8",
-    "@drpc/core": "^0.14.0",
-    "@drpc/interception": "^0.3.4",
-    "@drpc/types": "^0.4.1",
     "debug": "^4.3.2",
     "ts-essentials": "^8.1.0",
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
+    "@drpc/registry": "^0.1.0",
+    "@drpc/testlab": "^0.10.8",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
-    "@drpc/testlab": "^0.10.8",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.7.13",
     "@types/uniqid": "^5.3.1"

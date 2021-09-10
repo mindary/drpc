@@ -1,10 +1,19 @@
 import debugFactory from 'debug';
-import {CallablePacketType, Carrier, OnIncoming, Registry, Transport, ValueOrPromise} from '@drpc/core';
+import {ActionPacketType, Carrier, OnIncoming, Transport, TransportOptions, ValueOrPromise} from '@drpc/core';
 import {Emittery, UnsubscribeFn} from '@libit/emittery';
-import {Next} from '@libit/interceptor';
 import {Interception} from '@drpc/interception';
+import {Registry} from '@drpc/registry';
 import {Connection} from './connection';
-import {ConnectHandler, ServerCarrier, ServerIncomingHandler, ServerOutgoingHandler, ServerRequest} from './types';
+import {
+  AuthHandler,
+  ServerCarrier,
+  ServerIncomingHandler,
+  ServerOutgoingHandler,
+  ServerRequest,
+  TransportHandler,
+} from './types';
+import {accept} from './transports';
+import {Next} from '@libit/interceptor';
 
 const debug = debugFactory('drpc:application');
 
@@ -36,7 +45,7 @@ export class ApplicationEmittery extends Emittery<ApplicationEvents> {
 
 export class Application extends ApplicationEmittery {
   public readonly connections: Map<string, Connection> = new Map();
-  public readonly handle: (transport: Transport) => void;
+  public readonly handle: TransportHandler;
 
   public onconnect?: OnConnect;
   public onincoming?: OnIncoming;
@@ -47,26 +56,18 @@ export class Application extends ApplicationEmittery {
 
   protected connectionsUnsubs: Map<string, UnsubscribeFn[]> = new Map();
 
-  protected connectInterception = new Interception<Carrier<'connect', Connection>>();
-  protected incomingInterception = new Interception<Carrier<CallablePacketType, Connection>>();
-  protected outgoingInterception = new Interception<ServerRequest<CallablePacketType>>();
+  protected authInterception = new Interception<Carrier<'auth', Connection>>();
+  protected incomingInterception = new Interception<Carrier<ActionPacketType, Connection>>();
+  protected outgoingInterception = new Interception<ServerRequest<ActionPacketType>>();
 
   constructor(options: Partial<ApplicationOptions> = {}) {
     super();
     this.options = Object.assign({}, DEFAULT_APPLICATION_OPTIONS, options);
     this.connectTimeout = this.options.connectTimeout;
 
-    this.handle = transport =>
-      new Connection(transport, {
-        connectTimeout: this.connectTimeout,
-        requestTimeout: this.requestTimeout,
-        onconnect: carrier => this.handleConnect(carrier),
-        onincoming: (carrier, next) => this.handleIncoming(carrier, next),
-        onoutgoing: (request, next) => this.handleOutgoing(request, next),
-      });
-
+    this.handle = socket => this.doHandle(socket);
     this.onincoming = (carrier, next) =>
-      carrier.isCall() ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
+      carrier.type === 'call' ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
   }
 
   private _connectTimeout: number;
@@ -89,8 +90,8 @@ export class Application extends ApplicationEmittery {
     this._requestTimeout = timeout ? timeout : DEFAULT_APPLICATION_OPTIONS.requestTimeout;
   }
 
-  addConnectInterceptor(interceptor: ConnectHandler) {
-    this.connectInterception.add(interceptor);
+  addAuthInterceptor(interceptor: AuthHandler) {
+    this.authInterception.add(interceptor);
     return this;
   }
 
@@ -104,39 +105,43 @@ export class Application extends ApplicationEmittery {
     return this;
   }
 
-  protected async handleConnect(carrier: ServerCarrier<'connect'>) {
-    const {socket} = carrier;
-    debug('adding connection', socket.id);
-    await this.connectInterception.invoke(carrier, () => this.doConnect(carrier));
+  accept(options?: TransportOptions) {
+    return (socket: any) => this.handle(accept(socket, options));
   }
 
-  protected async handleIncoming(carrier: ServerCarrier<CallablePacketType>, next: Next) {
+  protected doHandle(transport: Transport) {
+    const conn = new Connection(transport, {
+      connectTimeout: this.connectTimeout,
+      requestTimeout: this.requestTimeout,
+      // onconnect: carrier => this.handleConnect(carrier),
+      onauth: carrier => this.handleAuth(carrier),
+      onincoming: (carrier, next) => this.handleIncoming(carrier, next),
+      onoutgoing: (request, next) => this.handleOutgoing(request, next),
+    });
+    conn
+      .once('connected')
+      .then(() => this.registerConnection(conn))
+      .catch(e => this.emit('error', e));
+    return conn;
+  }
+
+  protected async handleAuth(carrier: Carrier<'auth', Connection>) {
+    // intercept authentication, throw error for un-auth
+    return this.authInterception.invoke(carrier);
+  }
+
+  protected async handleIncoming(carrier: ServerCarrier<ActionPacketType>, next: Next) {
+    // call doIncoming to handle call or signal request if incomingInterception not handled
     return this.incomingInterception.invoke(carrier, () => this.doIncoming(carrier, next));
   }
 
-  protected async handleOutgoing(request: ServerRequest<CallablePacketType>, next: Next) {
+  protected async handleOutgoing(request: ServerRequest<ActionPacketType>, next: Next) {
+    // next will do send the request
     return this.outgoingInterception.invoke(request, next);
   }
 
-  protected async doConnect(carrier: ServerCarrier<'connect'>) {
-    const {socket} = carrier;
-
-    if (!socket.isOpen()) {
-      return debug('socket has been closed - cancel connect');
-    }
-
-    if (this.onconnect) {
-      await this.onconnect(carrier);
-    }
-
-    await this.registerConnection(socket);
-  }
-
-  protected async doIncoming(carrier: ServerCarrier<CallablePacketType>, next: Next) {
-    if (this.onincoming) {
-      return this.onincoming(carrier, next);
-    }
-    return next();
+  protected async doIncoming(carrier: ServerCarrier<ActionPacketType>, next: Next) {
+    return this.onincoming?.(carrier, next);
   }
 
   protected async registerConnection(conn: Connection) {
@@ -145,14 +150,12 @@ export class Application extends ApplicationEmittery {
     }
 
     this._add(conn);
+    await this.emit('connection', conn);
   }
 
   protected _add(conn: Connection) {
     this.connections.set(conn.id, conn);
-    this.connectionsUnsubs.set(conn.id, [
-      conn.on('connected', () => this._connected(conn)),
-      conn.on('close', () => this._remove(conn)),
-    ]);
+    this.connectionsUnsubs.set(conn.id, [conn.on('close', () => this._remove(conn))]);
   }
 
   protected async _remove(connection: Connection) {
@@ -167,9 +170,5 @@ export class Application extends ApplicationEmittery {
     } else {
       debug('ignoring remove for connection %s', connection.id);
     }
-  }
-
-  protected async _connected(connection: Connection) {
-    await this.emit('connection', connection);
   }
 }

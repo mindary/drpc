@@ -1,11 +1,10 @@
 import * as tls from 'tls';
 import {Certs, createTlsServer} from '@drpc/testlab';
-import {Application} from '@drpc/server';
+import {Application, tcp} from '@drpc/server';
 import {RpcSuite} from '@drpc/testsuite';
-import {tcp} from '@drpc/transport-tcp';
 import {connect} from '@drpc/client';
-import * as channel from '../..';
 import {expect} from '@loopback/testlab';
+import * as channel from '../..';
 
 describe('tls client', function () {
   let app: Application;

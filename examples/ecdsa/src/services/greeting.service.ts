@@ -1,4 +1,4 @@
-import {drpc} from '@drpc/core';
+import {drpc} from '@drpc/registry';
 import {Greeting, GreetingType} from './greeting.def';
 
 @drpc(Greeting.name)

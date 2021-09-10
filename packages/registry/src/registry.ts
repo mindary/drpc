@@ -2,9 +2,8 @@ import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
 import toArray from 'tily/array/toArray';
 import debugFactory from 'debug';
-import {Method} from './method';
-import {UnimplementedError} from './errors';
-import {getAllRpcMethodMetadata, getDrpcMetadata} from './decorators';
+import {Method, UnimplementedError} from '@drpc/core';
+import {getAllRpcMethodMetadata, getDrpcMetadata} from '@drpc/decorators';
 import flatten from 'tily/array/flatten';
 import uniq from 'tily/array/uniq';
 

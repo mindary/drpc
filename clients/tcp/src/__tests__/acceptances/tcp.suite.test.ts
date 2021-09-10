@@ -1,7 +1,7 @@
 import {fromCallback} from 'a-callback';
 import {RpcSuite} from '@drpc/testsuite';
-import {tcp} from '@drpc/transport-tcp';
 import {connect} from '@drpc/client';
+import {tcp} from '@drpc/server';
 import {createTcpServer} from '@drpc/testlab';
 import * as channel from '../..';
 

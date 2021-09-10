@@ -1,6 +1,5 @@
 import {ConnectivitySuite} from '@drpc/testsuite';
-import {Application} from '@drpc/server';
-import {tcp} from '@drpc/transport-tcp';
+import {Application, tcp} from '@drpc/server';
 import {connect} from '@drpc/client';
 import {fromCallback} from 'a-callback';
 import {Certs, createTlsServer} from '@drpc/testlab';

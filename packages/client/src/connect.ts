@@ -21,7 +21,7 @@ export async function connect(brokerUrlOrOptions: string | ClientOptions, option
     brokerUrl = undefined;
   }
 
-  let opts = options || {};
+  let opts: ClientOptions = options ?? {};
 
   if (brokerUrl) {
     const parsed = parseUrl(brokerUrl, true);

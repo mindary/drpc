@@ -2,7 +2,7 @@ import {Socket} from './sockets';
 import {MessageTypes, Metadata, MetadataValue} from '@drpc/packet';
 import {Response} from './response';
 
-export type RequestPacketType = 'connect' | 'signal' | 'call';
+export type RequestPacketType = 'connect' | 'auth' | 'signal' | 'call';
 
 export interface RequestPacket<T extends RequestPacketType> {
   metadata?: Metadata;
@@ -28,16 +28,24 @@ export class Request<T extends RequestPacketType, SOCKET extends Socket = any> {
     return this.socket.address;
   }
 
-  get(ket: string): MetadataValue[] {
-    return this.metadata.get(ket);
+  has(key: string) {
+    return this.metadata.has(key);
+  }
+
+  get(key: string): MetadataValue[] {
+    return this.metadata.get(key);
+  }
+
+  getAsString(key: string): string[] {
+    return this.metadata.getAsString(key);
+  }
+
+  getAsBuffer(key: string): Buffer[] {
+    return this.metadata.getAsBuffer(key);
   }
 
   getMap() {
     return this.metadata.getMap();
-  }
-
-  isConnect() {
-    return this.type === 'connect';
   }
 
   isCall() {

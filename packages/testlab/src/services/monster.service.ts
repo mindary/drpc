@@ -1,5 +1,6 @@
 import delay from 'delay';
-import {RemoteError, drpc} from '@drpc/core';
+import {RemoteError} from '@drpc/core';
+import {drpc} from '@drpc/decorators';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {MonsterType} from './monster.definition';
@@ -54,6 +55,14 @@ export class MonsterService implements MonsterType {
 
   @drpc.method() invalidError() {
     return new InvalidError();
+  }
+
+  extraMethod1() {
+    return 'extraMethod1';
+  }
+
+  extraMethod2() {
+    return 'extraMethod2';
   }
 }
 

@@ -11,6 +11,7 @@ import {
   TransportOptions,
 } from '@drpc/core';
 import {Client} from './client';
+import * as Buffer from 'buffer';
 
 export type ClientRequest = Request<RequestPacketType, ClientSocket>;
 
@@ -84,6 +85,7 @@ export interface ClientOptions
    * the password required by your broker, if any
    */
   password?: string;
+
   reschedulePings?: boolean;
   servers?: Array<{
     host: string;
@@ -91,7 +93,10 @@ export interface ClientOptions
     protocol?: ProtocolType;
   }>;
   transformWsUrl?: (url: string, options: ClientOptions, client: Client) => string;
-  metadata?: Record<string, any>;
+  metadata?: {
+    authmethod?: string;
+    authdata?: Buffer;
+  } & Record<string, Buffer | string>;
 }
 
 export type WrappedConnect = (client: Client) => Transport;

@@ -10,14 +10,15 @@ export interface BufferReader {
 }
 
 export const PacketTypeToNum = {
-  connect: 0x01,
-  connack: 0x02,
-  ping: 0x03,
-  pong: 0x04,
-  signal: 0x10,
-  call: 0x11,
-  ack: 0x12,
-  error: 0x13,
+  connect: 1,
+  connack: 2,
+  ping: 3,
+  pong: 4,
+  signal: 5,
+  call: 6,
+  ack: 7,
+  error: 8,
+  auth: 9,
 };
 
 export type PacketTypeToNumType = typeof PacketTypeToNum;

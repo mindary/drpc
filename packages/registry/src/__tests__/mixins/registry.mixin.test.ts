@@ -1,7 +1,13 @@
+import {OnIncoming} from '@drpc/core';
 import {expect} from '@loopback/testlab';
-import {OnIncoming} from '../../..';
-import {RegistryMixin} from '../../../mixins';
-import {monster} from '../../fixtures/monster.service';
+import {monster} from '@drpc/testlab';
+import {RegistryMixin} from '../../mixins';
+
+class Application {
+  onincoming: OnIncoming;
+}
+
+class ApplicationWithRegistry extends RegistryMixin(Application) {}
 
 describe('RegistryMixin', () => {
   it('mixed class has .register() and .unregister()', function () {
@@ -22,10 +28,4 @@ describe('RegistryMixin', () => {
     const result = await app.invokeWithRegistry({name: 'add', params: [1, 2]});
     expect(result).equal(3);
   });
-
-  class Application {
-    onincoming: OnIncoming;
-  }
-
-  class ApplicationWithRegistry extends RegistryMixin(Application) {}
 });

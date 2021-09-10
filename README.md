@@ -18,8 +18,7 @@ export const Greeter = {
 
 ```ts
 // main.ts
-import {Application} from '@drpc/server';
-import {tcp} from '@drpc/transport-tcp';
+import {Application, tcp} from '@drpc/server';
 import {Greeter} from './greeter.definition';
 
 async function main() {

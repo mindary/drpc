@@ -1,11 +1,8 @@
+import {Method, protoKeys, UnimplementedError} from '@drpc/core';
 import {expect} from '@loopback/testlab';
-import {DefaultRegistry} from '../../registry';
-import {monster, MonsterService} from '../fixtures/monster.service';
-import {protoKeys} from '../../utils';
-import {Method} from '../../method';
-import {UnimplementedError} from '../../errors';
-import {Monster} from '../fixtures/monster.definition';
-import {drpc, getAllRpcMethodMetadata} from '../../decorators';
+import {Monster, monster, MonsterService} from '@drpc/testlab';
+import {drpc, getAllRpcMethodMetadata} from '@drpc/decorators';
+import {DefaultRegistry} from '../registry';
 
 describe('registry', function () {
   describe('register', function () {

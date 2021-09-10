@@ -53,12 +53,20 @@ export class TCPTransport extends Transport {
   }
 }
 
-export function tcp(handler: (transport: Transport) => any, options?: TransportOptions) {
-  return (socket: net.Socket | tls.TLSSocket) => {
-    handler(new TCPTransport(socket, options));
-  };
+function isSocket(x: any): x is net.Socket {
+  return x && (x instanceof net.Socket || (typeof x.write === 'function' && typeof x.destroy === 'function'));
 }
 
 function isSecure(x: any): x is tls.TLSSocket {
   return typeof x?.getCertificate === 'function';
+}
+
+export function tcp(handle: (transport: Transport) => any, options?: TransportOptions) {
+  return (socket: net.Socket | tls.TLSSocket) => handle(new TCPTransport(socket, options));
+}
+
+export function accept(socket: any, options?: TransportOptions) {
+  if (isSocket(socket)) {
+    return new TCPTransport(socket, options);
+  }
 }

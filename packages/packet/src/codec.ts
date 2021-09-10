@@ -1,6 +1,7 @@
 import {build} from 'binio';
 import {
   AckMessageSchema,
+  AuthMessageSchema,
   CallMessageSchema,
   ConnackMessageSchema,
   ConnectMessageSchema,
@@ -23,6 +24,7 @@ export const CallMessageCodec = build(CallMessageSchema);
 export const AckMessageCodec = build(AckMessageSchema);
 export const SignalMessageCodec = build(SignalMessageSchema);
 export const ErrorMessageCodec = build(ErrorMessageSchema);
+export const AuthMessageCodec = build(AuthMessageSchema);
 
 export const MessageCodecs: MessageCodecTypes = {
   connect: ConnectMessageCodec,
@@ -33,4 +35,5 @@ export const MessageCodecs: MessageCodecTypes = {
   ack: AckMessageCodec,
   signal: SignalMessageCodec,
   error: ErrorMessageCodec,
+  auth: AuthMessageCodec,
 } as const;

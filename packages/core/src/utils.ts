@@ -1,18 +1,19 @@
 export const MAX_SAFE_INTEGER = 9007199254740991;
 
 /**
- * Create a 64 bit nonce.
+ * Create a n byte nonce.
  * @returns {Buffer}
  */
-export function nonce() {
-  const n = Buffer.allocUnsafe(8);
-  const a = (Math.random() * 0x100000000) >>> 0;
-  const b = (Math.random() * 0x100000000) >>> 0;
-
-  n.writeUInt32LE(a, 0);
-  n.writeUInt32LE(b, 4);
-
-  return n;
+export function random(n = 8) {
+  const answer = Buffer.allocUnsafe(n);
+  for (let i = 0; i < n; i += 4) {
+    const num = (Math.random() * 0x100000000) >>> 0;
+    const end = Math.min(n, i + 4);
+    for (let j = i; j < end; j++) {
+      answer[j] = (num >> ((j - i) << 3)) & 0xff;
+    }
+  }
+  return answer;
 }
 
 export function isLength(value: any): boolean {

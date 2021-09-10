@@ -1,7 +1,8 @@
 import {givenMemoryTransportPair, Monster, monster} from '@drpc/testlab';
 import {expect} from '@loopback/testlab';
-import {ClientSocket, ClientSocketOptions, RegistryMixin, Transport} from '@drpc/core';
+import {ClientSocket, ClientSocketOptions, Transport} from '@drpc/core';
 import {Application} from '../../application';
+import {RegistryMixin} from '@drpc/registry';
 
 describe('Application', function () {
   it('connect successful', async () => {
@@ -15,7 +16,7 @@ describe('Application', function () {
     app.handle(transport);
 
     // wait for connected
-    await client.once('connected');
+    await app.once('connection');
 
     expect(app.connections.size).equal(1);
 
@@ -38,7 +39,7 @@ describe('Application', function () {
     app.handle(transport);
 
     // wait for connected
-    await client.once('connected');
+    await app.once('connection');
 
     // call
     const result = await service.add(1, 2);
@@ -57,12 +58,12 @@ describe('Application', function () {
     const [client1, transport1] = givenSocketPair({clientId: '123'});
     app.handle(transport1);
     client1.on('close', () => (closed = true));
-    await client1.once('connected');
+    await app.once('connection');
     expect(app.connections.size).equal(1);
 
     const [client2, transport2] = givenSocketPair({clientId: '123'});
     app.handle(transport2);
-    await client2.once('connected');
+    await app.once('connection');
     expect(app.connections.size).equal(1);
     expect(closed).is.true();
     expect(client1.state).equal('closed');

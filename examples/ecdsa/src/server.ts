@@ -1,7 +1,6 @@
 import net, {ServerOpts} from 'net';
 import {once} from 'events';
-import {Application} from '@drpc/server';
-import {tcp} from '@drpc/transport-tcp';
+import {Application, tcp} from '@drpc/server';
 
 export async function setupServer(app: Application, opts?: ServerOpts & {port?: number}) {
   const server = net.createServer(opts, tcp(app.handle));

@@ -1,9 +1,10 @@
 import {assert} from 'ts-essentials';
 import {expect} from '@loopback/testlab';
-import {DefaultRegistry, Socket, ValueOrPromise} from '@drpc/core';
+import {Socket, ValueOrPromise} from '@drpc/core';
 import {Application, ApplicationOptions} from '@drpc/server';
 import {Client} from '@drpc/client';
 import {Monster, monster} from '@drpc/testlab';
+import {DefaultRegistry} from '@drpc/registry';
 import {PrepareFn} from './types';
 
 export namespace RpcSuite {

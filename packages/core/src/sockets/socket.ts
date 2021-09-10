@@ -8,16 +8,16 @@ import {ValueOrPromise} from '@drpc/types';
 import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
 import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {NetAddress, OnIncoming, OnOutgoing} from '../types';
+import {NetAddress, OnAuth, OnIncoming, OnOutgoing} from '../types';
 import {Alive} from '../alive';
 import {Remote} from '../remote';
 import {Request, RequestPacketType} from '../request';
-import {Response} from '../response';
+import {createResponse} from '../response';
 import {Carrier} from '../carrier';
 
 const debug = debugFactory('drpc:core:socket');
 
-export type SocketState = TransportState | 'connected';
+export type SocketState = 'connecting' | 'connected' | TransportState;
 
 export interface SocketEvents {
   tick: undefined;
@@ -41,6 +41,7 @@ export interface SocketOptions {
   connectTimeout?: number;
   requestTimeout?: number;
   transport?: Transport;
+  onauth?: OnAuth;
   onincoming?: OnIncoming;
   onoutgoing?: OnOutgoing;
 }
@@ -58,12 +59,13 @@ export abstract class Socket extends SocketEmittery {
   public id?: string;
   public transport: Transport;
   public state: SocketState;
-  public onincoming?: OnIncoming;
   public interval: number;
   public keepalive: number;
   public connectTimeout: number;
   public requestTimeout: number;
-  public metadata: Metadata;
+
+  public onauth?: OnAuth;
+  public onincoming?: OnIncoming;
 
   public readonly options: SocketOptions;
   public readonly remote: Remote;
@@ -83,6 +85,7 @@ export abstract class Socket extends SocketEmittery {
     this.connectTimeout = this.options.connectTimeout!;
     this.requestTimeout = this.options.requestTimeout!;
 
+    this.onauth = options.onauth;
     this.onincoming = options.onincoming;
 
     this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
@@ -120,7 +123,11 @@ export abstract class Socket extends SocketEmittery {
   }
 
   isOpen() {
-    return this.state === 'open' || this.state === 'connected';
+    return this.state !== 'closing' && this.state !== 'closed';
+  }
+
+  isConnecting() {
+    return this.state === 'connecting';
   }
 
   isConnected() {
@@ -159,21 +166,31 @@ export abstract class Socket extends SocketEmittery {
   }
 
   async handlePacket(packet: Packet) {
-    if (!this.isOpen()) {
-      return debug('packet received with closed socket');
-    }
-
-    this.alive?.touch();
-
     const {type, message} = packet;
 
     // export packet event
     if (debug.enabled) {
       debug(`received packet "${type ?? 'unknown'}"`);
     }
-    try {
-      await this.emit('packet', packet);
 
+    await this.emit('packet', packet);
+
+    if (type === 'connect') {
+      if (this.isConnecting() || this.isConnected()) {
+        await this.close();
+        return;
+      }
+      await this.handleConnect(packet as any);
+      return;
+    }
+
+    if (!this.isConnecting() && !this.isConnected()) {
+      await this.close();
+      return;
+    }
+
+    this.alive?.touch();
+    try {
       // Socket is live - any packet counts
       await this.emit('heartbeat');
 
@@ -191,11 +208,11 @@ export abstract class Socket extends SocketEmittery {
         case 'pong':
           await this.handlePong(packet as any);
           break;
-        case 'connect':
-          await this.handleConnect(packet as any);
-          break;
         case 'connack':
           await this.handleConnack(packet as any);
+          break;
+        case 'auth':
+          await this.handleAuth(packet as any);
           break;
         default:
           if (!this.isConnected()) {
@@ -262,6 +279,15 @@ export abstract class Socket extends SocketEmittery {
    * @protected
    */
   protected abstract handleConnect(packet: Packet<'connect'>): ValueOrPromise<void>;
+
+  /**
+   * Auth packet handler.
+   * client handle according to stage
+   * server handle according to stage
+   * @param packet
+   * @protected
+   */
+  protected abstract handleAuth(packet: Packet<'auth'>): ValueOrPromise<any>;
 
   /**
    * Connack packet handler.
@@ -375,44 +401,43 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected createCarrier<T extends RequestPacketType>({type, message, metadata}: Packet<T>) {
-    const request = new Request(this, type, {
+    const request = new Request<T>(this, type, {
       message,
       metadata,
     });
-    const response = new Response(this, type, (message as any)?.id);
+    const id = (message as any)?.id;
+    const response = createResponse(type, this, id);
     request.response = response;
     response.request = request;
 
     return new Carrier(request, response);
   }
 
-  private async handleConnectError({message}: Packet<'error'>) {
+  protected async handleConnectError({message}: Packet<'error'>) {
     await this.emit('connect_error', toError(message.message));
     await this.close();
   }
 
-  private async handleRequest(packet: Packet<'signal' | 'call'>) {
+  protected async handleRequest(packet: Packet<'signal' | 'call'>) {
     const {type} = packet;
     // id of 0,null,undefined means signal
     const carrier = this.createCarrier(packet);
 
+    if (type === 'call' && !this.onincoming) {
+      await carrier.error(new UnimplementedError());
+      return;
+    }
+
     try {
       const result = await this.onincoming?.(carrier, () => {
-        if (carrier.isCall()) {
-          throw new UnimplementedError();
-        }
-        // signal will ignore returns
-        return true;
+        throw new UnimplementedError();
       });
       if (type === 'call') {
         // call
-        if (!carrier.ended) {
-          await carrier.end(result);
-        }
-      } else {
-        // signal
-        await this.remote.emit(packet.message);
+        return await carrier.res.endIfNotEnded('ack', {payload: result});
       }
+      // signal
+      return await this.remote.emit(packet.message);
     } catch (e: any) {
       if (!carrier.ended && e?.message) {
         await carrier.error(e);

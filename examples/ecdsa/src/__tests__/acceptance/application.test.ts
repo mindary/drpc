@@ -23,15 +23,18 @@ describe('EcdsaApplication', function () {
       channel: await import('@drpc/client-tcp'),
       clientId: identity.id,
       metadata: {
-        auth: 'ecdsa',
+        authmethod: 'ecdsa',
+      },
+      onauth: carrier => {
+        const [data] = carrier.getAsBuffer('authdata-bin');
+        const authdata = signer.signAndPack(data, identity);
+        carrier.set('authmethod', 'ecdsa');
+        carrier.set('authdata-bin', authdata);
+        carrier.respond = 'auth';
       },
     });
     client.on('error', console.error);
     client.on('connect_error', console.error);
-    client.addOutgoingInterceptor((request, next) => {
-      request.metadata.set('sig-bin', signer.signAndPack(client.socket.nonce, identity));
-      return next();
-    });
   });
 
   it('gets a greeting', async function () {

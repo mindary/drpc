@@ -1,5 +1,4 @@
 import debugFactory from 'debug';
-import {ValueOrPromise} from '@drpc/types';
 import {Metadata, Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
@@ -28,7 +27,7 @@ const normalizeClientSocketOptions = (options?: Partial<ClientSocketOptions>) =>
 
 export class ClientSocket extends Socket {
   public readonly options: ClientSocketOptions;
-  public nonce: Buffer;
+  public metadata: Metadata;
 
   constructor(options?: Partial<ClientSocketOptions>) {
     super(normalizeClientSocketOptions(options));
@@ -46,15 +45,30 @@ export class ClientSocket extends Socket {
   }
 
   protected doConnect() {
+    this.state = 'connecting';
     this.send('connect', this.options, this.metadata).catch(e => this.emit('connect_error', e));
   }
 
-  protected handleConnect(packet: Packet<'connect'>): ValueOrPromise<void> {
-    throw new Error('Invalid packet');
+  protected handleConnect(packet: Packet<'connect'>) {
+    throw new Error('Unsupported packet in client');
   }
 
-  protected async handleConnack({message}: Packet<'connack'>) {
-    this.nonce = message.nonce;
+  protected async handleAuth(packet: Packet<'auth'>) {
+    const carrier = this.createCarrier(packet);
+    try {
+      await this.onauth?.(carrier);
+      if (carrier.respond === 'auth') {
+        await carrier.res.endIfNotEnded('auth');
+      }
+    } catch (e: any) {
+      await this.emit('error', e);
+    }
+  }
+
+  protected async handleConnack(packet: Packet<'connack'>) {
+    if (packet.metadata?.has('authmethod')) {
+      await this.onauth?.(this.createCarrier({...packet, type: 'auth'}));
+    }
     await this.doConnected();
   }
 

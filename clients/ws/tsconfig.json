@@ -18,9 +18,6 @@
     },
     {
       "path": "../../packages/testsuite/tsconfig.json"
-    },
-    {
-      "path": "../../transports/ws/tsconfig.json"
     }
   ]
 }

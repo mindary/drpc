@@ -103,7 +103,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
     }
   }
 
-  protected onData(data: Buffer): ValueOrPromise<void> {
+  protected async onData(data: Buffer | Uint8Array | string) {
     if (this.isOpen()) {
       return this.parser.feed(data);
     }

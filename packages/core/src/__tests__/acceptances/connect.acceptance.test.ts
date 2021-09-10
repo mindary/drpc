@@ -17,7 +17,7 @@ describe('Core - Connect', function () {
 
       await onceConnected(serverSocket, clientSocket);
 
-      expect(serverEvents).deepEqual(['packet', 'heartbeat', 'packet_create', 'connected']);
+      expect(serverEvents).deepEqual(['packet', 'packet_create', 'connected']);
       expect(clientEvents).deepEqual(['packet_create', 'packet', 'heartbeat', 'connected']);
 
       await serverSocket.close();
@@ -65,10 +65,12 @@ describe('Core - Connect', function () {
 
     it('should allow', async () => {
       const token = 'hello';
-      clientSocket.metadata.set('auth', token);
-      serverSocket.onconnect = carrier => {
-        const [auth] = carrier.get('auth');
-        if (auth !== token) {
+      clientSocket.metadata.set('authmethod', 'token');
+      clientSocket.metadata.set('authdata', token);
+      serverSocket.onauth = carrier => {
+        const [method] = carrier.get('authmethod');
+        const [data] = carrier.get('authdata');
+        if (method !== 'token' || data !== 'hello') {
           throw new Error('Unauthorized');
         }
       };
@@ -76,8 +78,8 @@ describe('Core - Connect', function () {
     });
 
     it('should deny', async () => {
-      clientSocket.metadata.set('auth', 'hello');
-      serverSocket.onconnect = () => {
+      clientSocket.metadata.set('authmethod', 'token');
+      serverSocket.onauth = () => {
         throw new Error('Unauthorized');
       };
       const error = await clientSocket.once('connect_error');
@@ -102,7 +104,12 @@ describe('Core - Connect', function () {
     });
 
     it('client should throw ConnectTimeoutError for server long time authenticating', async () => {
-      serverSocket.onconnect = async () => delay((clientSocket.connectTimeout + 5) * 1000);
+      // connect with authentication
+      clientSocket.metadata.set('authmethod', 'token');
+      // authentication timeout
+      serverSocket.onauth = async () => {
+        await delay((clientSocket.connectTimeout + 5) * 1000);
+      };
       const error = clientSocket.once('connect_error');
       await clock.tickAsync((clientSocket.connectTimeout + 1) * 1000);
       expect(await error).instanceOf(ConnectTimeoutError);

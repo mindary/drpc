@@ -1,8 +1,10 @@
-import {ApplicationOptions, ApplicationWithRegistry} from '@drpc/server';
+import {Application, ApplicationOptions} from '@drpc/server';
 import {Signer} from '@libit/josa';
 import {greeting} from './services/greeting.service';
+import {RegistryMixin} from '@drpc/registry';
+import {random} from '@drpc/core';
 
-export class EcdsaApplication extends ApplicationWithRegistry {
+export class EcdsaApplication extends RegistryMixin(Application) {
   signer: Signer;
 
   constructor(options?: ApplicationOptions) {
@@ -14,30 +16,34 @@ export class EcdsaApplication extends ApplicationWithRegistry {
 
     this.signer = new Signer();
 
-    this.addConnectInterceptor(async (carrier, next) => {
-      const id = carrier.message.clientId;
-      if (!id) {
-        throw new Error('clientId is required');
-      }
+    this.addAuthInterceptor(async carrier => {
+      const {socket} = carrier;
+      const [authmethod] = carrier.getAsString('authmethod');
 
-      const [auth] = carrier.get('auth') as string[];
-      if (!auth?.startsWith('ecdsa')) {
+      if (!authmethod?.startsWith('ecdsa')) {
         throw new Error('only ecdsa authentication allowed');
       }
 
-      return next();
-    });
-
-    this.addIncomingInterceptor(async (carrier, next) => {
-      const [sig] = carrier.get('sig-bin');
-      const ticket = this.signer.unpackAndVerify(sig as Buffer);
-      if (!ticket.identities.includes(carrier.socket.id)) {
-        throw new Error('identity in signature is not match with clientId');
+      if (!socket.session.nonce) {
+        // authentication stage 1
+        // generate challenge
+        const data = (socket.session.nonce = random(32));
+        carrier.set('authdata-bin', data);
+        carrier.set('authmethod', 'ecdsa');
+        carrier.respond = 'auth';
+      } else {
+        // authentication stage 2
+        const [data] = carrier.getAsBuffer('authdata-bin');
+        const ticket = this.signer.unpackAndVerify(data);
+        // check identity
+        if (!ticket.identities.includes(socket.id)) {
+          throw new Error('identity in signature is not match with clientId');
+        }
+        // validate signature
+        if (!socket.session.nonce || socket.session.nonce.compare(ticket.payload) !== 0) {
+          throw new Error('signature is invalid');
+        }
       }
-      if (!carrier.socket.nonce || carrier.socket.nonce.compare(ticket.payload) !== 0) {
-        throw new Error('signature is invalid');
-      }
-      return next();
     });
   }
 }

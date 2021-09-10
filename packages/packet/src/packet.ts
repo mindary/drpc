@@ -28,11 +28,13 @@ export const ConnectMessageSchema = {
 
 export type ConnectMessageType = Modify<BTDDataType<typeof ConnectMessageSchema>, {}>;
 
-export const ConnackMessageSchema = {
-  nonce: 'buffer',
-} as const;
+export const ConnackMessageSchema = {} as const;
 
 export type ConnackMessageType = BTDDataType<typeof ConnackMessageSchema>;
+
+export const AuthMessageSchema = {} as const;
+
+export type AuthMessageType = Modify<BTDDataType<typeof AuthMessageSchema>, {}>;
 
 export const HeartbeatMessageSchema = {
   payload: 'buffer',
@@ -93,6 +95,7 @@ export type ErrorMessageType = BTDDataType<typeof ErrorMessageSchema>;
 export const MessageSchemas: Record<PacketType, BTDSchema> = {
   connect: ConnectMessageSchema,
   connack: ConnackMessageSchema,
+  auth: AuthMessageSchema,
   ping: HeartbeatMessageSchema,
   pong: HeartbeatMessageSchema,
   signal: SignalMessageSchema,
@@ -115,6 +118,8 @@ export type MessageType<T extends PacketType> = T extends 'connect'
   ? ErrorMessageType
   : T extends 'ping' | 'pong'
   ? HeartbeatMessageType
+  : T extends 'auth'
+  ? AuthMessageType
   : never;
 
 export interface MessageTypes {
@@ -126,6 +131,7 @@ export interface MessageTypes {
   call: CallMessageType;
   ack: AckMessageType;
   error: ErrorMessageType;
+  auth: AuthMessageType;
 }
 
 export type MessageCodecType<T extends PacketType> = Codec<MessageType<T>>;

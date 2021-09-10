@@ -1,6 +1,5 @@
 import {fromCallback} from 'a-callback';
-import {tcp} from '@drpc/transport-tcp';
-import {Application} from '@drpc/server';
+import {Application, tcp} from '@drpc/server';
 import {connect} from '@drpc/client';
 import {ConnectivitySuite} from '@drpc/testsuite';
 import {createTcpServer} from '@drpc/testlab';

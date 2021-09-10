@@ -25,6 +25,7 @@
   "dependencies": {
     "@drpc/client": "^0.8.0",
     "@drpc/core": "^0.14.0",
+    "@drpc/registry": "^0.1.0",
     "@drpc/server": "^0.13.0",
     "@drpc/testlab": "^0.10.8",
     "@drpc/types": "^0.4.1",

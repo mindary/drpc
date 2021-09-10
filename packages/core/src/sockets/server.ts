@@ -1,20 +1,13 @@
-import {noop} from 'ts-essentials';
+import {assert} from 'ts-essentials';
 import {ValueOrPromise} from '@drpc/types';
-import {Metadata, Packet} from '@drpc/packet';
+import {Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
 import {Transport} from '../transport';
 import {Remote} from '../remote';
-import {Carrier} from '../carrier';
 import {RemoteError} from '../errors';
-import {nonce} from '../utils';
-
-export type OnServerConnect<SOCKET extends ServerSocket = any> = (
-  carrier: Carrier<'connect', SOCKET>,
-) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
-  onconnect?: OnServerConnect;
   generateId?: () => string;
 }
 
@@ -24,21 +17,23 @@ export class ServerSocket extends Socket {
    */
   public data: Record<string, any> = {};
 
+  public session: Record<string, any> = {};
+
   public remote: Remote;
 
   public id: string;
-  public nonce: Buffer;
-  public onconnect: OnServerConnect;
 
   protected generateId: () => string;
 
   constructor(transport: Transport, options?: ServerSocketOptions) {
     super({...options, transport});
-    this.onconnect = options?.onconnect ?? noop;
+    // this.onconnect = options?.onconnect ?? noop;
     this.generateId = options?.generateId ?? uniqid;
   }
 
   protected async handleConnect(packet: Packet<'connect'>) {
+    this.state = 'connecting';
+
     const carrier = this.createCarrier(packet);
 
     const {message} = packet;
@@ -47,21 +42,63 @@ export class ServerSocket extends Socket {
       await carrier.error(new RemoteError('Invalid keepalive'));
     }
 
-    this.nonce = nonce();
     this.id = message.clientId ?? this.generateId();
 
     try {
       this.keepalive = message.keepalive;
-      this.metadata = packet.metadata ?? new Metadata();
+      const m = packet.metadata;
 
-      await this.onconnect(carrier);
+      const [authMethod] = m?.getAsString('authmethod') ?? [];
 
-      if (!carrier.ended) {
-        await carrier.end(this.nonce);
+      if (authMethod) {
+        assert(this.onauth, `Unsupported authentication method: ${authMethod}`);
+        const authCarrier = this.createCarrier({
+          type: 'auth',
+          metadata: packet.metadata,
+          message: {},
+        });
+        await this.onauth?.(authCarrier);
+        if (authCarrier.respond === 'auth') {
+          // continue authentication
+          await authCarrier.res.endIfNotEnded('auth');
+          return;
+        }
       }
+
+      // end authentication and connecting
+      await carrier.res.endIfNotEnded('connack');
       await this.doConnected();
     } catch (e) {
       await carrier.error(e);
+    }
+  }
+
+  /**
+   * Auth packet handler.
+   * client handle according to stage
+   * server handle according to stage
+   * @param packet
+   * @protected
+   */
+  protected async handleAuth(packet: Packet<'auth'>) {
+    const carrier = this.createCarrier(packet);
+
+    try {
+      const result = await this.onauth?.(carrier);
+      if (!result && this.isConnecting()) {
+        // end authentication
+        await carrier.res.endIfNotEnded('connack');
+        await this.doConnected();
+        return;
+      }
+      // continue authentication
+      await carrier.res.endIfNotEnded('auth');
+    } catch (e: any) {
+      if (!carrier.ended && e?.message) {
+        await carrier.error(e);
+      } else {
+        console.error(e);
+      }
     }
   }
 
