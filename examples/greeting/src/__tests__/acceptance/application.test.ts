@@ -24,7 +24,7 @@ describe('GreetingApplication', function () {
   });
 
   it('gets a greeting', async function () {
-    const greeting = client.remote.service(Greeting);
+    const greeting = client.service(Greeting);
     const res = await greeting.greet('Torry');
     expect(res).equal('Hello, Torry');
   });

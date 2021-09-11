@@ -14,7 +14,7 @@ describe('TCP - connectivity', function () {
     const client = await connect(`tcp://localhost:${port}`, {
       channel,
     });
-    const clientSocket = client.socket;
+    const clientSocket = client;
     const serverSocket = await connection;
     const close = async () => {
       await client.close();

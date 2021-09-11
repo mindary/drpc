@@ -19,7 +19,7 @@ ConnectivitySuite.run('WebSocket', async () => {
     port: (server.address() as AddressInfo).port,
     channel,
   });
-  const clientSocket = client.socket;
+  const clientSocket = client;
   const serverSocket = await connection;
   const close = async () => {
     await client.close();

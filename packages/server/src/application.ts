@@ -50,7 +50,7 @@ export class Application extends ApplicationEmittery {
   public onconnect?: OnConnect;
   public onincoming?: OnIncoming;
   public oncall?: OnIncoming;
-  public onsignal?: OnIncoming;
+  public onevent?: OnIncoming;
 
   protected options: ApplicationOptions;
 
@@ -67,7 +67,7 @@ export class Application extends ApplicationEmittery {
 
     this.handle = socket => this.doHandle(socket);
     this.onincoming = (carrier, next) =>
-      carrier.type === 'call' ? this.oncall?.(carrier, next) : this.onsignal?.(carrier, next);
+      carrier.type === 'call' ? this.oncall?.(carrier, next) : this.onevent?.(carrier, next);
   }
 
   private _connectTimeout: number;
@@ -131,7 +131,7 @@ export class Application extends ApplicationEmittery {
   }
 
   protected async handleIncoming(carrier: ServerCarrier<ActionPacketType>, next: Next) {
-    // call doIncoming to handle call or signal request if incomingInterception not handled
+    // call doIncoming to handle call or event request if incomingInterception not handled
     return this.incomingInterception.invoke(carrier, () => this.doIncoming(carrier, next));
   }
 

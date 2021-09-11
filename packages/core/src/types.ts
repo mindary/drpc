@@ -1,14 +1,19 @@
 import {ValueOrPromise} from '@drpc/types';
+import {Metadata} from '@drpc/packet';
+import {InterceptContext, Next} from '@libit/interceptor';
 import {Socket} from './sockets';
 import {Carrier} from './carrier';
 import {Request} from './request';
-import {InterceptContext} from '@libit/interceptor/src/types';
-import {Next} from '@libit/interceptor/src/interceptor-chain';
 
-export type SignalName = string | symbol;
+// export type MetadataLike = Record<string, string | Buffer> | Metadata;
+
+export interface CallOptions {
+  timeout?: number;
+}
 
 export interface Callable {
-  call(name: string, args?: any[], timeout?: number): ValueOrPromise<any>;
+  call(name: string, args?: any[], options?: CallOptions): Promise<any>;
+  call(name: string, args?: any[], metadata?: Metadata, options?: CallOptions): Promise<any>;
 }
 
 export interface NetAddress {
@@ -24,7 +29,7 @@ export type IOInterceptor<C extends InterceptContext = InterceptContext, T = any
   next: Next,
 ) => ValueOrPromise<T>;
 
-export type ActionPacketType = 'signal' | 'call';
+export type ActionPacketType = 'event' | 'call';
 
 // return true for continue authentication, false for finish authentication
 export type OnAuth<S extends Socket = any, T = void> = (carrier: Carrier<'auth', S>) => ValueOrPromise<T>;

@@ -4,7 +4,6 @@ import {Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
 import {Socket, SocketOptions} from './socket';
 import {Transport} from '../transport';
-import {Remote} from '../remote';
 import {RemoteError} from '../errors';
 
 export interface ServerSocketOptions extends SocketOptions {
@@ -18,8 +17,6 @@ export class ServerSocket extends Socket {
   public data: Record<string, any> = {};
 
   public session: Record<string, any> = {};
-
-  public remote: Remote;
 
   public id: string;
 
@@ -51,13 +48,13 @@ export class ServerSocket extends Socket {
       const [authMethod] = m?.getAsString('authmethod') ?? [];
 
       if (authMethod) {
-        assert(this.onauth, `Unsupported authentication method: ${authMethod}`);
+        assert(this._onauth, `Unsupported authentication method: ${authMethod}`);
         const authCarrier = this.createCarrier({
           type: 'auth',
           metadata: packet.metadata,
           message: {},
         });
-        await this.onauth?.(authCarrier);
+        await this._onauth?.(authCarrier);
         if (authCarrier.respond === 'auth') {
           // continue authentication
           await authCarrier.res.endIfNotEnded('auth');
@@ -84,7 +81,7 @@ export class ServerSocket extends Socket {
     const carrier = this.createCarrier(packet);
 
     try {
-      const result = await this.onauth?.(carrier);
+      const result = await this._onauth?.(carrier);
       if (!result && this.isConnecting()) {
         // end authentication
         await carrier.res.endIfNotEnded('connack');

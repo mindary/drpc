@@ -14,7 +14,7 @@ export const PacketTypeToNum = {
   connack: 2,
   ping: 3,
   pong: 4,
-  signal: 5,
+  event: 5,
   call: 6,
   ack: 7,
   error: 8,

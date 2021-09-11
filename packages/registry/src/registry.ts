@@ -50,35 +50,42 @@ export class DefaultRegistry implements Registry {
   register<SERVICE extends object>(namespace: string, service: SERVICE, names: string[], scope?: object): void;
   register<SERVICE extends object>(service: SERVICE, scope?: object): void;
   register<SERVICE extends object>(service: SERVICE, names: string | string[], scope?: object): void;
-  register(a: any, b?: any, c?: any, d?: any) {
-    // eslint-disable-next-line prefer-const
-    let {namespace, service, names, scope} = resolveRegisterArgs(a, b, c, d);
-    if (namespace == null) {
-      namespace = getDrpcMetadata(service.constructor)?.namespace ?? '';
+  register<SERVICE extends object>(
+    namespace: string | SERVICE,
+    service?: SERVICE | object | string,
+    names?: string[] | object,
+    scope?: object,
+  ) {
+    const args = resolveRegisterArgs(namespace, service, names, scope);
+    if (args.namespace == null) {
+      args.namespace = getDrpcMetadata(args.service.constructor)?.namespace ?? '';
     }
 
     // Using a fresh meta but not use direct MetadataMap for avoid poison the original metadata store
-    const meta = Object.assign({}, getAllRpcMethodMetadata(service.constructor));
-    if (names?.length) {
+    const meta = Object.assign({}, getAllRpcMethodMetadata(args.service.constructor));
+    if (args.names?.length) {
       uniq(
         flatten<string>(
-          names.map(n =>
+          args.names.map(n =>
             n === '*'
-              ? [...Object.getOwnPropertyNames(service), ...Object.getOwnPropertyNames(service.constructor.prototype)]
+              ? [
+                  ...Object.getOwnPropertyNames(args.service),
+                  ...Object.getOwnPropertyNames(args.service.constructor.prototype),
+                ]
               : n,
           ),
         ),
       )
-        .filter(n => typeof service[n] === 'function' && n !== 'constructor')
+        .filter(n => typeof args.service[n] === 'function' && n !== 'constructor')
         .forEach(n => (meta[n] = meta[n] ?? {}));
     }
 
     for (const name of Object.keys(meta)) {
-      if (typeof (service as any)[name] === 'function') {
+      if (typeof args.service[name] === 'function') {
         assert(!this._methods[name], `Method already bound: "${name}"`);
         const alias = meta[name].name ?? name;
-        const qualified = namespace ? namespace + '.' + alias : alias;
-        this._methods[qualified] = new Method((service as any)[name], scope);
+        const qualified = args.namespace ? args.namespace + '.' + alias : alias;
+        this._methods[qualified] = new Method(args.service[name], args.scope);
         if (debug.enabled) {
           debug(`register method: ${qualified}`);
         }
@@ -121,10 +128,10 @@ export class DefaultRegistry implements Registry {
 // register<T extends object>(service: T, scope?: any): void;
 // register<T extends object>(service: T, names: string[], scope?: any): void;
 function resolveRegisterArgs(
-  a: any,
-  b?: any,
-  c?: any,
-  d?: any,
+  arg1: any,
+  arg2?: any,
+  arg3?: any,
+  arg4?: any,
 ): {
   namespace: string | undefined;
   service: any;
@@ -133,19 +140,19 @@ function resolveRegisterArgs(
 } {
   let namespace = undefined;
   let names: string[] | undefined;
-  if (typeof a === 'string') {
-    namespace = a;
-    a = b;
-    b = c;
-    c = d;
+  if (typeof arg1 === 'string') {
+    namespace = arg1;
+    arg1 = arg2;
+    arg2 = arg3;
+    arg3 = arg4;
   }
 
-  if (Array.isArray(b) || typeof b === 'string') {
-    names = toArray(b);
-    b = c;
+  if (Array.isArray(arg2) || typeof arg2 === 'string') {
+    names = toArray(arg2);
+    arg2 = arg3;
   }
-  const service = a;
-  const scope = b ?? service;
+  const service = arg1;
+  const scope = arg2 ?? service;
 
   return {namespace, service, names, scope};
 }

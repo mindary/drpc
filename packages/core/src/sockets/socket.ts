@@ -5,34 +5,61 @@ import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
 import {ValueOrPromise} from '@drpc/types';
-import {ErrorMessageType, MessageTypes, Metadata, packer, Packet, PacketType} from '@drpc/packet';
-import {ConnectionStallError, ConnectTimeoutError, UnimplementedError} from '../errors';
+import {
+  AckMessageType,
+  ErrorMessageType,
+  EventMessageType,
+  MessageTypes,
+  Metadata,
+  packer,
+  Packet,
+  PacketType,
+} from '@drpc/packet';
+import {ConnectionStallError, ConnectTimeoutError, RemoteError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {NetAddress, OnAuth, OnIncoming, OnOutgoing} from '../types';
+import {CallOptions, NetAddress, OnAuth, OnIncoming, OnOutgoing} from '../types';
 import {Alive} from '../alive';
-import {Remote} from '../remote';
 import {Request, RequestPacketType} from '../request';
 import {createResponse} from '../response';
 import {Carrier} from '../carrier';
+import {DatalessEventNames} from '@libit/emittery/src/types';
+import {Store} from '../store';
+import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from '../remote-service';
 
 const debug = debugFactory('drpc:core:socket');
 
 export type SocketState = 'connecting' | 'connected' | TransportState;
 
-export interface SocketEvents {
-  tick: undefined;
+export interface SocketReservedEvents {
+  // "error" allow to emitReserved and emit
   error: Error;
+  tick: undefined;
   open: Socket;
   connect: object;
-  connect_error: Error;
   connected: undefined;
   closing: string | Error;
   close: string | Error;
   packet: Packet;
   packet_create: Packet;
   heartbeat: undefined;
-  response: Packet;
 }
+
+export const SOCKET_RESERVED_EVENTS: ReadonlySet<string> = new Set<keyof SocketReservedEvents>(<const>[
+  // IMPORTANT: ignore "error" event
+  'tick',
+  'open',
+  'connect',
+  'connected',
+  'closing',
+  'close',
+  'packet',
+  'packet_create',
+  'heartbeat',
+]);
+
+export type SocketReservedDatalessEvents = DatalessEventNames<SocketReservedEvents>;
+
+export type SocketEvents = Record<string, any>;
 
 export interface SocketOptions {
   id?: string;
@@ -56,6 +83,9 @@ const DEFAULT_OPTIONS: SocketOptions = {
 export class SocketEmittery extends Emittery<SocketEvents> {}
 
 export abstract class Socket extends SocketEmittery {
+  readonly options: SocketOptions;
+
+  public tag: string;
   public id?: string;
   public transport: Transport;
   public state: SocketState;
@@ -63,20 +93,20 @@ export abstract class Socket extends SocketEmittery {
   public keepalive: number;
   public connectTimeout: number;
   public requestTimeout: number;
-
-  public onauth?: OnAuth;
-  public onincoming?: OnIncoming;
-
-  public readonly options: SocketOptions;
-  public readonly remote: Remote;
-
+  _onauth?: OnAuth;
+  _onincoming?: OnIncoming;
+  _onoutgoing: OnOutgoing;
+  protected store: Store = new Store();
   protected unsubs: UnsubscribeFn[] = [];
   protected timer: IntervalTimer | null;
   protected connectTimer: TimeoutTimer;
   protected alive: Alive;
+  // for RPC onAny
+  protected ee: Emittery = new Emittery();
 
   protected constructor(options: SocketOptions = {}) {
     super();
+    this.tag = this.constructor.name;
 
     this.options = Object.assign({}, DEFAULT_OPTIONS, options);
     this.id = this.options.id;
@@ -85,13 +115,14 @@ export abstract class Socket extends SocketEmittery {
     this.connectTimeout = this.options.connectTimeout!;
     this.requestTimeout = this.options.requestTimeout!;
 
-    this.onauth = options.onauth;
-    this.onincoming = options.onincoming;
+    this._onauth = options.onauth;
+    this._onincoming = options.onincoming;
+    this._onoutgoing = options.onoutgoing ?? ((request, next) => next());
 
-    this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
+    // this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
 
     if (this.options.transport) {
-      this.setTransport(this.options.transport);
+      this.attach(this.options.transport);
     }
   }
 
@@ -134,7 +165,7 @@ export abstract class Socket extends SocketEmittery {
     return this.state === 'connected';
   }
 
-  setTransport(transport: Transport) {
+  attach(transport: Transport) {
     if (this.transport?.isOpen()) {
       throw new Error('current transport is active. can not re-set transport on a active socket');
     }
@@ -150,7 +181,7 @@ export abstract class Socket extends SocketEmittery {
     this.transport
       .ready()
       .then(() => this.setup())
-      .catch(e => this.emit('error', e));
+      .catch(e => this.emitReserved('error', e));
     return this;
   }
 
@@ -159,13 +190,151 @@ export abstract class Socket extends SocketEmittery {
     await this.closeTransport();
   }
 
-  async doError(error: any) {
-    debug('transport error =>', error);
-    await this.emit('error', error);
-    await this.doClose('transport error');
+  onAny(listener: (eventName: string, eventData?: any) => any | Promise<any>): UnsubscribeFn {
+    return this.ee.onAny(listener as any);
   }
 
-  async handlePacket(packet: Packet) {
+  /**
+   * Send event to remote socket
+   *
+   */
+  async emit(eventName: string, metadata?: Metadata): Promise<void>;
+  async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void>;
+  async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void> {
+    assert(typeof eventName === 'string', 'Event must be a string.');
+    assert(!SOCKET_RESERVED_EVENTS.has(eventName), `"${eventName}" event is reserved`);
+
+    if (Metadata.isMetadata(eventData)) {
+      metadata = eventData;
+      eventData = undefined;
+    }
+
+    const request = new Request<'event'>(this, 'event', {
+      message: {name: eventName, payload: eventData},
+      metadata,
+    });
+
+    await this.ready();
+    await this._onoutgoing(request, async () => {
+      await this.send('event', {name: request.message.name, payload: request.message.payload}, request.metadata);
+    });
+  }
+
+  /**
+   * Emit reserved events on local socket
+   *
+   * @param eventName
+   */
+  async emitReserved<Name extends SocketReservedDatalessEvents>(eventName: Name): Promise<void>;
+  async emitReserved<Name extends keyof SocketReservedEvents>(
+    eventName: Name,
+    eventData: SocketReservedEvents[Name],
+  ): Promise<void>;
+  async emitReserved<Name extends keyof SocketReservedEvents>(
+    eventName: Name,
+    eventData?: SocketReservedEvents[Name],
+  ): Promise<void> {
+    if (eventName !== 'error' || super.listenerCount(eventName)) {
+      return super.emit(eventName, eventData);
+    } else {
+      console.error(`[${this.tag}]`, `Missing "${eventName}" handler on "socket".`);
+      console.error(eventData);
+    }
+  }
+
+  /**
+   * Emit rpc events on local socket
+   *
+   * @param event
+   */
+  async emitEvent(event: EventMessageType): Promise<void> {
+    const {name, payload} = event;
+    // emit for specific event listeners
+    await super.emit(name, payload);
+    // emit for any listeners
+    await this.ee.emit(name, payload);
+  }
+
+  service<T extends ServiceMethods>(
+    definition: ServiceDefinition<T>,
+    options?: CallOptions,
+  ): RemoteService<T> & RemoteMethods<T>;
+  service<T extends ServiceMethods>(
+    definition: ServiceDefinition<T>,
+    metadata?: Metadata,
+    options?: CallOptions,
+  ): RemoteService<T> & RemoteMethods<T>;
+  service<T extends ServiceMethods>(
+    definition: ServiceDefinition<T>,
+    metadata?: Metadata | CallOptions,
+    options?: CallOptions,
+  ): RemoteService<T> & RemoteMethods<T> {
+    if (metadata && !Metadata.isMetadata(metadata)) {
+      options = metadata;
+      metadata = undefined;
+    }
+    return RemoteService.build(this, definition, metadata, options);
+  }
+
+  /**
+   * Call remote method
+   *
+   */
+  async call(method: string, args?: any, options?: CallOptions): Promise<any>;
+  async call(method: string, args?: any, metadata?: Metadata, options?: CallOptions): Promise<any>;
+  async call(method: string, args?: any, metadata?: Metadata | CallOptions, options?: CallOptions): Promise<any> {
+    assert(typeof method === 'string', 'Event must be a string.');
+    if (metadata && !Metadata.isMetadata(metadata)) {
+      options = metadata;
+      metadata = undefined;
+    }
+    await this.ready();
+    const r = this.store.acquire(options?.timeout ?? this.requestTimeout);
+    const request = new Request(this, 'call', {
+      message: {id: r.id, name: method, payload: args},
+      metadata,
+    });
+
+    return this._onoutgoing(request, async () => {
+      await this.send(
+        'call',
+        {
+          id: r.id,
+          name: request.message.name,
+          payload: request.message.payload,
+        },
+        request.metadata,
+      );
+      return r.promise;
+    });
+  }
+
+  async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
+    await this.transport.ready();
+    debug('sending packet "%s"', type, message);
+    const packet: Packet<T> = {type, message, metadata};
+    await this.emitReserved('packet_create', packet);
+    try {
+      await this.transport.send(packer.pack(packet));
+    } catch (e) {
+      // TODO why no exception throw up and terminate the process
+      console.error(e);
+    }
+  }
+
+  protected setup() {
+    debug('setup');
+    this.state = 'open';
+
+    this.connectTimer?.cancel();
+    this.connectTimer = new TimeoutTimer(async () => {
+      debug('connect timeout, close the client');
+      await this.emitReserved('error', new ConnectTimeoutError('Timed out waiting for connecting'));
+      await this.close();
+    }, this.connectTimeout * 1000);
+  }
+
+  protected async handlePacket(packet: Packet) {
     const {type, message} = packet;
 
     // export packet event
@@ -173,7 +342,7 @@ export abstract class Socket extends SocketEmittery {
       debug(`received packet "${type ?? 'unknown'}"`);
     }
 
-    await this.emit('packet', packet);
+    await this.emitReserved('packet', packet);
 
     if (type === 'connect') {
       if (this.isConnecting() || this.isConnected()) {
@@ -192,7 +361,7 @@ export abstract class Socket extends SocketEmittery {
     this.alive?.touch();
     try {
       // Socket is live - any packet counts
-      await this.emit('heartbeat');
+      await this.emitReserved('heartbeat');
 
       // handle connect error first
       // id of 0 or null or undefined means connect error
@@ -221,42 +390,35 @@ export abstract class Socket extends SocketEmittery {
 
           switch (type) {
             case 'call':
-            case 'signal':
+            case 'event':
               await this.handleRequest(packet as any);
               break;
             // call response
             case 'ack':
             case 'error':
               // notify to handle call responses
-              await this.emit('response', packet);
+              await this.handleResponse(packet as any);
               break;
           }
 
           return;
       }
     } catch (e: any) {
-      await this.emit('error', e);
+      await this.emitReserved('error', e);
     }
   }
 
-  async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
-    await this.transport.ready();
-    debug('sending packet "%s"', type, message);
-    const packet: Packet<T> = {type, message, metadata};
-    await this.emit('packet_create', packet);
-    try {
-      await this.transport.send(packer.pack(packet));
-    } catch (e) {
-      // TODO why no exception throw up and terminate the process
-      console.error(e);
-    }
+  protected async doError(error: any) {
+    debug('transport error =>', error);
+    await this.emitReserved('error', error);
+    await this.doClose('transport error');
   }
 
   protected async doClose(reason: string | Error) {
     if (this.state !== 'closed' && this.state !== 'closing') {
       debug('socket close with reason %s', reason);
       this.state = 'closing';
-      await this.emit('closing', reason);
+      await this.emitReserved('closing', reason);
 
       this.unsubs.forEach(fn => fn());
       this.unsubs.splice(0);
@@ -267,14 +429,14 @@ export abstract class Socket extends SocketEmittery {
 
       this.state = 'closed';
       // notify ee disconnected
-      await this.emit('close', reason);
+      await this.emitReserved('close', reason);
     }
   }
 
   /**
    * Connect packet handler.
    * client deny it
-   * server should authenticate the client and send back connack packet for allowed and connect_error for denied.
+   * server should authenticate the client and send back connack packet for allowed and error for denied.
    * @param packet
    * @protected
    */
@@ -333,7 +495,7 @@ export abstract class Socket extends SocketEmittery {
     );
 
     this.startStall();
-    await this.emit('connected');
+    await this.emitReserved('connected');
   }
 
   protected async closeTransport(reason?: string | Error) {
@@ -379,25 +541,15 @@ export abstract class Socket extends SocketEmittery {
 
   protected async maybeStall() {
     await this.alive.tick(Date.now());
-    await this.emit('tick');
+    this.store.check();
+
+    await this.emitReserved('tick');
   }
 
   protected async handleAliveError() {
     debug(`close for heartbeat timeout in ${this.alive.timeout}ms`);
-    await this.emit('connect_error', new ConnectionStallError('Connection is stalling (ping)'));
+    await this.emitReserved('error', new ConnectionStallError('Connection is stalling (ping)'));
     await this.close();
-  }
-
-  protected setup() {
-    debug('setup');
-    this.state = 'open';
-
-    this.connectTimer?.cancel();
-    this.connectTimer = new TimeoutTimer(async () => {
-      debug('connect timeout, close the client');
-      await this.emit('connect_error', new ConnectTimeoutError('Timed out waiting for connecting'));
-      await this.close();
-    }, this.connectTimeout * 1000);
   }
 
   protected createCarrier<T extends RequestPacketType>({type, message, metadata}: Packet<T>) {
@@ -414,30 +566,30 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async handleConnectError({message}: Packet<'error'>) {
-    await this.emit('connect_error', toError(message.message));
+    await this.emitReserved('error', toError(message.message));
     await this.close();
   }
 
-  protected async handleRequest(packet: Packet<'signal' | 'call'>) {
+  protected async handleRequest(packet: Packet<'event' | 'call'>) {
     const {type} = packet;
-    // id of 0,null,undefined means signal
+    // id of 0,null,undefined means event
     const carrier = this.createCarrier(packet);
 
-    if (type === 'call' && !this.onincoming) {
+    if (type === 'call' && !this._onincoming) {
       await carrier.error(new UnimplementedError());
       return;
     }
 
     try {
-      const result = await this.onincoming?.(carrier, () => {
+      const result = await this._onincoming?.(carrier, () => {
         throw new UnimplementedError();
       });
       if (type === 'call') {
         // call
         return await carrier.res.endIfNotEnded('ack', {payload: result});
       }
-      // signal
-      return await this.remote.emit(packet.message);
+      // event
+      return await this.emitEvent(packet.message);
     } catch (e: any) {
       if (!carrier.ended && e?.message) {
         await carrier.error(e);
@@ -445,5 +597,40 @@ export abstract class Socket extends SocketEmittery {
         console.error(e);
       }
     }
+  }
+
+  protected async handleResponse(packet: Packet<'ack' | 'error'>) {
+    switch (packet.type) {
+      case 'ack':
+        await this.handleAck((packet as Packet<'ack'>).message);
+        break;
+      case 'error':
+        await this.handleError((packet as Packet<'error'>).message);
+        break;
+    }
+  }
+
+  protected async handleAck(message: AckMessageType) {
+    const {id, payload} = message;
+
+    if (!this.store.has(id)) {
+      // emit back noreq event
+      await this.emit('noreq', {type: 'ack', id});
+      return;
+    }
+
+    this.store.resolve(id, payload);
+  }
+
+  protected async handleError(message: ErrorMessageType) {
+    const {id, code, message: msg} = message;
+
+    if (!this.store.has(id)) {
+      // emit back noreq event
+      await this.emit('noreq', {type: 'error', id});
+      return;
+    }
+
+    this.store.reject(id, new RemoteError(code, msg));
   }
 }

@@ -19,7 +19,7 @@ describe('TLS - connectivity', function () {
       ca: [Certs.tlsCert],
     });
     client.on('error', console.error);
-    const clientSocket = client.socket;
+    const clientSocket = client;
     const serverSocket = await connection;
     const close = async () => {
       await client.close();

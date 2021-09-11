@@ -1,7 +1,7 @@
 import {expect, sinon} from '@loopback/testlab';
 import delay from 'delay';
 import {givenSocketPair, onceConnected} from '../support';
-import {ClientSocket, ServerSocket} from '../../sockets';
+import {ClientSocket, ServerSocket, SOCKET_RESERVED_EVENTS} from '../../sockets';
 import {ConnectTimeoutError} from '../../errors';
 import {Packet} from '@drpc/packet';
 
@@ -12,16 +12,16 @@ describe('Core - Connect', function () {
 
       const serverEvents: string[] = [];
       const clientEvents: string[] = [];
-      serverSocket.onAny(event => serverEvents.push(event));
-      clientSocket.onAny(event => clientEvents.push(event));
+      SOCKET_RESERVED_EVENTS.forEach(evt => serverSocket.on(evt, () => serverEvents.push(evt)));
+      SOCKET_RESERVED_EVENTS.forEach(evt => clientSocket.on(evt, () => clientEvents.push(evt)));
 
       await onceConnected(serverSocket, clientSocket);
 
       expect(serverEvents).deepEqual(['packet', 'packet_create', 'connected']);
       expect(clientEvents).deepEqual(['packet_create', 'packet', 'heartbeat', 'connected']);
 
-      await serverSocket.close();
       await clientSocket.close();
+      await serverSocket.close();
     });
 
     it('should received correct sequential packets', async () => {
@@ -45,8 +45,8 @@ describe('Core - Connect', function () {
       expect(clientRecv.map(p => p.type)).deepEqual(['connack']);
       expect(serverRecv.map(p => p.type)).deepEqual(['connect']);
 
-      await serverSocket.close();
       await clientSocket.close();
+      await serverSocket.close();
     });
   });
 
@@ -59,31 +59,31 @@ describe('Core - Connect', function () {
     });
 
     afterEach(async () => {
-      await serverSocket.close();
       await clientSocket.close();
+      await serverSocket.close();
     });
 
     it('should allow', async () => {
       const token = 'hello';
       clientSocket.metadata.set('authmethod', 'token');
       clientSocket.metadata.set('authdata', token);
-      serverSocket.onauth = carrier => {
+      serverSocket._onauth = carrier => {
         const [method] = carrier.getAsString('authmethod');
         const [data] = carrier.getAsString('authdata');
         if (method !== 'token' || data !== 'hello') {
           throw new Error('Unauthorized');
         }
       };
-      clientSocket.on('connect_error', console.error);
+      clientSocket.on('error', console.error);
       await onceConnected(serverSocket, clientSocket);
     });
 
     it('should deny', async () => {
       clientSocket.metadata.set('authmethod', 'token');
-      serverSocket.onauth = () => {
+      serverSocket._onauth = () => {
         throw new Error('Unauthorized');
       };
-      const error = await clientSocket.once('connect_error');
+      const error = await clientSocket.once('error');
       expect(error.message).equal('Unauthorized');
     });
   });
@@ -95,12 +95,12 @@ describe('Core - Connect', function () {
 
     beforeEach(() => {
       clock = sinon.useFakeTimers();
-      [serverSocket, clientSocket] = givenSocketPair('test');
+      [serverSocket, clientSocket] = givenSocketPair('test', {ignoreErrors: true});
     });
 
     afterEach(async () => {
-      await serverSocket.close();
       await clientSocket.close();
+      await serverSocket.close();
       clock.restore();
     });
 
@@ -108,17 +108,17 @@ describe('Core - Connect', function () {
       // connect with authentication
       clientSocket.metadata.set('authmethod', 'token');
       // authentication timeout
-      serverSocket.onauth = async () => {
+      serverSocket._onauth = async () => {
         await delay((clientSocket.connectTimeout + 5) * 1000);
       };
-      const error = clientSocket.once('connect_error');
+      const error = clientSocket.once('error');
       await clock.tickAsync((clientSocket.connectTimeout + 1) * 1000);
       expect(await error).instanceOf(ConnectTimeoutError);
     });
 
     it('server should throw ConnectTimeoutError for client long time response for "open"', async () => {
       sinon.stub(clientSocket, 'send').callsFake(async () => {});
-      const error = serverSocket.once('connect_error');
+      const error = serverSocket.once('error');
       await clock.tickAsync((serverSocket.connectTimeout + 1) * 1000);
       expect(await error).instanceOf(ConnectTimeoutError);
     });
@@ -131,12 +131,12 @@ describe('Core - Connect', function () {
 
     beforeEach(() => {
       clock = sinon.useFakeTimers();
-      [serverSocket, clientSocket] = givenSocketPair('test');
+      [serverSocket, clientSocket] = givenSocketPair('test', {ignoreErrors: true});
     });
 
     afterEach(async () => {
-      await serverSocket.close();
       await clientSocket.close();
+      await serverSocket.close();
       clock.restore();
     });
 
@@ -152,8 +152,8 @@ describe('Core - Connect', function () {
 
       await onceConnected(serverSocket, clientSocket);
 
-      serverSocket.onAny(event => serverEvents.push(event));
-      clientSocket.onAny(event => clientEvents.push(event));
+      SOCKET_RESERVED_EVENTS.forEach(evt => serverSocket.on(evt, () => serverEvents.push(evt)));
+      SOCKET_RESERVED_EVENTS.forEach(evt => clientSocket.on(evt, () => clientEvents.push(evt)));
 
       await clock.tickAsync(serverSocket.keepalive * 1000);
       await clock.tickAsync(serverSocket.keepalive * 1000);
@@ -186,7 +186,7 @@ describe('Core - Connect', function () {
 
     describe('transport with closing insensitive', () => {
       it('server should keep open until keepalive timeout after client socket closed', async () => {
-        const [serverSocket, clientSocket] = givenSocketPair('test');
+        const [serverSocket, clientSocket] = givenSocketPair('test', {ignoreErrors: true});
         await onceConnected(serverSocket, clientSocket);
         await clientSocket.close();
         expect(serverSocket.isOpen()).true();
@@ -196,7 +196,7 @@ describe('Core - Connect', function () {
       });
 
       it('client should keep open until keepalive timeout after server socket closed ', async () => {
-        const [serverSocket, clientSocket] = givenSocketPair('test');
+        const [serverSocket, clientSocket] = givenSocketPair('test', {ignoreErrors: true});
         await onceConnected(serverSocket, clientSocket);
         await serverSocket.close();
         expect(clientSocket.isOpen()).true();
@@ -208,14 +208,20 @@ describe('Core - Connect', function () {
 
     describe('transport with closing sensitive', function () {
       it('server should close immediately after client socket closed', async () => {
-        const [serverSocket, clientSocket] = givenSocketPair('test', {transport: {closeSensitive: true}});
+        const [serverSocket, clientSocket] = givenSocketPair('test', {
+          ignoreErrors: true,
+          transport: {closeSensitive: true},
+        });
         await onceConnected(serverSocket, clientSocket);
         await clientSocket.close();
         expect(serverSocket.isOpen()).false();
       });
 
       it('client should close immediately after server socket closed ', async () => {
-        const [serverSocket, clientSocket] = givenSocketPair('test', {transport: {closeSensitive: true}});
+        const [serverSocket, clientSocket] = givenSocketPair('test', {
+          ignoreErrors: true,
+          transport: {closeSensitive: true},
+        });
         await onceConnected(serverSocket, clientSocket);
         await serverSocket.close();
         expect(clientSocket.isOpen()).false();

@@ -10,7 +10,7 @@ import {
   HeartbeatMessageSchema,
   MessageCodecTypes,
   MetaSchema,
-  SignalMessageSchema,
+  EventMessageSchema,
 } from './packet';
 
 export const HeaderCodec = build(HeaderSchema);
@@ -22,7 +22,7 @@ export const ConnackMessageCodec = build(ConnackMessageSchema);
 export const HeartbeatMessageCodec = build(HeartbeatMessageSchema);
 export const CallMessageCodec = build(CallMessageSchema);
 export const AckMessageCodec = build(AckMessageSchema);
-export const SignalMessageCodec = build(SignalMessageSchema);
+export const EventMessageCodec = build(EventMessageSchema);
 export const ErrorMessageCodec = build(ErrorMessageSchema);
 export const AuthMessageCodec = build(AuthMessageSchema);
 
@@ -33,7 +33,7 @@ export const MessageCodecs: MessageCodecTypes = {
   pong: HeartbeatMessageCodec,
   call: CallMessageCodec,
   ack: AckMessageCodec,
-  signal: SignalMessageCodec,
+  event: EventMessageCodec,
   error: ErrorMessageCodec,
   auth: AuthMessageCodec,
 } as const;

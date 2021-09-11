@@ -1,5 +1,6 @@
 import {ValueOrPromise} from '@drpc/types';
-import {Callable} from './types';
+import {Callable, CallOptions} from './types';
+import {Metadata} from '@drpc/packet';
 
 export type ValueType<T> = T extends PromiseLike<infer U> ? U : T extends ValueOrPromise<infer U> ? U : T;
 export type ReturnTypeOfMethod<T> = T extends (...args: Array<any>) => any ? ReturnType<T> : any;
@@ -18,15 +19,16 @@ export type ServiceDefinition<T extends ServiceMethods> = {
 
 export class RemoteService<T extends ServiceMethods> {
   protected constructor(
-    readonly callable: Callable,
-    readonly proto: T,
-    readonly service?: string,
-    public timeout?: number,
+    protected callable: Callable,
+    protected proto: T,
+    protected service?: string,
+    protected metadata?: Metadata,
+    protected options?: CallOptions,
   ) {
     Object.keys(proto).forEach(name => {
       const type = typeof proto[name];
       if (type === 'object' || type === 'function') {
-        (this as any)[name] = (...args: any[]): any => this.call(name, ...args);
+        (this as any)[name] = (...args: any[]): any => this.call(name, args as any);
       }
     });
   }
@@ -34,13 +36,19 @@ export class RemoteService<T extends ServiceMethods> {
   static build<T extends ServiceMethods>(
     callable: Callable,
     definition: ServiceDefinition<T>,
-    timeout?: number,
-  ): RemoteMethods<T> {
-    return new RemoteService<T>(callable, definition.methods, definition.name, timeout) as any;
+    metadata?: Metadata,
+    options?: CallOptions,
+  ): RemoteService<T> & RemoteMethods<T> {
+    return new RemoteService<T>(callable, definition.methods, definition.name, metadata, options) as any;
   }
 
-  protected call(method: string, ...args: any[]): any {
+  call<K extends keyof T>(
+    method: K,
+    args: Parameters<T[K]>,
+    metadata?: Metadata,
+    options?: CallOptions,
+  ): Promise<ValueType<ReturnTypeOfMethodIfExists<T, K>>> {
     const qualified = this.service ? `${this.service}.${method}` : method;
-    return <Promise<any>>this.callable.call(qualified, args, this.timeout);
+    return <Promise<any>>this.callable.call(qualified as string, args, metadata, options);
   }
 }

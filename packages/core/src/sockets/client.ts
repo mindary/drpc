@@ -46,7 +46,7 @@ export class ClientSocket extends Socket {
 
   protected doConnect() {
     this.state = 'connecting';
-    this.send('connect', this.options, this.metadata).catch(e => this.emit('connect_error', e));
+    this.send('connect', this.options, this.metadata).catch(e => this.emit('error', e));
   }
 
   protected handleConnect(packet: Packet<'connect'>) {
@@ -56,7 +56,7 @@ export class ClientSocket extends Socket {
   protected async handleAuth(packet: Packet<'auth'>) {
     const carrier = this.createCarrier(packet);
     try {
-      await this.onauth?.(carrier);
+      await this._onauth?.(carrier);
       if (carrier.respond === 'auth') {
         await carrier.res.endIfNotEnded('auth');
       }
@@ -67,7 +67,7 @@ export class ClientSocket extends Socket {
 
   protected async handleConnack(packet: Packet<'connack'>) {
     if (packet.metadata?.has('authmethod')) {
-      await this.onauth?.(this.createCarrier({...packet, type: 'auth'}));
+      await this._onauth?.(this.createCarrier({...packet, type: 'auth'}));
     }
     await this.doConnected();
   }

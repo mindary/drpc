@@ -20,7 +20,7 @@ describe('TLS - suite', function () {
     });
     client.on('error', console.error);
     RpcSuite.setupClient(client);
-    const clientSocket = client.socket;
+    const clientSocket = client;
     const serverSocket = await connection;
 
     const close = async () => {

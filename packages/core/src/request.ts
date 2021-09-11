@@ -2,7 +2,7 @@ import {Socket} from './sockets';
 import {MessageTypes, Metadata, MetadataValue} from '@drpc/packet';
 import {Response} from './response';
 
-export type RequestPacketType = 'connect' | 'auth' | 'signal' | 'call';
+export type RequestPacketType = 'connect' | 'auth' | 'event' | 'call';
 
 export interface RequestPacket<T extends RequestPacketType> {
   metadata?: Metadata;
@@ -52,7 +52,7 @@ export class Request<T extends RequestPacketType, SOCKET extends Socket = any> {
     return this.type === 'call';
   }
 
-  isSignal() {
-    return this.type === 'signal';
+  isEvent() {
+    return this.type === 'event';
   }
 }

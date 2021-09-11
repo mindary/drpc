@@ -3,6 +3,7 @@ import {MemoryTransport, MemoryTransportOptions} from '../fixtures/transports';
 import {ClientSocket, ClientSocketOptions, ServerSocket, ServerSocketOptions} from '../../sockets';
 
 export interface SocketsOptions {
+  ignoreErrors?: boolean;
   client?: Partial<ClientSocketOptions>;
   server?: Partial<ServerSocketOptions>;
   transport?: MemoryTransportOptions;
@@ -17,11 +18,12 @@ export function givenMemoryTransportPair(options?: MemoryTransportOptions) {
 
 export function givenSocketPair(id: string, options: SocketsOptions = {}): [ServerSocket, ClientSocket] {
   const [t1, t2] = givenMemoryTransportPair(options.transport);
-  const onerror = (e: Error) => console.error(e);
   const server = new ServerSocket(t1, options.server);
-  const client = new ClientSocket(options.client).setTransport(t2);
-  server.on('error', onerror);
-  client.on('error', onerror);
+  const client = new ClientSocket(options.client).attach(t2);
+  if (options.ignoreErrors) {
+    server.on('error', () => {});
+    client.on('error', () => {});
+  }
   return [server, client];
 }
 

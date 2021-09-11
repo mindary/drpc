@@ -26,11 +26,11 @@ export namespace RpcSuite {
     registry.register(Monster.name, monster);
     client.onincoming = async request => request.isCall() && registry.invoke(request.message);
 
-    setupSocket(client.socket);
+    setupSocket(client);
   }
 
   function setupSocket(socket: Socket) {
-    socket.remote.on('echo', (msg: string) => socket.remote.signal('echo-reply', 'Hello ' + msg));
+    socket.on('echo', (msg: string) => socket.emit('echo-reply', 'Hello ' + msg));
   }
 
   export function run(prepare: PrepareFn, side: Side = 'both') {
@@ -60,7 +60,7 @@ export namespace RpcSuite {
           it('call a success-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.remote.service(Monster);
+            const service = socket.service(Monster);
             const result = await service.add(1, 2);
             expect(result).equal(3);
           });
@@ -68,17 +68,17 @@ export namespace RpcSuite {
           it('call a error-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.remote.service(Monster);
+            const service = socket.service(Monster);
             await expect(service.error()).rejectedWith(/An error message/);
           });
         });
 
-        describe('remote on and signal', function () {
+        describe('remote on and event', function () {
           it('remote on', async () => {
             const socket = getSocket();
             assert(socket);
-            const reply = new Promise(resolve => socket.remote.on('echo-reply', resolve));
-            await socket.remote.signal('echo', 'Tom');
+            const reply = new Promise(resolve => socket.on('echo-reply', resolve));
+            await socket.emit('echo', 'Tom');
             expect(await reply).deepEqual('Hello Tom');
           });
         });

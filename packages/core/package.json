@@ -22,7 +22,7 @@
     "build": "lb-tsc",
     "clean": "lb-clean drpc-core*.tgz dist *.tsbuildinfo package",
     "pretest": "npm run build",
-    "test": "lb-mocha \"dist/__tests__/**/*.js\"",
+    "test": "lb-mocha --reporter spec \"dist/__tests__/**/*.js\"",
     "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
     "verify": "npm pack && tar xf drpc-core*.tgz && tree package && npm run clean"
   },

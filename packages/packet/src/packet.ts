@@ -47,13 +47,13 @@ export type HeartbeatMessageType = Modify<
   }
 >;
 
-export const SignalMessageSchema = {
+export const EventMessageSchema = {
   name: 'string',
   payload: 'buffer',
 } as const;
 
-export type SignalMessageType = Modify<
-  BTDDataType<typeof SignalMessageSchema>,
+export type EventMessageType = Modify<
+  BTDDataType<typeof EventMessageSchema>,
   {
     payload?: any;
   }
@@ -98,7 +98,7 @@ export const MessageSchemas: Record<PacketType, BTDSchema> = {
   auth: AuthMessageSchema,
   ping: HeartbeatMessageSchema,
   pong: HeartbeatMessageSchema,
-  signal: SignalMessageSchema,
+  event: EventMessageSchema,
   call: CallMessageSchema,
   ack: AckMessageSchema,
   error: ErrorMessageSchema,
@@ -108,8 +108,8 @@ export type MessageType<T extends PacketType> = T extends 'connect'
   ? ConnectMessageType
   : T extends 'connack'
   ? ConnackMessageType
-  : T extends 'signal'
-  ? SignalMessageType
+  : T extends 'event'
+  ? EventMessageType
   : T extends 'call'
   ? CallMessageType
   : T extends 'ack'
@@ -127,7 +127,7 @@ export interface MessageTypes {
   connack: ConnackMessageType;
   ping: HeartbeatMessageType;
   pong: HeartbeatMessageType;
-  signal: SignalMessageType;
+  event: EventMessageType;
   call: CallMessageType;
   ack: AckMessageType;
   error: ErrorMessageType;

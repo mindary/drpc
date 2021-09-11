@@ -45,6 +45,10 @@ function validate(key: string, value?: MetadataValue): void {
   }
 }
 
+function isMetadataObject(x?: any): x is MetadataObject {
+  return x && Object.prototype.toString.call(x.data) === '[object Map]';
+}
+
 /**
  * A class for storing metadata. Keys are normalized to lowercase ASCII.
  */
@@ -260,8 +264,4 @@ export class Metadata {
     }
     return result;
   }
-}
-
-function isMetadataObject(x?: any): x is MetadataObject {
-  return x && Object.prototype.toString.call(x.data) === '[object Map]';
 }

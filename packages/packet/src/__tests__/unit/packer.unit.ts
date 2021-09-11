@@ -10,14 +10,14 @@ describe('Packer', function () {
   });
 
   it('unpack fail with invalid check sum', function () {
-    const encoded = packer.pack('signal', {name: 'event'});
+    const encoded = packer.pack('event', {name: 'event'});
     // 5~8 for check num
     encoded[6] = ~encoded[6];
     expect(() => packer.unpack(encoded)).throw(/Checksum dose not match/);
   });
 
   it('unpack fail with invalid packet type', function () {
-    const encoded = packer.pack('signal', {name: 'event'});
+    const encoded = packer.pack('event', {name: 'event'});
     encoded[0] = 0xff;
     expect(() => packer.unpack(encoded)).throw(/Unknown packet type/);
   });
@@ -56,7 +56,7 @@ describe('Packer', function () {
       },
     );
 
-    testPackUnpack('signal', {
+    testPackUnpack('event', {
       name: 'message',
       payload: 'The door is open',
     });

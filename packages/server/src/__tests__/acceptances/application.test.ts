@@ -33,7 +33,7 @@ describe('Application', function () {
 
     // prepare client and server transport
     const [client, transport] = givenSocketPair();
-    const service = client.remote.service(Monster);
+    const service = client.service(Monster);
 
     // connect
     app.handle(transport);
@@ -77,7 +77,7 @@ describe('Application', function () {
   function givenSocketPair(options?: Partial<ClientSocketOptions>): [ClientSocket, Transport] {
     const [t1, t2] = givenMemoryTransportPair();
     const client = new ClientSocket(options);
-    client.setTransport(t1);
+    client.attach(t1);
     return [client, t2];
   }
 });

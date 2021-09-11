@@ -67,8 +67,8 @@ export class Carrier<T extends RequestPacketType, SOCKET extends Socket = any>
     return this.req.isCall();
   }
 
-  isSignal(): boolean {
-    return this.req.isSignal();
+  isEvent(): boolean {
+    return this.req.isEvent();
   }
 
   error(err?: any): Promise<void> {

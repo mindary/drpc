@@ -34,11 +34,11 @@ describe('EcdsaApplication', function () {
       },
     });
     client.on('error', console.error);
-    client.on('connect_error', console.error);
+    client.on('error', console.error);
   });
 
   it('gets a greeting', async function () {
-    const greeting = client.remote.service(Greeting);
+    const greeting = client.service(Greeting);
     const res = await greeting.greet('Torry');
     expect(res).equal('Hello, Torry');
   });

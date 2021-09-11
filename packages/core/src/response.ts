@@ -111,7 +111,7 @@ export class AuthResponse<SOCKET extends Socket = any> extends Response<'auth', 
   }
 }
 
-export class SignalResponse<SOCKET extends Socket = any> extends Response<'signal', SOCKET> {
+export class EventResponse<SOCKET extends Socket = any> extends Response<'event', SOCKET> {
   constructor(socket: SOCKET) {
     super(socket);
   }
@@ -127,8 +127,8 @@ export class CallResponse<SOCKET extends Socket = any> extends Response<'call', 
 //   ? ConnectResponse
 //   : T extends 'auth'
 //   ? AuthResponse
-//   : T extends 'signal'
-//   ? SignalResponse
+//   : T extends 'event'
+//   ? EventResponse
 //   : T extends 'call'
 //   ? CallResponse
 //   : never;
@@ -143,8 +143,8 @@ export function createResponse<T extends RequestPacketType, SOCKET extends Socke
       return new ConnectResponse(socket) as any;
     case 'auth':
       return new AuthResponse(socket) as any;
-    case 'signal':
-      return new SignalResponse(socket) as any;
+    case 'event':
+      return new EventResponse(socket) as any;
     case 'call':
       assert(id, 'id is required for "call" request');
       return new CallResponse(socket, id) as any;
