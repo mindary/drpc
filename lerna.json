@@ -9,8 +9,7 @@
   "command": {
     "bootstrap": {
       "concurrency": 4,
-      "forceLocal": true,
-      "hoist": true
+      "forceLocal": true
     },
     "version": {
       "conventionalCommits": true,

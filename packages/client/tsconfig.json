@@ -20,10 +20,16 @@
       "path": "../interception/tsconfig.json"
     },
     {
+      "path": "../registry/tsconfig.json"
+    },
+    {
       "path": "../resolver/tsconfig.json"
     },
     {
       "path": "../server/tsconfig.json"
+    },
+    {
+      "path": "../testlab/tsconfig.json"
     }
   ]
 }
