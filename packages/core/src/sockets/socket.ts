@@ -292,7 +292,7 @@ export abstract class Socket extends SocketEmittery {
 
   async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
     await this.transport.ready();
-    debug('sending packet "%s"', type, message);
+    debug('send :: sending packet "%s"', type, message);
     const packet: Packet<T> = {type, message, metadata};
     await this.emitReserved('packet_create', packet);
     try {
@@ -304,12 +304,12 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected setup() {
-    debug('setup');
+    debug('setup :: setup');
     this.state = 'open';
 
     this.connectTimer?.cancel();
     this.connectTimer = new TimeoutTimer(async () => {
-      debug('connect timeout, close the client');
+      debug('setup :: connect timeout, close the client');
       await this.emitReserved('error', new ConnectTimeoutError('Timed out waiting for connecting'));
       await this.close();
     }, this.connectTimeout * 1000);
@@ -320,7 +320,7 @@ export abstract class Socket extends SocketEmittery {
 
     // export packet event
     if (debug.enabled) {
-      debug(`received packet "${type ?? 'unknown'}"`);
+      debug(`handlePacket :: received packet "${type ?? 'unknown'}"`);
     }
 
     await this.emitReserved('packet', packet);
@@ -366,7 +366,7 @@ export abstract class Socket extends SocketEmittery {
           break;
         default:
           if (!this.isConnected()) {
-            return debug('packet received with not connected socket');
+            return debug('handlePacket :: packet received with not connected socket');
           }
 
           switch (type) {
@@ -390,23 +390,32 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async doError(error: any) {
-    debug('transport error =>', error);
+    debug('doError :: transport error =>', error);
     await this.emitReserved('error', error);
     await this.doClose('transport error');
   }
 
   protected async doClose(reason: string | Error) {
     if (this.state !== 'closed' && this.state !== 'closing') {
-      debug('socket close with reason %s', reason);
+      debug('doClose :: socket close with reason %s', reason);
       this.state = 'closing';
       await this.emitReserved('closing', reason);
 
-      this.unsubs.forEach(fn => fn());
-      this.unsubs.splice(0);
-
       this.connectTimer.cancel();
 
-      await this.clearTransport(reason);
+      while (this.unsubs.length) {
+        this.unsubs.shift()?.();
+      }
+
+      // silence further transport errors and prevent uncaught exceptions
+      this.transport.on('error', function () {
+        debug('doClose :: error triggered by discarded transport');
+      });
+
+      // ensure transport won't stay open
+      await this.transport.close(reason);
+
+      await this.stopStall();
 
       this.state = 'closed';
       // notify ee disconnected
@@ -485,38 +494,22 @@ export abstract class Socket extends SocketEmittery {
     await this.doClose(reason);
   }
 
-  protected async clearTransport(reason?: string | Error) {
-    while (this.unsubs.length) {
-      this.unsubs.shift()?.();
-    }
-
-    // silence further transport errors and prevent uncaught exceptions
-    this.transport.on('error', function () {
-      debug('error triggered by discarded transport');
-    });
-
-    // ensure transport won't stay open
-    await this.transport.close(reason);
-
-    await this.stopStall();
-  }
-
   protected startStall() {
     if (!this.timer) {
-      debug(`start stall with interval ${this.interval}s`);
+      debug(`startStall :: with interval ${this.interval}s`);
       this.timer = IntervalTimer.start(() => this.maybeStall(), this.interval * 1000);
     } else {
-      debug('start stall - already start stall');
+      debug('startStall :: already start stall');
     }
   }
 
   protected async stopStall() {
     if (this.timer) {
-      debug('stop stall');
+      debug('stopStall :: stop stall');
       await this.timer.stop();
       this.timer = null;
     } else {
-      debug('stop stall - stall has not been started');
+      debug('stopStall :: stall has not been started');
     }
   }
 
@@ -528,7 +521,7 @@ export abstract class Socket extends SocketEmittery {
   }
 
   protected async handleAliveError() {
-    debug(`close for heartbeat timeout in ${this.alive.timeout}ms`);
+    debug(`handleAliveError :: close for heartbeat timeout in ${this.alive.timeout}ms`);
     await this.emitReserved('error', new ConnectionStallError('Connection is stalling (ping)'));
     await this.close();
   }
