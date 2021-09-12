@@ -61,11 +61,10 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   async close(reason?: string | Error) {
-    if (!this.isOpen()) {
-      return;
+    if (this.isOpen()) {
+      this.state = 'closing';
+      await this.doClose(reason);
     }
-    this.state = 'closing';
-    await this.doClose(reason);
   }
 
   async send(data: Buffer) {

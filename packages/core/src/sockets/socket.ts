@@ -192,8 +192,10 @@ export abstract class Socket<
   }
 
   async close() {
-    if (!this.isOpen()) return;
-    await this.closeTransport();
+    this.state = 'closing';
+    const reason = 'forced close';
+    await this.emitReserved('closing', reason);
+    await this.closeTransport(reason);
   }
 
   onAny(listener: (eventName: string, eventData?: any) => any | Promise<any>): UnsubscribeFn {
@@ -293,7 +295,7 @@ export abstract class Socket<
 
   async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
     await this.transport.ready();
-    debug('send :: sending packet "%s"', type, message);
+    debug('send: sending packet "%s"', type, message);
     const packet: Packet<T> = {type, message, metadata};
     await this.emitReserved('packet_create', packet);
     try {
@@ -305,12 +307,12 @@ export abstract class Socket<
   }
 
   protected setup() {
-    debug('setup :: setup');
+    debug('setup: setup');
     this.state = 'open';
 
     this.connectTimer?.cancel();
     this.connectTimer = new TimeoutTimer(async () => {
-      debug('setup :: connect timeout, close the client');
+      debug('setup: connect timeout, close the client');
       await this.emitReserved('error', new ConnectTimeoutError('Timed out waiting for connecting'));
       await this.close();
     }, this.connectTimeout * 1000);
@@ -321,7 +323,7 @@ export abstract class Socket<
 
     // export packet event
     if (debug.enabled) {
-      debug(`handlePacket :: received packet "${type ?? 'unknown'}"`);
+      debug(`handlePacket: received packet "${type ?? 'unknown'}"`);
     }
 
     await this.emitReserved('packet', packet);
@@ -367,7 +369,7 @@ export abstract class Socket<
           break;
         default:
           if (!this.isConnected()) {
-            return debug('handlePacket :: packet received with not connected socket');
+            return debug('handlePacket: packet received with not connected socket');
           }
 
           switch (type) {
@@ -391,37 +393,38 @@ export abstract class Socket<
   }
 
   protected async doError(error: any) {
-    debug('doError :: transport error =>', error);
+    debug('doError: transport error =>', error);
     await this.emitReserved('error', error);
     await this.doClose('transport error');
   }
 
   protected async doClose(reason: string | Error) {
-    if (this.state !== 'closed' && this.state !== 'closing') {
-      debug('doClose :: socket close with reason %s', reason);
-      this.state = 'closing';
-      await this.emitReserved('closing', reason);
-
-      this.connectTimer.cancel();
-
-      while (this.unsubs.length) {
-        this.unsubs.shift()?.();
-      }
-
-      // silence further transport errors and prevent uncaught exceptions
-      this.transport.on('error', function () {
-        debug('doClose :: error triggered by discarded transport');
-      });
-
-      // ensure transport won't stay open
-      await this.transport.close(reason);
-
-      await this.stopStall();
-
+    if (this.state !== 'closed') {
+      debug('doClose: socket close with reason %s', reason);
+      await this.cleanUp(reason);
       this.state = 'closed';
       // notify ee disconnected
       await this.emitReserved('close', reason);
     }
+  }
+
+  protected async cleanUp(reason: string | Error) {
+    this.connectTimer.cancel();
+
+    while (this.unsubs.length) {
+      this.unsubs.shift()?.();
+    }
+
+    // ensure transport won't stay open
+    if (this.transport.isOpen()) {
+      // silence further transport errors and prevent uncaught exceptions
+      this.transport.on('error', function () {
+        debug('doClose: error triggered by discarded transport');
+      });
+      await this.transport.close(reason);
+    }
+
+    await this.stopStall();
   }
 
   /**
@@ -489,28 +492,27 @@ export abstract class Socket<
     await this.emitReserved('connected');
   }
 
-  protected async closeTransport(reason?: string | Error) {
-    reason = reason ?? 'forced close';
+  protected async closeTransport(reason: string | Error) {
     await this.transport.close(reason);
     await this.doClose(reason);
   }
 
   protected startStall() {
     if (!this.timer) {
-      debug(`startStall :: with interval ${this.interval}s`);
+      debug(`startStall: with interval ${this.interval}s`);
       this.timer = IntervalTimer.start(() => this.maybeStall(), this.interval * 1000);
     } else {
-      debug('startStall :: already start stall');
+      debug('startStall: already start stall');
     }
   }
 
   protected async stopStall() {
     if (this.timer) {
-      debug('stopStall :: stop stall');
+      debug('stopStall: stop stall');
       await this.timer.stop();
       this.timer = null;
     } else {
-      debug('stopStall :: stall has not been started');
+      debug('stopStall: stall has not been started');
     }
   }
 
@@ -522,7 +524,7 @@ export abstract class Socket<
   }
 
   protected async handleAliveError() {
-    debug(`handleAliveError :: close for heartbeat timeout in ${this.alive.timeout}ms`);
+    debug(`handleAliveError: close for heartbeat timeout in ${this.alive.timeout}ms`);
     await this.emitReserved('error', new ConnectionStallError('Connection is stalling (ping)'));
     await this.close();
   }
