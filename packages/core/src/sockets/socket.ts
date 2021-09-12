@@ -74,8 +74,8 @@ export interface SocketOptions {
 
 const DEFAULT_OPTIONS: SocketOptions = {
   interval: 5,
-  keepalive: 10,
-  connectTimeout: 20,
+  keepalive: 60,
+  connectTimeout: 30,
   requestTimeout: 10,
 };
 

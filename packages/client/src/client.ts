@@ -22,8 +22,8 @@ const DEFAULT_CLIENT_OPTIONS = {
   keepalive: 60,
   protocolId: 'drpc',
   protocolVersion: 1,
+  connectTimeout: 30,
   reconnectPeriod: 1000,
-  connectTimeout: 30 * 1000,
 };
 
 export type ResolvedClientOptions = MarkRequired<ClientOptions, keyof typeof DEFAULT_CLIENT_OPTIONS>;

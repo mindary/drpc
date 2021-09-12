@@ -18,7 +18,7 @@ export interface ClientSocketOptions extends SocketOptions {
 const DEFAULT_CLIENT_SOCKET_OPTIONS: ClientSocketOptions = {
   protocolId: 'drpc',
   protocolVersion: 1,
-  keepalive: 30,
+  keepalive: 60,
 };
 
 export type ResolvedClientSocketOptions = MarkRequired<
