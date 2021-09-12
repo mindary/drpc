@@ -27,7 +27,6 @@ function createTlsConnection(client: Client, opts: MarkRequired<ClientOptions, '
   debug('port %d host %s rejectUnauthorized %b', opts.port, opts.host, opts.rejectUnauthorized);
 
   const conn = tls.connect(opts);
-  /* eslint no-use-before-define: [2, "nofunc"] */
   conn.on('secureConnect', function () {
     if (opts.rejectUnauthorized && !conn.authorized) {
       conn.emit('error', new Error('TLS not authorized'));
