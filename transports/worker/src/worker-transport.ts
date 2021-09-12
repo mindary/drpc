@@ -1,31 +1,39 @@
-import {Transport, ValueOrPromise} from '@drpc/core';
-import {listenPort, MessagePort} from './port';
+import {Transport, TransportOptions, ValueOrPromise} from '@drpc/core';
+import {listenWorker, Worker} from './worker';
 
 export class WorkerTransport extends Transport {
   protected unbind: () => void;
 
-  constructor(public port: MessagePort) {
-    super();
+  constructor(public readonly worker: Worker, options?: TransportOptions) {
+    super(options);
     this.bind();
     this.open();
   }
 
   protected bind() {
-    this.unbind = listenPort(this.port, {
+    this.unbind = listenWorker(this.worker, {
       onmessage: (message: any) => this.onData(message),
       onmessageerror: (error: any) => this.onError(error),
       onerror: (error: any) => this.onError(error),
-      onclose: () => this.doClose('worker lost'),
+      onexit: (code: number) => this.onExit(code),
     });
   }
 
+  protected async onExit(code: number) {
+    if (code !== 0 && this.isOpen()) {
+      // ignore exit error for end()
+      await this.onError(new Error(`Worker stopped with exit code ${code}`));
+    }
+    await this.doClose();
+  }
+
   protected doSend(data: Buffer): ValueOrPromise<any> {
-    return this.port.postMessage(data);
+    return this.worker.postMessage(data);
   }
 
   protected async doClose(reason?: string | Error) {
     this.unbind();
     await super.doClose(reason);
-    this.port.close();
+    await this.worker.terminate();
   }
 }
