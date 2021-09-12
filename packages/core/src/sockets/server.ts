@@ -2,7 +2,7 @@ import {assert} from 'ts-essentials';
 import {ValueOrPromise} from '@drpc/types';
 import {Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
-import {Socket, SocketOptions} from './socket';
+import {Socket, SocketOptions, SocketReservedEvents} from './socket';
 import {Transport} from '../transport';
 import {RemoteError} from '../errors';
 
@@ -10,7 +10,7 @@ export interface ServerSocketOptions extends SocketOptions {
   generateId?: () => string;
 }
 
-export class ServerSocket extends Socket {
+export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEvents> extends Socket<EVENTS> {
   /**
    * Additional information that can be attached to the Connection instance and which will be used in DTO/Persistent
    */

@@ -1,36 +1,40 @@
 import debugFactory from 'debug';
 import {Metadata, Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
-import {Socket, SocketOptions} from './socket';
+import {Socket, SocketOptions, SocketReservedEvents} from './socket';
 import {nextTick} from '../utils';
+import {MarkRequired} from 'ts-essentials';
 
 const debug = debugFactory('drpc:core:socket:client');
 
 export interface ClientSocketOptions extends SocketOptions {
   protocolId: string;
   protocolVersion: number;
-  clientId: string;
   keepalive: number;
+  clientId?: string;
   metadata?: Metadata;
 }
 
-const DefaultClientSocketOptions: Partial<ClientSocketOptions> = {
+const DEFAULT_CLIENT_SOCKET_OPTIONS: ClientSocketOptions = {
   protocolId: 'drpc',
   protocolVersion: 1,
   keepalive: 30,
 };
 
-const normalizeClientSocketOptions = (options?: Partial<ClientSocketOptions>) => ({
-  ...DefaultClientSocketOptions,
-  ...options,
-});
+export type ResolvedClientSocketOptions = MarkRequired<
+  ClientSocketOptions,
+  keyof typeof DEFAULT_CLIENT_SOCKET_OPTIONS & 'clientId'
+>;
 
-export class ClientSocket extends Socket {
-  public readonly options: ClientSocketOptions;
+export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEvents> extends Socket<EVENTS> {
+  public readonly options: ResolvedClientSocketOptions;
   public metadata: Metadata;
 
   constructor(options?: Partial<ClientSocketOptions>) {
-    super(normalizeClientSocketOptions(options));
+    super({
+      ...DEFAULT_CLIENT_SOCKET_OPTIONS,
+      ...options,
+    });
     this.metadata = this.options.metadata ?? new Metadata();
     this.options.clientId = this.options.clientId ?? 'drpc_' + uniqid();
   }

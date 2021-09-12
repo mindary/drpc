@@ -1,6 +1,6 @@
 import debugFactory from 'debug';
 import {assert} from 'ts-essentials';
-import {Emittery, UnsubscribeFn} from '@libit/emittery';
+import {DatalessEventNames, Emittery, UnsubscribeFn} from '@libit/emittery';
 import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
@@ -22,7 +22,6 @@ import {Alive} from '../alive';
 import {Request, RequestPacketType} from '../request';
 import {createResponse} from '../response';
 import {Carrier} from '../carrier';
-import {DatalessEventNames} from '@libit/emittery/src/types';
 import {Store} from '../store';
 import {RemoteService} from '../remote';
 
@@ -34,7 +33,7 @@ export interface SocketReservedEvents {
   // "error" allow to emitReserved and emit
   error: Error;
   tick: undefined;
-  open: Socket;
+  open: Socket<any>;
   connect: object;
   connected: undefined;
   closing: string | Error;
@@ -82,7 +81,10 @@ const DEFAULT_OPTIONS: SocketOptions = {
 
 export class SocketEmittery extends Emittery<SocketEvents> {}
 
-export abstract class Socket extends SocketEmittery {
+export abstract class Socket<
+  EventData extends SocketReservedEvents = SocketReservedEvents,
+  DatalessEvents = DatalessEventNames<EventData>,
+> extends SocketEmittery {
   readonly options: SocketOptions;
 
   public tag: string;
@@ -165,6 +167,10 @@ export abstract class Socket extends SocketEmittery {
     return this.state === 'connected';
   }
 
+  isClosing() {
+    return this.state === 'closing';
+  }
+
   attach(transport: Transport) {
     if (this.transport?.isOpen()) {
       throw new Error('current transport is active. can not re-set transport on a active socket');
@@ -225,16 +231,11 @@ export abstract class Socket extends SocketEmittery {
    * @param eventName
    */
   async emitReserved<Name extends SocketReservedDatalessEvents>(eventName: Name): Promise<void>;
-  async emitReserved<Name extends keyof SocketReservedEvents>(
-    eventName: Name,
-    eventData: SocketReservedEvents[Name],
-  ): Promise<void>;
-  async emitReserved<Name extends keyof SocketReservedEvents>(
-    eventName: Name,
-    eventData?: SocketReservedEvents[Name],
-  ): Promise<void> {
+  async emitReserved<Name extends DatalessEvents>(eventName: Name): Promise<void>;
+  async emitReserved<Name extends keyof EventData>(eventName: Name, eventData: EventData[Name]): Promise<void>;
+  async emitReserved<Name extends keyof EventData>(eventName: Name, eventData?: EventData[Name]): Promise<void> {
     if (eventName !== 'error' || super.listenerCount(eventName)) {
-      return super.emit(eventName, eventData);
+      return super.emit(eventName as string, eventData);
     } else {
       console.error(`[${this.tag}]`, `Missing "${eventName}" handler on "socket".`);
       console.error(eventData);
@@ -544,7 +545,7 @@ export abstract class Socket extends SocketEmittery {
     await this.close();
   }
 
-  protected async handleRequest(packet: Packet<'event' | 'call'>) {
+  protected async handleRequest(packet: Packet<'event' | 'call'>): Promise<void> {
     const {type} = packet;
     // id of 0,null,undefined means event
     const carrier = this.createCarrier(packet);
@@ -560,7 +561,8 @@ export abstract class Socket extends SocketEmittery {
       });
       if (type === 'call') {
         // call
-        return await carrier.res.endIfNotEnded('ack', {payload: result});
+        await carrier.res.endIfNotEnded('ack', {payload: result});
+        return;
       }
       // event
       return await this.emitEvent(packet.message);
