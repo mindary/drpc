@@ -1,8 +1,8 @@
 import {givenMemoryTransportPair, Monster, monster} from '@drpc/testlab';
 import {expect} from '@loopback/testlab';
 import {ClientSocket, ClientSocketOptions, Transport} from '@drpc/core';
-import {Application} from '../../application';
 import {RegistryMixin} from '@drpc/registry';
+import {Application} from '../../application';
 
 describe('Application', function () {
   it('connect successful', async () => {
@@ -29,11 +29,11 @@ describe('Application', function () {
   it('call successful', async () => {
     // prepare application
     const app = new ApplicationWithRegistry();
-    app.register(Monster.name, monster);
+    app.register(Monster.namespace, monster);
 
     // prepare client and server transport
     const [client, transport] = givenSocketPair();
-    const service = client.service(Monster);
+    const service = client.service<Monster>(Monster.namespace);
 
     // connect
     app.handle(transport);
@@ -42,7 +42,7 @@ describe('Application', function () {
     await app.once('connection');
 
     // call
-    const result = await service.add(1, 2);
+    const result = await service.call('add', [1, 2]);
     expect(result).equal(3);
 
     // close

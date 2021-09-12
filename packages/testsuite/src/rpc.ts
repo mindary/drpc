@@ -14,7 +14,7 @@ export namespace RpcSuite {
     const app = new Application(options);
 
     const registry = new DefaultRegistry();
-    registry.register(Monster.name, monster);
+    registry.register(Monster.namespace, monster);
     app.onincoming = async request => request.isCall() && registry.invoke(request.message);
 
     app.on('connection', setupSocket);
@@ -23,7 +23,7 @@ export namespace RpcSuite {
 
   export function setupClient(client: Client) {
     const registry = new DefaultRegistry();
-    registry.register(Monster.name, monster);
+    registry.register(Monster.namespace, monster);
     client.onincoming = async request => request.isCall() && registry.invoke(request.message);
 
     setupSocket(client);
@@ -60,16 +60,16 @@ export namespace RpcSuite {
           it('call a success-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.service(Monster);
-            const result = await service.add(1, 2);
+            const service = socket.service<Monster>(Monster.namespace);
+            const result = await service.call('add', [1, 2]);
             expect(result).equal(3);
           });
 
           it('call a error-method', async () => {
             const socket = getSocket();
             assert(socket);
-            const service = socket.service(Monster);
-            await expect(service.error()).rejectedWith(/An error message/);
+            const service = socket.service<Monster>(Monster.namespace);
+            await expect(service.call('error')).rejectedWith(/An error message/);
           });
         });
 

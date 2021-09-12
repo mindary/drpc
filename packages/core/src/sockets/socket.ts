@@ -4,7 +4,7 @@ import {Emittery, UnsubscribeFn} from '@libit/emittery';
 import {IntervalTimer} from '@libit/timer/interval';
 import {TimeoutTimer} from '@libit/timer/timeout';
 import {toError} from '@libit/error/utils';
-import {ValueOrPromise} from '@drpc/types';
+import {ServiceMethods, ValueOrPromise} from '@drpc/types';
 import {
   AckMessageType,
   ErrorMessageType,
@@ -24,7 +24,7 @@ import {createResponse} from '../response';
 import {Carrier} from '../carrier';
 import {DatalessEventNames} from '@libit/emittery/src/types';
 import {Store} from '../store';
-import {RemoteMethods, RemoteService, ServiceDefinition, ServiceMethods} from '../remote-service';
+import {RemoteService} from '../remote';
 
 const debug = debugFactory('drpc:core:socket');
 
@@ -201,7 +201,6 @@ export abstract class Socket extends SocketEmittery {
   async emit(eventName: string, metadata?: Metadata): Promise<void>;
   async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void>;
   async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void> {
-    assert(typeof eventName === 'string', 'Event must be a string.');
     assert(!SOCKET_RESERVED_EVENTS.has(eventName), `"${eventName}" event is reserved`);
 
     if (Metadata.isMetadata(eventData)) {
@@ -255,25 +254,8 @@ export abstract class Socket extends SocketEmittery {
     await this.ee.emit(name, payload);
   }
 
-  service<T extends ServiceMethods>(
-    definition: ServiceDefinition<T>,
-    options?: CallOptions,
-  ): RemoteService<T> & RemoteMethods<T>;
-  service<T extends ServiceMethods>(
-    definition: ServiceDefinition<T>,
-    metadata?: Metadata,
-    options?: CallOptions,
-  ): RemoteService<T> & RemoteMethods<T>;
-  service<T extends ServiceMethods>(
-    definition: ServiceDefinition<T>,
-    metadata?: Metadata | CallOptions,
-    options?: CallOptions,
-  ): RemoteService<T> & RemoteMethods<T> {
-    if (metadata && !Metadata.isMetadata(metadata)) {
-      options = metadata;
-      metadata = undefined;
-    }
-    return RemoteService.build(this, definition, metadata, options);
+  service<T extends ServiceMethods>(namespace?: string): RemoteService<T> {
+    return new RemoteService(this, namespace);
   }
 
   /**
@@ -283,7 +265,6 @@ export abstract class Socket extends SocketEmittery {
   async call(method: string, args?: any, options?: CallOptions): Promise<any>;
   async call(method: string, args?: any, metadata?: Metadata, options?: CallOptions): Promise<any>;
   async call(method: string, args?: any, metadata?: Metadata | CallOptions, options?: CallOptions): Promise<any> {
-    assert(typeof method === 'string', 'Event must be a string.');
     if (metadata && !Metadata.isMetadata(metadata)) {
       options = metadata;
       metadata = undefined;

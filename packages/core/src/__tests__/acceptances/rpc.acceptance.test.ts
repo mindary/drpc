@@ -3,7 +3,7 @@ import delay from 'delay';
 import {ClientSocket, ServerSocket} from '../../sockets';
 import {OnIncoming} from '../..';
 import {givenSocketPair} from '../support';
-import {Monster} from '../fixtures/monster.definition';
+import {Monster} from '../fixtures/monster.def';
 
 describe('Core - RPC', function () {
   let clock: sinon.SinonFakeTimers;
@@ -71,15 +71,15 @@ describe('Core - RPC', function () {
 
     it('invoke successfully', async () => {
       serverSocket._onincoming = Invoker;
-      const monster = clientSocket.service(Monster);
-      const result = await monster.add(1, 2);
+      const monster = clientSocket.service<Monster>(Monster.namespace);
+      const result = await monster.call('add', [1, 2]);
       expect(result).eql(3);
     });
 
     it('invoke fail with unknown method', async () => {
       serverSocket._onincoming = Invoker;
-      const monster = clientSocket.service(Monster);
-      const result = monster.empty();
+      const monster = clientSocket.service<Monster>(Monster.namespace);
+      const result = monster.call('empty');
       await expect(result).rejectedWith(/Method not found/);
     });
   });

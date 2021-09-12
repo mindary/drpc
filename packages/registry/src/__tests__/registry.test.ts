@@ -38,7 +38,7 @@ describe('registry', function () {
 
       it('should register with namespace parameter', function () {
         const registry = new DefaultRegistry();
-        registry.register(Monster.name, monster);
+        registry.register(Monster.namespace, monster);
         expect(registry.methods).have.key('monster.add');
       });
     });
@@ -59,7 +59,7 @@ describe('registry', function () {
 
     it('should get for namespace', function () {
       const registry = new DefaultRegistry();
-      registry.register(Monster.name, monster);
+      registry.register(Monster.namespace, monster);
       expect(registry.methods).have.key('monster.add');
     });
   });

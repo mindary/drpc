@@ -8,8 +8,6 @@ export * from './sockets';
 export * from './request';
 export * from './response';
 export * from './carrier';
-export * from './remote-service';
-export * from './remote-emitter';
 
 export * from '@libit/emittery';
 export * from '@drpc/types';

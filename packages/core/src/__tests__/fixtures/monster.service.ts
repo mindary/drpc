@@ -2,9 +2,9 @@ import delay from 'delay';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
 import {RemoteError} from '../../errors';
-import {MonsterType} from './monster.definition';
+import {Monster} from './monster.def';
 
-export class MonsterService implements MonsterType {
+export class MonsterService implements Monster {
   foo = 'bar';
 
   prefix = 'Hello';
@@ -21,7 +21,7 @@ export class MonsterService implements MonsterType {
     throw new Error('An exception message');
   }
 
-  incrementCounterBy(counter: Counter, value: any) {
+  incrementCounterBy(counter: any, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError(-1000, 'Argument not an instance of Counter');
     }

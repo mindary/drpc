@@ -38,8 +38,8 @@ describe('EcdsaApplication', function () {
   });
 
   it('gets a greeting', async function () {
-    const greeting = client.service(Greeting);
-    const res = await greeting.greet('Torry');
+    const greeting = client.service<Greeting>(Greeting.namespace);
+    const res = await greeting.call('greet', ['Torry']);
     expect(res).equal('Hello, Torry');
   });
 

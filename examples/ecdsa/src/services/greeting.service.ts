@@ -1,8 +1,8 @@
 import {drpc} from '@drpc/registry';
-import {Greeting, GreetingType} from './greeting.def';
+import {Greeting} from './greeting.def';
 
-@drpc(Greeting.name)
-export class GreetingService implements GreetingType {
+@drpc(Greeting.namespace)
+export class GreetingService implements Greeting {
   prefix = 'Hello,';
 
   @drpc.method() greet(msg: string) {

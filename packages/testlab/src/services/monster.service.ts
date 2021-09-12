@@ -3,9 +3,9 @@ import {RemoteError} from '@drpc/core';
 import {drpc} from '@drpc/decorators';
 import {Counter} from './counter';
 import {InvalidError} from './errors';
-import {MonsterType} from './monster.definition';
+import {Monster} from './monster.def';
 
-export class MonsterService implements MonsterType {
+export class MonsterService implements Monster {
   foo = 'bar';
 
   prefix = 'Hello';
@@ -22,7 +22,7 @@ export class MonsterService implements MonsterType {
     throw new Error('An exception message');
   }
 
-  @drpc.method() incrementCounterBy(counter: Counter, value: any) {
+  @drpc.method() incrementCounterBy(counter: any, value: any) {
     if (!(counter instanceof Counter)) {
       throw new RemoteError({code: -1000, message: 'Argument not an instance of Counter'});
     }
