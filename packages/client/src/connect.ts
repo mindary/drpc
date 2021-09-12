@@ -8,23 +8,23 @@ import {protocols} from './protocols';
 
 const debug = debugFactory('drpc:client:connect');
 
-export async function connect(brokerUrl: string, options?: ClientOptions): Promise<Client>;
+export async function connect(url: string, options?: ClientOptions): Promise<Client>;
 export async function connect(options: ClientOptions): Promise<Client>;
-export async function connect(brokerUrlOrOptions: string | ClientOptions, options?: ClientOptions): Promise<Client> {
+export async function connect(urlOrOptions: string | ClientOptions, options?: ClientOptions): Promise<Client> {
   debug('connecting to an drpc broker...');
-  let brokerUrl: string | undefined;
+  let url: string | undefined;
 
-  if (typeof brokerUrlOrOptions === 'string') {
-    brokerUrl = brokerUrlOrOptions;
-  } else if (typeof brokerUrlOrOptions !== 'string' && !options) {
-    options = brokerUrlOrOptions;
-    brokerUrl = undefined;
+  if (typeof urlOrOptions === 'string') {
+    url = urlOrOptions;
+  } else if (!options) {
+    options = urlOrOptions;
+    url = undefined;
   }
 
   let opts: ClientOptions = options ?? {};
 
-  if (brokerUrl) {
-    const parsed = parseUrl(brokerUrl, true);
+  if (url) {
+    const parsed = parseUrl(url, true);
     opts = Object.assign(
       parsed,
       {

@@ -47,8 +47,10 @@ export class Client extends ClientSocket {
     return this;
   }
 
-  protected async connect() {
-    this.attach(this.#connect(this));
+  async connect() {
+    if (!this.isConnected()) {
+      this.attach(this.#connect(this));
+    }
     return this;
   }
 

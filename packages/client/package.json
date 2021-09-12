@@ -26,8 +26,6 @@
     "@drpc/core": "^0.14.0",
     "@drpc/interception": "^0.3.4",
     "@drpc/resolver": "^0.1.0",
-    "@drpc/transport-tcp": "^0.1.0",
-    "@drpc/transport-ws": "^0.1.0",
     "@libit/interceptor": "^0.2.1",
     "debug": "^4.3.2",
     "once-promise": "^2.0.0",
@@ -37,6 +35,10 @@
     "ws": "^8.2.1"
   },
   "devDependencies": {
+    "@drpc/registry": "^0.1.0",
+    "@drpc/server": "^0.13.0",
+    "@drpc/testlab": "^0.10.8",
+    "@drpc/transport-tcp": "^0.1.0",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
