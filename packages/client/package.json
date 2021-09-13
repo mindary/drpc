@@ -27,6 +27,7 @@
     "@drpc/interception": "^0.3.4",
     "@drpc/resolver": "^0.1.0",
     "@libit/interceptor": "^0.2.1",
+    "backo2": "^1.0.2",
     "debug": "^4.3.2",
     "once-promise": "^2.0.0",
     "parse-url": "^5.0.7",
@@ -42,6 +43,7 @@
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",
+    "@types/backo2": "^1.0.1",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.7.13",
     "@types/ws": "^7.4.7"

@@ -8,6 +8,8 @@ import {protocols} from './protocols';
 
 const debug = debugFactory('drpc:client:connect');
 
+const reconnects = Symbol('reconnects');
+
 export async function connect(url: string, options?: ClientOptions): Promise<Client>;
 export async function connect(options: ClientOptions): Promise<Client>;
 export async function connect(urlOrOptions: string | ClientOptions, options?: ClientOptions): Promise<Client> {
@@ -108,19 +110,20 @@ export async function connect(urlOrOptions: string | ClientOptions, options?: Cl
     }) ?? [],
   );
 
-  function wrapper(client: Client) {
+  function wrapper(client: any) {
+    client[reconnects] = client[reconnects] ?? 0;
     let channel = defaultChannel!;
     if (servers?.length > 0) {
-      if (client._reconnectCount >= servers.length) {
-        client._reconnectCount = 0;
+      if (client[reconnects] >= servers.length) {
+        client[reconnects] = 0;
       }
-      const server = servers[client._reconnectCount];
+      const server = servers[client[reconnects]];
       channel = server.channel;
       opts.host = server.host;
       opts.port = server.port;
       opts.protocol = server.protocol;
       opts.hostname = opts.host;
-      client._reconnectCount++;
+      client[reconnects]++;
     }
 
     debug('connect for', opts.protocol);

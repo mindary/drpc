@@ -4,6 +4,7 @@ import {Application, tcp} from '@drpc/server';
 import {RpcSuite} from '@drpc/testsuite';
 import {connect} from '@drpc/client';
 import {expect} from '@loopback/testlab';
+import {noop} from 'ts-essentials';
 import * as channel from '../..';
 
 describe('tls client', function () {
@@ -13,6 +14,8 @@ describe('tls client', function () {
 
   before(() => {
     app = RpcSuite.givenApplication();
+    // ignore connection errors
+    app.on('connection', conn => conn.on('error', noop));
     [server, port] = createTlsServer(tcp(app.handle), {
       key: Certs.tlsKey,
       cert: Certs.tlsCert,
@@ -32,7 +35,7 @@ describe('tls client', function () {
         ca: [Certs.tlsCert],
         rejectUnauthorized: true,
       });
-      client.on('error', console.error);
+      client.on('error', noop);
       await app.once('connection');
       await client.close();
     });
@@ -43,7 +46,7 @@ describe('tls client', function () {
         ca: [Certs.tlsCert],
         rejectUnauthorized: true,
       });
-      client.on('error', console.error);
+      client.on('error', noop);
       await app.once('connection');
       await client.close();
     });
@@ -54,7 +57,7 @@ describe('tls client', function () {
         ca: [Certs.tlsCert],
         rejectUnauthorized: true,
       });
-      client.on('error', console.error);
+      client.on('error', noop);
       await app.once('connection');
       await client.close();
     });
@@ -80,7 +83,7 @@ describe('tls client', function () {
         ca: [Certs.wrongCert],
         rejectUnauthorized: true,
       });
-
+      client.on('error', noop);
       await client.once('close');
     });
 
@@ -95,6 +98,7 @@ describe('tls client', function () {
         rejectUnauthorized: true,
         host,
       });
+      client.on('error', noop);
 
       app.onconnect = carrier => {
         servername = carrier.socket.transport.socket.servername;

@@ -123,16 +123,6 @@ export class CallResponse<SOCKET extends Socket = any> extends Response<'call', 
   }
 }
 
-// export type ResponseClass<T extends RequestPacketType> = T extends 'connect'
-//   ? ConnectResponse
-//   : T extends 'auth'
-//   ? AuthResponse
-//   : T extends 'event'
-//   ? EventResponse
-//   : T extends 'call'
-//   ? CallResponse
-//   : never;
-
 export function createResponse<T extends RequestPacketType, SOCKET extends Socket = any>(
   type: T,
   socket: SOCKET,

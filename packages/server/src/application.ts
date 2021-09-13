@@ -113,7 +113,7 @@ export class Application extends ApplicationEmittery {
     const conn = new Connection(transport, {
       connectTimeout: this.connectTimeout,
       requestTimeout: this.requestTimeout,
-      // onconnect: carrier => this.handleConnect(carrier),
+      onconnect: carrier => this.handleConnect(carrier),
       onauth: carrier => this.handleAuth(carrier),
       onincoming: (carrier, next) => this.handleIncoming(carrier, next),
       onoutgoing: (request, next) => this.handleOutgoing(request, next),
@@ -123,6 +123,10 @@ export class Application extends ApplicationEmittery {
       .then(() => this.registerConnection(conn))
       .catch(e => this.emit('error', e));
     return conn;
+  }
+
+  protected async handleConnect(carrier: Carrier<'connect', Connection>) {
+    await this.onconnect?.(carrier);
   }
 
   protected async handleAuth(carrier: Carrier<'auth', Connection>) {

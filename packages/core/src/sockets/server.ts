@@ -1,13 +1,20 @@
-import {assert} from 'ts-essentials';
+import {assert, noop} from 'ts-essentials';
 import {ValueOrPromise} from '@drpc/types';
 import {Packet} from '@drpc/packet';
 import uniqid from 'uniqid';
+import debugFactory from 'debug';
 import {Socket, SocketOptions, SocketReservedEvents} from './socket';
 import {Transport} from '../transport';
 import {RemoteError} from '../errors';
+import {Carrier} from '../carrier';
+
+const debug = debugFactory('drpc:core:socket:server');
+
+export type OnServerSocketConnect = (carrier: Carrier<'connect'>) => ValueOrPromise<any>;
 
 export interface ServerSocketOptions extends SocketOptions {
   generateId?: () => string;
+  onconnect?: OnServerSocketConnect;
 }
 
 export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEvents> extends Socket<EVENTS> {
@@ -15,16 +22,15 @@ export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
    * Additional information that can be attached to the Connection instance and which will be used in DTO/Persistent
    */
   public data: Record<string, any> = {};
-
   public session: Record<string, any> = {};
-
   public id: string;
+  public onconnect: OnServerSocketConnect;
 
   protected generateId: () => string;
 
   constructor(transport: Transport, options?: ServerSocketOptions) {
     super({...options, transport});
-    // this.onconnect = options?.onconnect ?? noop;
+    this.onconnect = options?.onconnect ?? noop;
     this.generateId = options?.generateId ?? uniqid;
   }
 
@@ -42,19 +48,20 @@ export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
     this.id = message.clientId ?? this.generateId();
 
     try {
+      await this.onconnect(carrier);
+
       this.keepalive = message.keepalive;
       const m = packet.metadata;
+      const [authmethod] = m?.getAsString('authmethod') ?? [];
 
-      const [authMethod] = m?.getAsString('authmethod') ?? [];
-
-      if (authMethod) {
-        assert(this._onauth, `Unsupported authentication method: ${authMethod}`);
+      if (authmethod) {
+        assert(this.onauth, `Unsupported authentication method: ${authmethod}`);
         const authCarrier = this.createCarrier({
           type: 'auth',
           metadata: packet.metadata,
           message: {},
         });
-        await this._onauth?.(authCarrier);
+        await this.onauth?.(authCarrier);
         if (authCarrier.respond === 'auth') {
           // continue authentication
           await authCarrier.res.endIfNotEnded('auth');
@@ -81,7 +88,7 @@ export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
     const carrier = this.createCarrier(packet);
 
     try {
-      const result = await this._onauth?.(carrier);
+      const result = await this.onauth?.(carrier);
       if (!result && this.isConnecting()) {
         // end authentication
         await carrier.res.endIfNotEnded('connack');
@@ -109,5 +116,10 @@ export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
 
   protected handlePing(packet: Packet<'ping'>): ValueOrPromise<void> {
     return this.doError('invalid ping direction');
+  }
+
+  protected doDisconnect(): Promise<void> {
+    debug('doDisconnect');
+    return this.close();
   }
 }

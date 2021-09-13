@@ -1,9 +1,9 @@
 import {expect, sinon} from '@loopback/testlab';
 import delay from 'delay';
+import {Packet} from '@drpc/packet';
 import {givenSocketPair, onceConnected} from '../support';
 import {ClientSocket, ServerSocket, SOCKET_RESERVED_EVENTS} from '../../sockets';
 import {ConnectTimeoutError} from '../../errors';
-import {Packet} from '@drpc/packet';
 
 describe('Core - Connect', function () {
   describe('connect handshake', function () {
@@ -17,8 +17,8 @@ describe('Core - Connect', function () {
 
       await onceConnected(serverSocket, clientSocket);
 
-      expect(serverEvents).deepEqual(['packet', 'packet_create', 'connected']);
-      expect(clientEvents).deepEqual(['packet_create', 'packet', 'heartbeat', 'connected']);
+      expect(serverEvents).containDeepOrdered(['packet', 'packet_create', 'connected']);
+      expect(clientEvents).containDeepOrdered(['packet_create', 'packet', 'heartbeat', 'connected']);
 
       await clientSocket.close();
       await serverSocket.close();
@@ -67,7 +67,7 @@ describe('Core - Connect', function () {
       const token = 'hello';
       clientSocket.metadata.set('authmethod', 'token');
       clientSocket.metadata.set('authdata', token);
-      serverSocket._onauth = carrier => {
+      serverSocket.onauth = carrier => {
         const [method] = carrier.getAsString('authmethod');
         const [data] = carrier.getAsString('authdata');
         if (method !== 'token' || data !== 'hello') {
@@ -80,7 +80,7 @@ describe('Core - Connect', function () {
 
     it('should deny', async () => {
       clientSocket.metadata.set('authmethod', 'token');
-      serverSocket._onauth = () => {
+      serverSocket.onauth = () => {
         throw new Error('Unauthorized');
       };
       const error = await clientSocket.once('error');
@@ -108,7 +108,7 @@ describe('Core - Connect', function () {
       // connect with authentication
       clientSocket.metadata.set('authmethod', 'token');
       // authentication timeout
-      serverSocket._onauth = async () => {
+      serverSocket.onauth = async () => {
         await delay((clientSocket.connectTimeout + 5) * 1000);
       };
       const error = clientSocket.once('error');

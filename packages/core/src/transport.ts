@@ -32,7 +32,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
   public state?: TransportState;
   public parser: Parser;
   public socket?: any;
-  private unsubs: UnsubscribeFn[] = [];
+  private subs: UnsubscribeFn[] = [];
 
   protected constructor(options?: TransportOptions) {
     super();
@@ -77,7 +77,7 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   protected setup() {
-    this.unsubs.push(
+    this.subs.push(
       this.parser.on('packet', this.onPacket.bind(this)),
       this.parser.on('error', this.onError.bind(this)),
     );
@@ -109,8 +109,8 @@ export abstract class Transport extends Emittery<TransportEvents> {
   }
 
   protected async doClose(reason?: string | Error) {
-    while (this.unsubs.length) {
-      this.unsubs.shift()?.();
+    while (this.subs.length) {
+      this.subs.shift()?.();
     }
     this.state = 'closed';
     await this.emit('close', reason ?? 'unknown');

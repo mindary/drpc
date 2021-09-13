@@ -3,7 +3,6 @@
 packages/*/dist
 transports/*/dist
 clients/*/dist
-channels/*/dist
 examples/*/dist
 *.json
 CHANGELOG.md

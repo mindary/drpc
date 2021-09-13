@@ -17,24 +17,24 @@ import {
 } from '@drpc/packet';
 import {ConnectionStallError, ConnectTimeoutError, RemoteError, UnimplementedError} from '../errors';
 import {Transport, TransportState} from '../transport';
-import {CallOptions, NetAddress, OnAuth, OnIncoming, OnOutgoing} from '../types';
+import {ActionPacketType, CallOptions, NetAddress, OnAuth, OnIncoming, OnOutgoing} from '../types';
 import {Alive} from '../alive';
 import {Request, RequestPacketType} from '../request';
 import {createResponse} from '../response';
 import {Carrier} from '../carrier';
 import {Store} from '../store';
 import {RemoteService} from '../remote';
+import {Next} from '@libit/interceptor';
 
 const debug = debugFactory('drpc:core:socket');
 
 export type SocketState = 'connecting' | 'connected' | TransportState;
 
 export interface SocketReservedEvents {
-  // "error" allow to emitReserved and emit
+  // Both "emitReserved" and "emit" may emit "error" event
   error: Error;
   tick: undefined;
-  open: Socket<any>;
-  connect: object;
+  connect: undefined;
   connected: undefined;
   closing: string | Error;
   close: string | Error;
@@ -46,7 +46,6 @@ export interface SocketReservedEvents {
 export const SOCKET_RESERVED_EVENTS: ReadonlySet<string> = new Set<keyof SocketReservedEvents>(<const>[
   // IMPORTANT: ignore "error" event
   'tick',
-  'open',
   'connect',
   'connected',
   'closing',
@@ -58,7 +57,9 @@ export const SOCKET_RESERVED_EVENTS: ReadonlySet<string> = new Set<keyof SocketR
 
 export type SocketReservedDatalessEvents = DatalessEventNames<SocketReservedEvents>;
 
-export type SocketEvents = Record<string, any>;
+export type SocketEvents = SocketReservedEvents & {
+  [name: string]: any;
+};
 
 export interface SocketOptions {
   id?: string;
@@ -79,12 +80,10 @@ const DEFAULT_OPTIONS: SocketOptions = {
   requestTimeout: 10,
 };
 
-export class SocketEmittery extends Emittery<SocketEvents> {}
-
 export abstract class Socket<
   EventData extends SocketReservedEvents = SocketReservedEvents,
   DatalessEvents = DatalessEventNames<EventData>,
-> extends SocketEmittery {
+> extends Emittery<SocketEvents> {
   readonly options: SocketOptions;
 
   public tag: string;
@@ -95,11 +94,12 @@ export abstract class Socket<
   public keepalive: number;
   public connectTimeout: number;
   public requestTimeout: number;
-  _onauth?: OnAuth;
-  _onincoming?: OnIncoming;
-  _onoutgoing: OnOutgoing;
+  public error: (error: Error) => void;
+  public onauth?: OnAuth;
+  public onincoming?: OnIncoming;
+  public onoutgoing: OnOutgoing;
   protected store: Store = new Store();
-  protected unsubs: UnsubscribeFn[] = [];
+  protected subs: UnsubscribeFn[] = [];
   protected timer: IntervalTimer | null;
   protected connectTimer: TimeoutTimer;
   protected alive: Alive;
@@ -116,10 +116,11 @@ export abstract class Socket<
     this.keepalive = this.options.keepalive!;
     this.connectTimeout = this.options.connectTimeout!;
     this.requestTimeout = this.options.requestTimeout!;
+    this.error = err => this.emitReserved('error', err);
 
-    this._onauth = options.onauth;
-    this._onincoming = options.onincoming;
-    this._onoutgoing = options.onoutgoing ?? ((request, next) => next());
+    this.onauth = options.onauth;
+    this.onincoming = options.onincoming;
+    this.onoutgoing = options.onoutgoing ?? ((request, next) => next());
 
     // this.remote = new Remote(this, {onoutgoing: options.onoutgoing});
 
@@ -178,7 +179,7 @@ export abstract class Socket<
     assert(transport, 'Must pass a transport');
     this.transport = transport;
 
-    this.unsubs.push(
+    this.subs.push(
       this.transport.on('error', this.doError.bind(this)),
       this.transport.on('close', this.doClose.bind(this)),
       this.transport.on('packet', this.handlePacket.bind(this)),
@@ -186,12 +187,13 @@ export abstract class Socket<
     // this.setup();
     this.transport
       .ready()
-      .then(() => this.setup())
+      .then(() => this.open())
       .catch(e => this.emitReserved('error', e));
     return this;
   }
 
   async close() {
+    debug(`${this.tag}.close: calling close directly`);
     this.state = 'closing';
     const reason = 'forced close';
     await this.emitReserved('closing', reason);
@@ -222,7 +224,7 @@ export abstract class Socket<
     });
 
     await this.ready();
-    await this._onoutgoing(request, async () => {
+    await this.handleOutgoing(request, async () => {
       await this.send('event', {name: request.message.name, payload: request.message.payload}, request.metadata);
     });
   }
@@ -279,7 +281,7 @@ export abstract class Socket<
       metadata,
     });
 
-    return this._onoutgoing(request, async () => {
+    return this.handleOutgoing(request, async () => {
       await this.send(
         'call',
         {
@@ -306,16 +308,78 @@ export abstract class Socket<
     }
   }
 
-  protected setup() {
-    debug('setup: setup');
-    this.state = 'open';
+  /**
+   * Connect packet handler.
+   * client deny it
+   * server should authenticate the client and send back connack packet for allowed and error for denied.
+   * @param packet
+   * @protected
+   */
+  protected abstract handleConnect(packet: Packet<'connect'>): ValueOrPromise<void>;
 
+  /**
+   * Auth packet handler.
+   * client handle according to stage
+   * server handle according to stage
+   * @param packet
+   * @protected
+   */
+  protected abstract handleAuth(packet: Packet<'auth'>): ValueOrPromise<any>;
+
+  /**
+   * Connack packet handler.
+   * client change state to connected
+   * server deny it
+   * @param packet
+   * @protected
+   */
+  protected abstract handleConnack(packet: Packet<'connack'>): ValueOrPromise<void>;
+
+  /**
+   * Handle keepalive expired
+   * server should send a ping challenge
+   * client should ignore it and wait for server ping
+   * @param nonce
+   * @protected
+   */
+  protected abstract handleAliveExpired(nonce: Buffer): ValueOrPromise<void>;
+
+  /**
+   * Ping packet handler.
+   * client should send back heartbeat payload
+   * server should handle as error and close the connection
+   * @param packet
+   * @protected
+   */
+  protected abstract handlePing(packet: Packet<'ping'>): ValueOrPromise<void>;
+
+  protected abstract doDisconnect(): Promise<void>;
+
+  protected open() {
+    if (!this.state || this.state === 'closed') {
+      debug('open');
+      this.state = 'open';
+
+      this.startConnectTiming();
+    }
+  }
+
+  protected startConnectTiming() {
+    debug(`${this.tag}.startConnectTiming`);
     this.connectTimer?.cancel();
-    this.connectTimer = new TimeoutTimer(async () => {
-      debug('setup: connect timeout, close the client');
-      await this.emitReserved('error', new ConnectTimeoutError('Timed out waiting for connecting'));
-      await this.close();
-    }, this.connectTimeout * 1000);
+    this.connectTimer = new TimeoutTimer(() => this.handleConnectTimout(), this.connectTimeout * 1000);
+  }
+
+  protected async handleConnectTimout() {
+    debug(`${this.tag}.handleConnectTimout: connect timeout, close the client`);
+    await this.emitReserved('error', new ConnectTimeoutError('Timed out waiting for connecting'));
+    await this.doDisconnect();
+  }
+
+  protected async handleAliveError() {
+    debug(`${this.tag}.handleAliveError: close for heartbeat timeout in ${this.alive.timeout}ms`);
+    await this.emitReserved('error', new ConnectionStallError('Connection is stalling (ping)'));
+    await this.doDisconnect();
   }
 
   protected async handlePacket(packet: Packet) {
@@ -323,7 +387,7 @@ export abstract class Socket<
 
     // export packet event
     if (debug.enabled) {
-      debug(`handlePacket: received packet "${type ?? 'unknown'}"`);
+      debug(`${this.tag}.handlePacket: received packet "${type ?? 'unknown'}"`);
     }
 
     await this.emitReserved('packet', packet);
@@ -400,19 +464,23 @@ export abstract class Socket<
 
   protected async doClose(reason: string | Error) {
     if (this.state !== 'closed') {
-      debug('doClose: socket close with reason %s', reason);
+      debug(`${this.tag}.doClose: close socket with reason %s`, reason);
       await this.cleanUp(reason);
+
+      debug(`${this.tag}.doClose: change state from '${this.state}' to 'closed'`);
       this.state = 'closed';
+
       // notify ee disconnected
       await this.emitReserved('close', reason);
     }
   }
 
   protected async cleanUp(reason: string | Error) {
+    debug(`${this.tag}.cleanUp`);
     this.connectTimer.cancel();
 
-    while (this.unsubs.length) {
-      this.unsubs.shift()?.();
+    while (this.subs.length) {
+      this.subs.shift()?.();
     }
 
     // ensure transport won't stay open
@@ -427,51 +495,6 @@ export abstract class Socket<
     await this.stopStall();
   }
 
-  /**
-   * Connect packet handler.
-   * client deny it
-   * server should authenticate the client and send back connack packet for allowed and error for denied.
-   * @param packet
-   * @protected
-   */
-  protected abstract handleConnect(packet: Packet<'connect'>): ValueOrPromise<void>;
-
-  /**
-   * Auth packet handler.
-   * client handle according to stage
-   * server handle according to stage
-   * @param packet
-   * @protected
-   */
-  protected abstract handleAuth(packet: Packet<'auth'>): ValueOrPromise<any>;
-
-  /**
-   * Connack packet handler.
-   * client change state to connected
-   * server deny it
-   * @param packet
-   * @protected
-   */
-  protected abstract handleConnack(packet: Packet<'connack'>): ValueOrPromise<void>;
-
-  /**
-   * Handle keepalive expired
-   * server should send a ping challenge
-   * client should ignore it and wait for server ping
-   * @param nonce
-   * @protected
-   */
-  protected abstract handleAliveExpired(nonce: Buffer): ValueOrPromise<void>;
-
-  /**
-   * Ping packet handler.
-   * client should send back heartbeat payload
-   * server should handle as error and close the connection
-   * @param packet
-   * @protected
-   */
-  protected abstract handlePing(packet: Packet<'ping'>): ValueOrPromise<void>;
-
   protected async handlePong({message}: Packet<'pong'>) {
     await this.alive.update(message.payload);
   }
@@ -483,12 +506,13 @@ export abstract class Socket<
     this.connectTimer.cancel();
 
     this.alive = new Alive(this.keepalive * 1000);
-    this.unsubs.push(
+    this.subs.push(
       this.alive.on('expired', nonce => this.handleAliveExpired(nonce)),
       this.alive.on('error', () => this.handleAliveError()),
     );
 
     this.startStall();
+    await this.emitReserved('connect');
     await this.emitReserved('connected');
   }
 
@@ -508,28 +532,22 @@ export abstract class Socket<
 
   protected async stopStall() {
     if (this.timer) {
-      debug('stopStall: stop stall');
-      await this.timer.stop();
+      debug(`${this.tag}.stopStall`);
+      this.timer.stop().catch(e => this.emitReserved('error', e));
+      debug(`${this.tag}.stopStall: set timer to null`);
       this.timer = null;
     } else {
-      debug('stopStall: stall has not been started');
+      debug(`${this.tag}.stopStall: stall has not been started`);
     }
   }
 
   protected async maybeStall() {
-    await this.alive.tick(Date.now());
+    this.alive.tick(Date.now()).catch(this.error);
     this.store.check();
-
-    await this.emitReserved('tick');
+    this.emitReserved('tick').catch(this.error);
   }
 
-  protected async handleAliveError() {
-    debug(`handleAliveError: close for heartbeat timeout in ${this.alive.timeout}ms`);
-    await this.emitReserved('error', new ConnectionStallError('Connection is stalling (ping)'));
-    await this.close();
-  }
-
-  protected createCarrier<T extends RequestPacketType>({type, message, metadata}: Packet<T>) {
+  protected createCarrier<T extends RequestPacketType>({type, message, metadata}: Packet<T>): Carrier<T> {
     const request = new Request<T>(this, type, {
       message,
       metadata,
@@ -552,13 +570,8 @@ export abstract class Socket<
     // id of 0,null,undefined means event
     const carrier = this.createCarrier(packet);
 
-    if (type === 'call' && !this._onincoming) {
-      await carrier.error(new UnimplementedError());
-      return;
-    }
-
     try {
-      const result = await this._onincoming?.(carrier, () => {
+      const result = await this.handleIncoming(carrier, () => {
         throw new UnimplementedError();
       });
       if (type === 'call') {
@@ -610,5 +623,20 @@ export abstract class Socket<
     }
 
     this.store.reject(id, new RemoteError(code, msg));
+  }
+
+  protected async handleIncoming(carrier: Carrier<ActionPacketType>, next: Next) {
+    if (carrier.type === 'call' && !this.onincoming) {
+      throw new UnimplementedError();
+    }
+    return this.onincoming?.(carrier, next);
+  }
+
+  protected async handleOutgoing(request: Request<ActionPacketType>, next: Next) {
+    if (!this.onoutgoing) {
+      return next();
+    }
+
+    return this.onoutgoing(request, next);
   }
 }

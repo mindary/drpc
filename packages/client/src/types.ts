@@ -2,20 +2,21 @@ import {ClientRequestArgs} from 'http';
 import {KeyObject} from 'tls';
 import {GenericInterceptor} from '@libit/interceptor';
 import {
+  ActionPacketType,
   Carrier,
   ClientSocket,
   ClientSocketOptions,
   Request,
-  RequestPacketType,
   Transport,
   TransportOptions,
 } from '@drpc/core';
 import {Client} from './client';
 import * as Buffer from 'buffer';
 
-export type ClientRequest = Request<RequestPacketType, ClientSocket>;
+export type ClientCarrier = Carrier<ActionPacketType, ClientSocket>;
+export type ClientRequest = Request<ActionPacketType, ClientSocket>;
 
-export type ClientIncomingHandler = GenericInterceptor<Carrier<RequestPacketType>>;
+export type ClientIncomingHandler = GenericInterceptor<ClientCarrier>;
 export type ClientOutgoingHandler = GenericInterceptor<ClientRequest>;
 
 export type ProtocolType = 'ws' | 'wss' | 'tcp' | 'tls' | 'ssl';
@@ -65,10 +66,37 @@ export interface ClientOptions
    * 4
    */
   protocolVersion?: number;
+
   /**
-   * 1000 milliseconds, interval between two reconnections
+   * Should we allow reconnections?
+   * @default true
    */
-  reconnectPeriod?: number;
+  reconnection?: boolean;
+
+  /**
+   * How many reconnection attempts should we try?
+   * @default Infinity
+   */
+  reconnectionAttempts?: number;
+
+  /**
+   * The time delay in milliseconds between reconnection attempts
+   * @default 1000
+   */
+  reconnectionDelay?: number;
+
+  /**
+   * The max time delay in milliseconds between reconnection attempts
+   * @default 5000
+   */
+  reconnectionDelayMax?: number;
+
+  /**
+   * Used in the exponential backoff jitter when reconnecting
+   * @default 0.5
+   */
+  randomizationFactor?: number;
+
   /**
    * 30 * 1000 milliseconds, time to wait before a CONNACK is received
    */

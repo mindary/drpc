@@ -23,20 +23,20 @@ describe('Core - RPC', function () {
 
   describe(`call`, function () {
     it('call and return with ack', async () => {
-      serverSocket._onincoming = request => request.message.payload;
+      serverSocket.onincoming = request => request.message.payload;
       const result = await clientSocket.call('echo', 'hello');
       expect(result).eql('hello');
     });
 
     it('call and throw an error', async () => {
-      serverSocket._onincoming = () => {
+      serverSocket.onincoming = () => {
         throw new Error('invalid args');
       };
       await expect(clientSocket.call('echo', 'hello')).rejectedWith('invalid args');
     });
 
     it('calling timeout', async () => {
-      serverSocket._onincoming = async () => {
+      serverSocket.onincoming = async () => {
         await delay(serverSocket.requestTimeout * 3 * 1000);
       };
       const result = clientSocket.call('echo', 'hello');
@@ -70,14 +70,14 @@ describe('Core - RPC', function () {
     };
 
     it('invoke successfully', async () => {
-      serverSocket._onincoming = Invoker;
+      serverSocket.onincoming = Invoker;
       const monster = clientSocket.service<Monster>(Monster.namespace);
       const result = await monster.call('add', [1, 2]);
       expect(result).eql(3);
     });
 
     it('invoke fail with unknown method', async () => {
-      serverSocket._onincoming = Invoker;
+      serverSocket.onincoming = Invoker;
       const monster = clientSocket.service<Monster>(Monster.namespace);
       const result = monster.call('empty');
       await expect(result).rejectedWith(/Method not found/);

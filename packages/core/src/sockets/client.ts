@@ -43,8 +43,8 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
     return this.options.clientId;
   }
 
-  protected setup() {
-    super.setup();
+  protected open() {
+    super.open();
     nextTick(() => this.doConnect());
   }
 
@@ -60,7 +60,7 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
   protected async handleAuth(packet: Packet<'auth'>) {
     const carrier = this.createCarrier(packet);
     try {
-      await this._onauth?.(carrier);
+      await this.onauth?.(carrier);
       if (carrier.respond === 'auth') {
         await carrier.res.endIfNotEnded('auth');
       }
@@ -71,7 +71,7 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
 
   protected async handleConnack(packet: Packet<'connack'>) {
     if (packet.metadata?.has('authmethod')) {
-      await this._onauth?.(this.createCarrier({...packet, type: 'auth'}));
+      await this.onauth?.(this.createCarrier({...packet, type: 'auth'}));
     }
     await this.doConnected();
   }
@@ -82,5 +82,11 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
 
   protected async handlePing({message}: Packet<'ping'>) {
     return this.send('pong', message);
+  }
+
+  protected doDisconnect(): Promise<void> {
+    debug('doDisconnect');
+    // connect timeout or alive expired, disconnect transport and allow reconnecting
+    return this.transport.close();
   }
 }
