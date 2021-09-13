@@ -44,6 +44,7 @@
     "build:full": "npm ci --ignore-scripts && lerna bootstrap --ci && npm run clean && npm run build",
     "pretest": "npm run clean && npm run build",
     "test": "lb-nyc npm run mocha",
+    "test:ci": "lb-nyc npm run mocha",
     "mocha": "lb-mocha --lang en_US.UTF-8 \"packages/*/dist/__tests__/**/*.test.js\" \"transports/*/dist/__tests__/**/*.test.js\" \"clients/*/dist/__tests__/**/*.test.js\" \"examples/*/dist/__tests__/**/*.test.js\"",
     "posttest": "npm run lint"
   },
