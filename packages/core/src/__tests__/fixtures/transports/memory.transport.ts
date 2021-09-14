@@ -5,11 +5,14 @@ export interface MemoryTransportOptions extends TransportOptions {
 }
 
 export class MemoryTransport extends Transport {
+  options: MemoryTransportOptions;
+
   protected closeSensitive?: boolean;
   protected dest: MemoryTransport;
 
   constructor(options: MemoryTransportOptions = {}) {
     super(options);
+    this.options = options;
     this.closeSensitive = options.closeSensitive;
     this.open();
   }

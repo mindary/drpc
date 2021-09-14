@@ -6,6 +6,7 @@ import {Client} from '@drpc/client';
 import {Monster, monster} from '@drpc/testlab';
 import {DefaultRegistry} from '@drpc/registry';
 import {PrepareFn} from './types';
+import {RemoteService} from '@drpc/core/dist/remote';
 
 export namespace RpcSuite {
   export type Side = 'both' | 'server' | 'client';
@@ -57,24 +58,54 @@ export namespace RpcSuite {
 
       function runTests(getSocket: () => Socket | undefined) {
         describe('call', function () {
-          it('call a success-method', async () => {
-            const socket = getSocket();
+          let socket: Socket;
+          let service: RemoteService<Monster>;
+
+          before(() => {
+            socket = getSocket() as Socket;
             assert(socket);
-            const service = socket.service<Monster>(Monster.namespace);
-            const result = await service.call('add', [1, 2]);
-            expect(result).equal(3);
+            service = socket.service<Monster>(Monster.namespace);
           });
 
-          it('call a error-method', async () => {
-            const socket = getSocket();
-            assert(socket);
-            const service = socket.service<Monster>(Monster.namespace);
+          it('calls a success-method', async () => {
+            const start = Date.now();
+            const result = await service.call('add', [1, 2]);
+            expect(result).equal(3);
+            const elapse = Date.now() - start;
+            expect(elapse).lessThan(15);
+          });
+
+          it('calls a error-method', async () => {
             await expect(service.call('error')).rejectedWith(/An error message/);
+          });
+
+          it('calls a slow method', async () => {
+            const start = Date.now();
+            expect(await service.call('addSlow', [1, 2, true])).equal(3);
+            const elapse = Date.now() - start;
+            expect(elapse).greaterThan(15);
+            expect(elapse).lessThan(25);
+          });
+
+          it('calls sleep', async () => {
+            const start = Date.now();
+            expect(await service.call('sleep', [10])).equal(10);
+            const elapse = Date.now() - start;
+            expect(elapse).greaterThan(10);
+            expect(elapse).lessThan(20);
+          });
+
+          it('calls with no args', async () => {
+            expect(await service.call('noArgs')).equal(true);
+          });
+
+          it('calls with custom exception', async () => {
+            await expect(service.call('exception')).rejectedWith(/An exception message/);
           });
         });
 
-        describe('remote on and event', function () {
-          it('remote on', async () => {
+        describe('event', function () {
+          it('echo with event', async () => {
             const socket = getSocket();
             assert(socket);
             const reply = new Promise(resolve => socket.on('echo-reply', resolve));

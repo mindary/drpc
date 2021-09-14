@@ -25,14 +25,13 @@
   "dependencies": {
     "@drpc/core": "^0.15.1",
     "@drpc/interception": "^0.4.1",
-    "@drpc/resolver": "^0.2.1",
     "@libit/interceptor": "^0.2.1",
     "backo2": "^1.0.2",
     "debug": "^4.3.2",
     "once-promise": "^2.0.0",
-    "parse-url": "^5.0.7",
     "tily": "^2.8.3",
     "ts-essentials": "^8.1.0",
+    "url-parse": "^1.5.3",
     "ws": "^8.2.1"
   },
   "devDependencies": {
@@ -46,7 +45,9 @@
     "@types/backo2": "^1.0.1",
     "@types/debug": "^4.1.7",
     "@types/node": "^16.7.13",
-    "@types/ws": "^7.4.7"
+    "@types/url-parse": "^1.4.4",
+    "@types/ws": "^7.4.7",
+    "drpc-connector-throwing": "file:./fixtures/drpc-connector-throwing"
   },
   "files": [
     "README.md",

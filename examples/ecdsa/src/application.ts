@@ -2,7 +2,7 @@ import {Application, ApplicationOptions} from '@drpc/server';
 import {Signer} from '@libit/josa';
 import {greeting} from './services/greeting.service';
 import {RegistryMixin} from '@drpc/registry';
-import {random} from '@drpc/core';
+import {MetadataKeys, random} from '@drpc/core';
 
 export class EcdsaApplication extends RegistryMixin(Application) {
   signer: Signer;
@@ -18,7 +18,7 @@ export class EcdsaApplication extends RegistryMixin(Application) {
 
     this.addAuthInterceptor(async carrier => {
       const {socket} = carrier;
-      const [authmethod] = carrier.getAsString('authmethod');
+      const [authmethod] = carrier.getAsString(MetadataKeys.AUTH_METHOD);
 
       if (!authmethod?.startsWith('ecdsa')) {
         throw new Error('only ecdsa authentication allowed');
@@ -29,7 +29,7 @@ export class EcdsaApplication extends RegistryMixin(Application) {
         // generate challenge
         const data = (socket.session.nonce = random(32));
         carrier.set('authdata', data);
-        carrier.set('authmethod', 'ecdsa');
+        carrier.set(MetadataKeys.AUTH_METHOD, 'ecdsa');
         carrier.respond = 'auth';
       } else {
         // authentication stage 2

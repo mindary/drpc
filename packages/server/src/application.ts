@@ -106,7 +106,7 @@ export class Application extends ApplicationEmittery {
   }
 
   accept(options?: TransportOptions) {
-    return (socket: any) => this.handle(accept(socket, options));
+    return async (socket: any) => this.handle(await accept(socket, options));
   }
 
   protected doHandle(transport: Transport) {

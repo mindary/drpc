@@ -7,7 +7,12 @@ import {createWebSocket} from './ws';
 const debug = debugFactory('drpc:connector:ws');
 
 export function connect(client: Client, opts: ClientOptions) {
-  debug('streamBuilder');
+  debug('connect');
+
+  if (opts.cert && opts.key) {
+    opts.protocol = 'wss';
+  }
+
   const options = setDefaultOpts(opts);
   const socket = createWebSocket(client, options);
   return new WebSocketTransport(socket, opts);

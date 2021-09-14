@@ -5,11 +5,13 @@ export interface MemoryTransportOptions extends TransportOptions {
 }
 
 export class MemoryTransport extends Transport {
+  options: Record<string, any>;
   protected closeSensitive?: boolean;
-  protected dest: MemoryTransport;
+  protected dest?: MemoryTransport;
 
   constructor(options: MemoryTransportOptions = {}) {
     super(options);
+    this.options = options;
     this.closeSensitive = options.closeSensitive;
     this.open();
   }
@@ -21,13 +23,13 @@ export class MemoryTransport extends Transport {
 
   protected async doClose(reason: string | Error) {
     await super.doClose(reason);
-    if (this.closeSensitive && this.dest.isOpen()) {
-      await this.dest.close('destination closed');
+    if (this.closeSensitive && this.dest?.isOpen()) {
+      await this.dest?.close('destination closed');
     }
   }
 
   protected doSend(data: Buffer) {
-    return this.dest.onData(data);
+    return this.dest?.onData(data);
   }
 }
 

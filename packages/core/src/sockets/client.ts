@@ -4,6 +4,7 @@ import uniqid from 'uniqid';
 import {Socket, SocketOptions, SocketReservedEvents} from './socket';
 import {nextTick} from '../utils';
 import {MarkRequired} from 'ts-essentials';
+import {MetadataKeys} from '../keys';
 
 const debug = debugFactory('drpc:core:socket:client');
 
@@ -35,8 +36,8 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
       ...DEFAULT_CLIENT_SOCKET_OPTIONS,
       ...options,
     });
-    this.metadata = this.options.metadata ?? new Metadata();
     this.options.clientId = this.options.clientId ?? 'drpc_' + uniqid();
+    this.metadata = this.options.metadata ?? new Metadata();
   }
 
   get clientId() {
@@ -70,7 +71,7 @@ export class ClientSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
   }
 
   protected async handleConnack(packet: Packet<'connack'>) {
-    if (packet.metadata?.has('authmethod')) {
+    if (packet.metadata?.has(MetadataKeys.AUTH_METHOD)) {
       await this.onauth?.(this.createCarrier({...packet, type: 'auth'}));
     }
     await this.doConnected();

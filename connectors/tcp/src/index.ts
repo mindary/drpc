@@ -11,6 +11,10 @@ export function connect(client: Client, opts: ClientOptions & {servername?: stri
   opts.port = opts.port ?? 1999;
   opts.servername = opts.hostname = opts.host = opts.hostname ?? opts.host ?? opts.servername ?? 'localhost';
 
+  if (opts.cert && opts.key) {
+    opts.protocol = 'tls';
+  }
+
   return new TCPTransport(
     opts.protocol === 'tcp' ? createTcpConnection(client, opts as any) : createTlsConnection(client, opts as any),
   );

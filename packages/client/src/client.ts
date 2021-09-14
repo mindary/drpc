@@ -7,9 +7,11 @@ import {Next} from '@libit/interceptor';
 import {Interception} from '@drpc/interception';
 import {
   ActionPacketType,
+  AuthMethods,
   Carrier,
   ClientSocket,
   Metadata,
+  MetadataKeys,
   OnIncoming,
   ResolvedClientSocketOptions,
   SocketReservedEvents,
@@ -72,7 +74,7 @@ export class Client extends ClientSocket<ClientReservedEvents & SocketReservedEv
     super({
       ...DEFAULT_CLIENT_OPTIONS,
       ...opts,
-      metadata: opts.metadata ? Metadata.from(opts.metadata) : new Metadata(),
+      metadata: resolveMetadata(opts),
     });
     this.reconnection(opts.reconnection !== false);
     this.reconnectionAttempts(opts.reconnectionAttempts || Infinity);
@@ -295,4 +297,15 @@ export class Client extends ClientSocket<ClientReservedEvents & SocketReservedEv
       this.reconnectTimer = null;
     }
   }
+}
+
+function resolveMetadata(opts: ClientOptions): Metadata {
+  const metadata = opts.metadata ? Metadata.from(opts.metadata) : new Metadata();
+
+  if (opts.username && !metadata.has(MetadataKeys.AUTH_METHOD)) {
+    metadata.set(MetadataKeys.AUTH_METHOD, AuthMethods.BASIC);
+    metadata.set(MetadataKeys.AUTH_DATA, `${opts.username}:${opts.password ?? ''}`);
+  }
+
+  return metadata;
 }

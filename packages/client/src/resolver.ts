@@ -1,15 +1,15 @@
 import debugFactory from 'debug';
 
-const debug = debugFactory('drpc:resolver');
+const debug = debugFactory('drpc:client:resolver');
 
-export type Loader = (name: string) => Promise<any>;
+export type Loader = (name: string) => any | Promise<any>;
 
-export async function resolveModule(name: string, loader?: Loader) {
+export async function resolve(name: string, loader?: Loader) {
   const names = channelModuleNames(name);
   const module = await tryModules(names, loader);
   let error = null;
   if (!module) {
-    error = `WARNING: DRPC channel "${name}" is not installed  as any of the following modules:\n\n ${names.join(
+    error = `WARNING: DRPC connector "${name}" is not installed  as any of the following connectors:\n\n ${names.join(
       '\n',
     )}\n\nTo fix, run:\n\n    npm install ${names[names.length - 1]} --save\n`;
   }
@@ -19,16 +19,17 @@ export async function resolveModule(name: string, loader?: Loader) {
   };
 }
 
-// List possible channel module names
+// List possible connector module names
 function channelModuleNames(name: string) {
   const names = []; // Check the name as is
-  if (!name.match(/^[\/.@]/) && !name.startsWith('@')) {
-    names.push('./channels/' + name); // Check built-in channels
-    if (name.indexOf('drpc-') !== 0) {
-      names.push('drpc-' + name); // Try drpc-channel-<name>
-    }
-    names.push('@drpc/' + name); // Try @drpc/channel-<name>
+  if (!name.match(/^[\/.@]/) && !name.startsWith('drpc-connector-')) {
+    names.push('./connectors/' + name); // Check built-in channels
+    names.push('drpc-connector-' + name); // Try drpc-connector-<name>
+    names.push('@drpc/connector-' + name); // Try @drpc/connector-<name>
+  } else {
+    names.push(name);
   }
+
   return names;
 }
 
@@ -47,7 +48,7 @@ async function tryModules(names: string[], loader?: Loader) {
         continue;
       }
 
-      debug('Cannot load channel %s: %s', item, e.stack || e);
+      debug('Cannot load connector %s: %s', item, e.stack || e);
       throw e;
     }
     if (mod) {

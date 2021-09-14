@@ -1,3 +1,4 @@
+import {noop} from 'ts-essentials';
 import {Monster} from '@drpc/testlab';
 import * as net from 'net';
 import {expect, sinon} from '@loopback/testlab';
@@ -6,7 +7,6 @@ import {ApplicationWithRegistry} from '../fixtures/app';
 import * as tcp from '../fixtures/tcp';
 import * as drpc from '../..';
 import {ClientOptions} from './../..';
-import {noop} from 'ts-essentials';
 
 describe('Client', function () {
   const config: Partial<ClientOptions> = {protocol: 'tcp', connector: tcp};

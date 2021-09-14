@@ -106,11 +106,11 @@ export interface ClientOptions
    */
   auth?: string;
   /**
-   * the username required by your broker, if any
+   * the username required by your server, if any
    */
   username?: string;
   /**
-   * the password required by your broker, if any
+   * the password required by your server, if any
    */
   password?: string;
 

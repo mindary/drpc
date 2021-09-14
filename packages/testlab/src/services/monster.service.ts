@@ -1,8 +1,6 @@
 import delay from 'delay';
 import {RemoteError} from '@drpc/core';
 import {drpc} from '@drpc/decorators';
-import {Counter} from './counter';
-import {InvalidError} from './errors';
 import {Monster} from './monster.def';
 
 export class MonsterService implements Monster {
@@ -20,14 +18,6 @@ export class MonsterService implements Monster {
 
   @drpc.method() exception() {
     throw new Error('An exception message');
-  }
-
-  @drpc.method() incrementCounterBy(counter: any, value: any) {
-    if (!(counter instanceof Counter)) {
-      throw new RemoteError({code: -1000, message: 'Argument not an instance of Counter'});
-    }
-    counter.incrementBy(value);
-    return counter;
   }
 
   @drpc.method() add(a: number, b: number) {
@@ -53,10 +43,7 @@ export class MonsterService implements Monster {
     return true;
   }
 
-  @drpc.method() invalidError() {
-    return new InvalidError();
-  }
-
+  /* istanbul ignore next */
   extraMethod1() {
     return 'extraMethod1';
   }

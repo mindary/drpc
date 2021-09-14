@@ -35,9 +35,6 @@
       "path": "packages/registry/tsconfig.json"
     },
     {
-      "path": "packages/resolver/tsconfig.json"
-    },
-    {
       "path": "packages/server/tsconfig.json"
     },
     {

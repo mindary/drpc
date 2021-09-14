@@ -4,6 +4,7 @@ import {Packet} from '@drpc/packet';
 import {givenSocketPair, onceConnected} from '../support';
 import {ClientSocket, ServerSocket, SOCKET_RESERVED_EVENTS} from '../../sockets';
 import {ConnectTimeoutError} from '../../errors';
+import {MetadataKeys} from '../../keys';
 
 describe('Core - Connect', function () {
   describe('connect handshake', function () {
@@ -65,10 +66,10 @@ describe('Core - Connect', function () {
 
     it('should allow', async () => {
       const token = 'hello';
-      clientSocket.metadata.set('authmethod', 'token');
+      clientSocket.metadata.set(MetadataKeys.AUTH_METHOD, 'token');
       clientSocket.metadata.set('authdata', token);
       serverSocket.onauth = carrier => {
-        const [method] = carrier.getAsString('authmethod');
+        const [method] = carrier.getAsString(MetadataKeys.AUTH_METHOD);
         const [data] = carrier.getAsString('authdata');
         if (method !== 'token' || data !== 'hello') {
           throw new Error('Unauthorized');
@@ -79,7 +80,7 @@ describe('Core - Connect', function () {
     });
 
     it('should deny', async () => {
-      clientSocket.metadata.set('authmethod', 'token');
+      clientSocket.metadata.set(MetadataKeys.AUTH_METHOD, 'token');
       serverSocket.onauth = () => {
         throw new Error('Unauthorized');
       };
@@ -106,7 +107,7 @@ describe('Core - Connect', function () {
 
     it('client should throw ConnectTimeoutError for server long time authenticating', async () => {
       // connect with authentication
-      clientSocket.metadata.set('authmethod', 'token');
+      clientSocket.metadata.set(MetadataKeys.AUTH_METHOD, 'token');
       // authentication timeout
       serverSocket.onauth = async () => {
         await delay((clientSocket.connectTimeout + 5) * 1000);

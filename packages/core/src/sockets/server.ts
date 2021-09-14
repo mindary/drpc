@@ -7,6 +7,7 @@ import {Socket, SocketOptions, SocketReservedEvents} from './socket';
 import {Transport} from '../transport';
 import {RemoteError} from '../errors';
 import {Carrier} from '../carrier';
+import {MetadataKeys} from '../keys';
 
 const debug = debugFactory('drpc:core:socket:server');
 
@@ -52,7 +53,7 @@ export class ServerSocket<EVENTS extends SocketReservedEvents = SocketReservedEv
 
       this.keepalive = message.keepalive;
       const m = packet.metadata;
-      const [authmethod] = m?.getAsString('authmethod') ?? [];
+      const [authmethod] = m?.getAsString(MetadataKeys.AUTH_METHOD) ?? [];
 
       if (authmethod) {
         assert(this.onauth, `Unsupported authentication method: ${authmethod}`);

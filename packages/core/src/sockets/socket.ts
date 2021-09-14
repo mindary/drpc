@@ -297,7 +297,9 @@ export abstract class Socket<
 
   async send<T extends PacketType>(type: T, message: MessageTypes[T], metadata?: Metadata) {
     await this.transport.ready();
-    debug('send: sending packet "%s"', type, message);
+    if (debug.enabled) {
+      debug('send: sending packet "%s"', type, message);
+    }
     const packet: Packet<T> = {type, message, metadata};
     await this.emitReserved('packet_create', packet);
     try {

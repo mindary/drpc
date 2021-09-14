@@ -5,6 +5,7 @@ import {Identity, Signer} from '@libit/josa';
 import {setupServer} from '../../server';
 import {EcdsaApplication} from '../../application';
 import {Greeting} from '../../services/greeting.def';
+import {MetadataKeys} from '@drpc/core';
 
 describe('EcdsaApplication', function () {
   const signer = new Signer();
@@ -28,7 +29,7 @@ describe('EcdsaApplication', function () {
       onauth: carrier => {
         const [data] = carrier.getAsBuffer('authdata');
         const authdata = signer.signAndPack(data, identity);
-        carrier.set('authmethod', 'ecdsa');
+        carrier.set(MetadataKeys.AUTH_METHOD, 'ecdsa');
         carrier.set('authdata', authdata);
         carrier.respond = 'auth';
       },
