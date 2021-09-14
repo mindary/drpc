@@ -22,8 +22,8 @@ export type MetaType = BTDDataType<typeof MetaSchema>;
 export const ConnectMessageSchema = {
   protocolId: 'string',
   protocolVersion: 'uint8',
-  clientId: 'string',
   keepalive: 'uint16',
+  clientId: 'string',
 } as const;
 
 export type ConnectMessageType = Modify<BTDDataType<typeof ConnectMessageSchema>, {}>;

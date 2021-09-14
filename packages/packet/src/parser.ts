@@ -7,7 +7,7 @@ import {packer} from './packer';
 
 const HEADER_SIZE = HeaderCodec.encode({type: 0, size: 0, checksum: 0}).byteLength;
 
-export const DefaultMaxPacketSize = 10 * 1024 * 1024;
+export const DEFAULT_MAX_PACKET_SIZE = 10 * 1024 * 1024;
 
 export class Parser extends Emittery<{
   error: Error;
@@ -22,7 +22,7 @@ export class Parser extends Emittery<{
 
   constructor(maxPacketSize?: number) {
     super();
-    this.maxPacketSize = maxPacketSize ?? DefaultMaxPacketSize;
+    this.maxPacketSize = maxPacketSize ?? DEFAULT_MAX_PACKET_SIZE;
     this.reset();
   }
 

@@ -18,8 +18,42 @@ export const Greeter = {
 
 ```ts
 // main.ts
+// declare we have @drpc/transport-tcp for app.accept().
+import '@drpc/transport-tcp';
+
 import {Application, tcp} from '@drpc/server';
-import {Greeter} from './greeter.definition';
+
+// *******************
+// Definitions
+// *******************
+// definition style 1
+class Greeter {
+  // or define a const string
+  static namespace: 'greeter';
+
+  greet: (name: string) => string;
+}
+
+// definition style 2
+const GreeterNamespace = 'greeter';
+
+interface Greeter {
+  greet: (name: string) => string;
+}
+
+// *******************
+// Implementations
+// *******************
+@drpc(Greeter.namespace)
+class GreeterImpl implements Greeter {
+  @drpc.method()
+  greet(name: string) {
+    return `Hello, ${name}!`;
+  }
+}
+
+// server initiation
+const greeter = new GreeterImpl();
 
 async function main() {
   // *******************
@@ -27,15 +61,19 @@ async function main() {
   // *******************
   // prepare applicaiton
   const app = new Application();
+
   // register all methods of the service with '*' name filter
-  app.register(Greeter.name, {greet: name => `Hello, ${name}!`}, '*');
+  app.register(Greeter.namespace, greeter, '*');
+  // or according to decorators
+  // app.register(greeter);
+
   // signal every client on connected
   app.on('connection', async connection => {
-    await connection.signal('message', 'Welcome');
+    await connection.emit('message', 'Welcome');
   });
 
   // setup server (tcp, websocket or worker)
-  const server = net.createServer(tcp(app.handle));
+  const server = net.createServer(app.accept());
   server.listen(3000);
 
   // *******************
@@ -43,12 +81,12 @@ async function main() {
   // *******************
   const client = connect('tcp://localhost:3000');
   // subscribe "message" signal
-  client.remote.on('message', message => {
+  client.on('message', message => {
     console.log(message); // => Welcome
   });
-  const service = client.remote.service(Greeter);
+  const service = client.service<Greeter>(Greeter.namespace);
   // call remote method
-  const result = await service.greet('Tom');
+  const result = await service.call('greet', ['Tom']);
   console.log(result);
 
   await client.end();
@@ -64,10 +102,6 @@ main().catch(err => {
   process.exit(1);
 });
 ```
-
-## Specification
-
-See `spec.md`.
 
 ## Licence
 
