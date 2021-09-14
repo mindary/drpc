@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://gitr.net/mindary/drpc/compare/@drpc/types@0.5.0...@drpc/types@0.5.1) (2021-09-14)
+
+**Note:** Version bump only for package @drpc/types
+
+
+
+
+
 # 0.5.0 (2021-09-14)
 
 

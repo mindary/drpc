@@ -1,7 +1,7 @@
 {
   "name": "@drpc/server",
   "description": "The drpc abstract server",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,11 +27,11 @@
     "verify": "npm pack && tar xf drpc-server*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.15.0",
-    "@drpc/interception": "^0.4.0",
-    "@drpc/transport-tcp": "^0.2.0",
-    "@drpc/transport-ws": "^0.2.0",
-    "@drpc/types": "^0.5.0",
+    "@drpc/core": "^0.15.1",
+    "@drpc/interception": "^0.4.1",
+    "@drpc/transport-tcp": "^0.2.1",
+    "@drpc/transport-ws": "^0.2.1",
+    "@drpc/types": "^0.5.1",
     "@libit/emittery": "^0.10.1",
     "@libit/error": "^0.3.6",
     "@libit/interceptor": "^0.2.1",
@@ -41,8 +41,8 @@
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
-    "@drpc/registry": "^0.2.0",
-    "@drpc/testlab": "^0.11.0",
+    "@drpc/registry": "^0.2.1",
+    "@drpc/testlab": "^0.11.1",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",

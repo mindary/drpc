@@ -1,7 +1,7 @@
 {
   "name": "@drpc/core",
   "description": "A binary-only RPC protocol for multiple transports such as WebSocket, WebWorker, HTTP, BLE and so on.",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,8 +27,8 @@
     "verify": "npm pack && tar xf drpc-core*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/packet": "^0.2.0",
-    "@drpc/types": "^0.5.0",
+    "@drpc/packet": "^0.2.1",
+    "@drpc/types": "^0.5.1",
     "@libit/bufio": "^0.4.2",
     "@libit/emittery": "^0.10.1",
     "@libit/error": "^0.3.6",

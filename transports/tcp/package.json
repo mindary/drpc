@@ -1,7 +1,7 @@
 {
   "name": "@drpc/transport-tcp",
   "description": "The TCP transport",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,7 @@
     "verify": "npm pack && tar xf drpc-transport-tcp*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.15.0",
+    "@drpc/core": "^0.15.1",
     "tily": "^2.8.3"
   },
   "devDependencies": {

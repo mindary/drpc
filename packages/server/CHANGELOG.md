@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.1](https://github.com/mindary/drpc/compare/@drpc/server@0.14.0...@drpc/server@0.14.1) (2021-09-14)
+
+**Note:** Version bump only for package @drpc/server
+
+
+
+
+
 # 0.14.0 (2021-09-14)
 
 

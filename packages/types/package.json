@@ -1,7 +1,7 @@
 {
   "name": "@drpc/types",
   "description": "Common types shared in drpc packages",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

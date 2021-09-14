@@ -1,7 +1,7 @@
 {
   "name": "@drpc/registry",
   "description": "A builtin service registry",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,16 +23,16 @@
     "verify": "npm pack && tar xf drpc-registry*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.15.0",
-    "@drpc/decorators": "^0.2.0",
-    "@drpc/types": "^0.5.0",
+    "@drpc/core": "^0.15.1",
+    "@drpc/decorators": "^0.2.1",
+    "@drpc/types": "^0.5.1",
     "debug": "^4.3.2",
     "micromatch": "^4.0.4",
     "tily": "^2.8.3",
     "ts-essentials": "^8.1.0"
   },
   "devDependencies": {
-    "@drpc/testlab": "^0.11.0",
+    "@drpc/testlab": "^0.11.1",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",

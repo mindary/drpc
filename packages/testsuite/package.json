@@ -1,7 +1,7 @@
 {
   "name": "@drpc/testsuite",
   "description": "The test suite for drpc transports",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,12 +23,12 @@
     "verify": "npm pack && tar xf drpc-testsuite*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/client": "^0.9.0",
-    "@drpc/core": "^0.15.0",
-    "@drpc/registry": "^0.2.0",
-    "@drpc/server": "^0.14.0",
-    "@drpc/testlab": "^0.11.0",
-    "@drpc/types": "^0.5.0",
+    "@drpc/client": "^0.9.1",
+    "@drpc/core": "^0.15.1",
+    "@drpc/registry": "^0.2.1",
+    "@drpc/server": "^0.14.1",
+    "@drpc/testlab": "^0.11.1",
+    "@drpc/types": "^0.5.1",
     "delay": "^5.0.0",
     "ts-essentials": "^8.1.0"
   },
