@@ -7,16 +7,6 @@ An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker
 ### TCP transport
 
 ```ts
-// greeter.definition.ts
-export const Greeter = {
-  name: 'greeter',
-  methods: {
-    greet: {} as (name: strting) => string,
-  },
-};
-```
-
-```ts
 // main.ts
 // declare we have @drpc/transport-tcp for app.accept().
 import '@drpc/transport-tcp';
