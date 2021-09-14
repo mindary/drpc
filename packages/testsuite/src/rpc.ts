@@ -68,11 +68,8 @@ export namespace RpcSuite {
           });
 
           it('calls a success-method', async () => {
-            const start = Date.now();
             const result = await service.call('add', [1, 2]);
             expect(result).equal(3);
-            const elapse = Date.now() - start;
-            expect(elapse).lessThan(15);
           });
 
           it('calls a error-method', async () => {
