@@ -2,12 +2,12 @@
   "include": [
     "packages/*/dist",
     "transports/*/dist",
-    "clients/*/dist"
+    "connectors/*/dist"
   ],
   "exclude": [
     "packages/*/dist/__tests__/",
     "transports/*/dist/__tests__/",
-    "clients/*/dist/__tests__/"
+    "connectors/*/dist/__tests__/"
   ],
   "extension": [
     ".js",

@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@drpc/client": "^0.9.1",
-    "@drpc/client-tcp": "^0.2.1",
+    "@drpc/connector-tcp": "^0.2.1",
     "@drpc/core": "^0.15.1",
     "@drpc/registry": "^0.2.1",
     "@drpc/server": "^0.14.1",

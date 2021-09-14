@@ -11,7 +11,7 @@
   ],
   "references": [
     {
-      "path": "../../clients/tcp/tsconfig.json"
+      "path": "../../connectors/tcp/tsconfig.json"
     },
     {
       "path": "../../packages/client/tsconfig.json"

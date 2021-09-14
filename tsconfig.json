@@ -5,10 +5,10 @@
   },
   "references": [
     {
-      "path": "clients/tcp/tsconfig.json"
+      "path": "connectors/tcp/tsconfig.json"
     },
     {
-      "path": "clients/ws/tsconfig.json"
+      "path": "connectors/ws/tsconfig.json"
     },
     {
       "path": "examples/ecdsa/tsconfig.json"

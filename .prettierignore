@@ -2,7 +2,7 @@
 /coverage
 packages/*/dist
 transports/*/dist
-clients/*/dist
+connectors/*/dist
 examples/*/dist
 *.json
 CHANGELOG.md

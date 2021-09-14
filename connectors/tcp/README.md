@@ -1,3 +1,3 @@
-# @drpc/client-tcp
+# @drpc/connector-tcp
 
 > The TCP client connector

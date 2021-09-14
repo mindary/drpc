@@ -1,14 +1,14 @@
 import {ProtocolType} from './types';
 
 export const protocols: Record<ProtocolType, string> = {
-  ws: 'client-ws',
-  wss: 'client-ws',
+  ws: 'connector-ws',
+  wss: 'connector-ws',
 } as any;
 
 if (typeof process?.versions?.node !== 'undefined') {
   Object.assign(protocols, {
-    tcp: 'client-tcp',
-    tls: 'client-tcp',
-    ssl: 'client-tcp',
+    tcp: 'connector-tcp',
+    tls: 'connector-tcp',
+    ssl: 'connector-tcp',
   });
 }
