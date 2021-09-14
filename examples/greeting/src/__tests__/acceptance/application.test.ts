@@ -17,9 +17,9 @@ describe('GreetingApplication', function () {
 
   before(async () => {
     client = await connect(`tcp://localhost:${port}`, {
-      // TODO find a way to dynamic load channel by protocol in mono-project.
-      //   in mono-project, dependencies are added with link, it affect requiring to find proper channel module
-      channel: await import('@drpc/connector-tcp'),
+      // TODO find a way to dynamic load connector by protocol in mono-project.
+      //   in mono-project, dependencies are added with link, it affect requiring to find proper connector module
+      connector: await import('@drpc/connector-tcp'),
     });
   });
 

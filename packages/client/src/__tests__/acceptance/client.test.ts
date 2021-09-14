@@ -9,7 +9,7 @@ import {ClientOptions} from './../..';
 import {noop} from 'ts-essentials';
 
 describe('Client', function () {
-  const config: Partial<ClientOptions> = {protocol: 'tcp', channel: tcp};
+  const config: Partial<ClientOptions> = {protocol: 'tcp', connector: tcp};
   let app: ApplicationWithRegistry;
   let server: net.Server;
   let port: number;
@@ -46,7 +46,7 @@ function clientTests(config?: Partial<ClientOptions>) {
   describe('connect multiple times', function () {
     it('should restore connected state after reconnecting', async function () {
       const client = await connect({
-        channel: await import('../fixtures/tcp'),
+        connector: await import('../fixtures/tcp'),
       });
 
       const service = client.service<Monster>(Monster.namespace);

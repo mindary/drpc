@@ -4,7 +4,7 @@ import {connect} from '@drpc/client';
 import {ConnectivitySuite} from '@drpc/testsuite';
 import {createTcpServer} from '@drpc/testlab';
 import {noop} from 'ts-essentials';
-import * as channel from '../..';
+import * as connector from '../..';
 
 describe('TCP - connectivity', function () {
   ConnectivitySuite.run('TCP', async () => {
@@ -14,7 +14,7 @@ describe('TCP - connectivity', function () {
     const connection = app.once('connection');
 
     const client = await connect(`tcp://localhost:${port}`, {
-      channel,
+      connector,
     });
     const clientSocket = client;
     const serverSocket = await connection;

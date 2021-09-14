@@ -5,7 +5,7 @@ import {RpcSuite} from '@drpc/testsuite';
 import {connect} from '@drpc/client';
 import {expect} from '@loopback/testlab';
 import {noop} from 'ts-essentials';
-import * as channel from '../..';
+import * as connector from '../..';
 
 describe('tls client', function () {
   let app: Application;
@@ -29,7 +29,7 @@ describe('tls client', function () {
   describe('with secure parameters', function () {
     it('should validate successfully the CA', async () => {
       const client = await connect({
-        channel,
+        connector,
         protocol: 'tls',
         port,
         ca: [Certs.tlsCert],
@@ -42,7 +42,7 @@ describe('tls client', function () {
 
     it('should validate successfully the CA using URI', async () => {
       const client = await connect(`tls://localhost:${port}`, {
-        channel,
+        connector,
         ca: [Certs.tlsCert],
         rejectUnauthorized: true,
       });
@@ -53,7 +53,7 @@ describe('tls client', function () {
 
     it('should validate successfully the CA using URI with path', async () => {
       const client = await connect(`tls://localhost:${port}/`, {
-        channel,
+        connector,
         ca: [Certs.tlsCert],
         rejectUnauthorized: true,
       });
@@ -64,7 +64,7 @@ describe('tls client', function () {
 
     it('should validate unsuccessfully the CA', async () => {
       const client = await connect({
-        channel,
+        connector,
         protocol: 'tls',
         port,
         ca: [Certs.wrongCert],
@@ -77,7 +77,7 @@ describe('tls client', function () {
 
     it('should emit close on TLS error', async () => {
       const client = await connect({
-        channel,
+        connector,
         protocol: 'tls',
         port,
         ca: [Certs.wrongCert],
@@ -91,7 +91,7 @@ describe('tls client', function () {
       let servername = '';
       const host = 'localhost';
       const client = await connect({
-        channel,
+        connector,
         protocol: 'tls',
         port,
         ca: [Certs.tlsCert],

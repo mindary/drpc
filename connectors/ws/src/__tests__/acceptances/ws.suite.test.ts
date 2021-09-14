@@ -5,7 +5,7 @@ import http from 'http';
 import WS from 'ws';
 import {connect} from '@drpc/client';
 import {ws} from '@drpc/server';
-import * as channel from '../..';
+import * as connector from '../..';
 
 describe('WebSocket - Suite', function () {
   RpcSuite.run(async () => {
@@ -18,7 +18,7 @@ describe('WebSocket - Suite', function () {
     const connection = app.once('connection');
     const client = await connect('ws://localhost', {
       port: (server.address() as AddressInfo).port,
-      channel,
+      connector,
     });
     RpcSuite.setupClient(client);
     const clientSocket = client;

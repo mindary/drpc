@@ -4,7 +4,7 @@ An efficient RPC protocol for multiple transports such as TCP, WebSocket, Worker
 
 ## Usage
 
-### TCP Channel
+### TCP transport
 
 ```ts
 // greeter.definition.ts

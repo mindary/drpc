@@ -3,7 +3,7 @@ import {Client, ClientOptions} from '@drpc/client';
 import debugFactory from 'debug';
 import {buildUrl} from './common';
 
-const debug = debugFactory('drpc:channel:ws');
+const debug = debugFactory('drpc:connector:ws');
 
 export function createWebSocket(client: Client, opts: ClientOptions) {
   debug('createWebSocket');

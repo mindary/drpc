@@ -3,7 +3,7 @@ import {assert} from 'ts-essentials';
 import parseUrl from 'parse-url';
 import {resolveModule} from '@drpc/resolver';
 import {Client} from './client';
-import {ClientChannel, ClientOptions, ProtocolType} from './types';
+import {Connector, ClientOptions, ProtocolType} from './types';
 import {protocols} from './protocols';
 
 const debug = debugFactory('drpc:client:connect');
@@ -71,54 +71,54 @@ export async function connect(urlOrOptions: string | ClientOptions, options?: Cl
   assert(opts.protocol, 'protocol is required');
 
   const defaultProtocol = opts.protocol;
-  let defaultChannel: ClientChannel | undefined;
+  let defaultConnector: Connector | undefined;
   let protocolPath: string | undefined;
 
-  if (opts.channel) {
-    if (typeof opts.channel === 'string') {
-      protocolPath = opts.channel;
+  if (opts.connector) {
+    if (typeof opts.connector === 'string') {
+      protocolPath = opts.connector;
     } else {
-      defaultChannel = opts.channel;
+      defaultConnector = opts.connector;
     }
   }
 
-  if (!defaultChannel) {
+  if (!defaultConnector) {
     const resolved = await resolveClientChannel(protocolPath ?? protocols[opts.protocol]);
     if (resolved.error) {
       throw new Error(resolved.error);
     }
 
-    defaultChannel = resolved.module;
+    defaultConnector = resolved.module;
   }
 
-  assert(defaultChannel, 'channel is not resolved');
+  assert(defaultConnector, 'connector is not resolved');
 
   const servers = await Promise.all(
     opts.servers?.map(async s => {
       const protocol = s.protocol ?? defaultProtocol;
-      const channel =
+      const connector =
         protocol === defaultProtocol
-          ? defaultChannel
+          ? defaultConnector
           : protocols[protocol]
-          ? (await resolveClientChannel(protocols[protocol])).module ?? defaultChannel
-          : defaultChannel;
+          ? (await resolveClientChannel(protocols[protocol])).module ?? defaultConnector
+          : defaultConnector;
       return {
         ...s,
         protocol,
-        channel,
+        connector,
       };
     }) ?? [],
   );
 
   function wrapper(client: any) {
     client[reconnects] = client[reconnects] ?? 0;
-    let channel = defaultChannel!;
+    let connector = defaultConnector!;
     if (servers?.length > 0) {
       if (client[reconnects] >= servers.length) {
         client[reconnects] = 0;
       }
       const server = servers[client[reconnects]];
-      channel = server.channel;
+      connector = server.connector;
       opts.host = server.host;
       opts.port = server.port;
       opts.protocol = server.protocol;
@@ -127,7 +127,7 @@ export async function connect(urlOrOptions: string | ClientOptions, options?: Cl
     }
 
     debug('connect for', opts.protocol);
-    return channel.connect(client, opts);
+    return connector.connect(client, opts);
   }
 
   return Client.connect(wrapper, opts);

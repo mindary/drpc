@@ -47,7 +47,7 @@ export interface ClientOptions
   path?: string;
   protocol?: ProtocolType;
 
-  channel?: string | ClientChannel;
+  connector?: string | Connector;
 
   wsOptions?: ClientOptions | ClientRequestArgs;
   /**
@@ -129,6 +129,6 @@ export interface ClientOptions
 
 export type WrappedConnect = (client: Client) => Transport;
 
-export interface ClientChannel {
+export interface Connector {
   connect(client: Client, opts: ClientOptions): Transport;
 }

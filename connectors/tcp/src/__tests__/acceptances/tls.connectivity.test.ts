@@ -3,7 +3,7 @@ import {Application, tcp} from '@drpc/server';
 import {connect} from '@drpc/client';
 import {fromCallback} from 'a-callback';
 import {Certs, createTlsServer} from '@drpc/testlab';
-import * as channel from '../../index';
+import * as connector from '../../index';
 import {noop} from 'ts-essentials';
 
 describe('TLS - connectivity', function () {
@@ -16,7 +16,7 @@ describe('TLS - connectivity', function () {
 
     const connection = app.once('connection');
     const client = await connect(`tls://localhost:${port}`, {
-      channel,
+      connector,
       ca: [Certs.tlsCert],
     });
     client.on('error', console.error);

@@ -3,7 +3,7 @@ import {RpcSuite} from '@drpc/testsuite';
 import {connect} from '@drpc/client';
 import {tcp} from '@drpc/server';
 import {Certs, createTlsServer} from '@drpc/testlab';
-import * as channel from '../../index';
+import * as connector from '../../index';
 
 describe('TLS - suite', function () {
   RpcSuite.run(async () => {
@@ -15,7 +15,7 @@ describe('TLS - suite', function () {
 
     const connection = app.once('connection');
     const client = await connect(`tls://localhost:${port}`, {
-      channel,
+      connector,
       ca: [Certs.tlsCert],
     });
     client.on('error', console.error);

@@ -5,7 +5,7 @@ import WS from 'ws';
 import {Application, ws} from '@drpc/server';
 import {ConnectivitySuite} from '@drpc/testsuite';
 import {connect} from '@drpc/client';
-import * as channel from '../..';
+import * as connector from '../..';
 
 ConnectivitySuite.run('WebSocket', async () => {
   const app = new Application();
@@ -17,7 +17,7 @@ ConnectivitySuite.run('WebSocket', async () => {
   const connection = app.once('connection');
   const client = await connect('ws://localhost', {
     port: (server.address() as AddressInfo).port,
-    channel,
+    connector,
   });
   const clientSocket = client;
   const serverSocket = await connection;

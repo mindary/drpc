@@ -3,7 +3,7 @@ import {RpcSuite} from '@drpc/testsuite';
 import {connect} from '@drpc/client';
 import {tcp} from '@drpc/server';
 import {createTcpServer} from '@drpc/testlab';
-import * as channel from '../..';
+import * as connector from '../..';
 
 describe('TCP - suite', function () {
   RpcSuite.run(async () => {
@@ -12,7 +12,7 @@ describe('TCP - suite', function () {
 
     const connection = app.once('connection');
     const client = await connect(`tcp://localhost:${port}`, {
-      channel,
+      connector,
     });
     RpcSuite.setupClient(client);
     const clientSocket = client;

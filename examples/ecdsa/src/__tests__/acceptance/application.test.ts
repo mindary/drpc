@@ -20,7 +20,7 @@ describe('EcdsaApplication', function () {
   before(async () => {
     identity = signer.createIdentity();
     client = await connect(`tcp://localhost:${port}`, {
-      channel: await import('@drpc/connector-tcp'),
+      connector: await import('@drpc/connector-tcp'),
       clientId: identity.id,
       metadata: {
         authmethod: 'ecdsa',

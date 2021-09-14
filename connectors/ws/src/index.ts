@@ -4,7 +4,7 @@ import {WebSocketTransport} from '@drpc/transport-ws';
 import {setDefaultOpts} from './common';
 import {createWebSocket} from './ws';
 
-const debug = debugFactory('drpc:channel:ws');
+const debug = debugFactory('drpc:connector:ws');
 
 export function connect(client: Client, opts: ClientOptions) {
   debug('streamBuilder');
