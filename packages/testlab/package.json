@@ -1,7 +1,7 @@
 {
   "name": "@drpc/testlab",
   "description": "A collection of test utilities we use to write drpc tests",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
     "verify": "npm pack && tar xf drpc-tests*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.15.1",
+    "@drpc/core": "^0.15.2",
     "@drpc/decorators": "^0.2.1",
     "@drpc/types": "^0.5.1",
     "delay": "^4.0.0",

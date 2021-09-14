@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://gitr.net/mindary/drpc/compare/@drpc/example-ecdsa@0.2.1...@drpc/example-ecdsa@0.2.2) (2021-09-14)
+
+**Note:** Version bump only for package @drpc/example-ecdsa
+
+
+
+
+
 ## [0.2.1](https://gitr.net/mindary/drpc/compare/@drpc/example-ecdsa@0.2.0...@drpc/example-ecdsa@0.2.1) (2021-09-14)
 
 **Note:** Version bump only for package @drpc/example-ecdsa
