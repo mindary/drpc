@@ -1,7 +1,7 @@
 {
   "name": "@drpc/transport-worker",
   "description": "The Worker transport",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "verify": "npm pack && tar xf drpc-transport-worker*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.14.0"
+    "@drpc/core": "^0.15.0"
   },
   "devDependencies": {
     "@loopback/build": "^7.0.0",

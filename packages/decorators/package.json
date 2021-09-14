@@ -1,7 +1,7 @@
 {
   "name": "@drpc/decorators",
   "description": "The default drpc decorators",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "verify": "npm pack && tar xf drpc-decorators*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/types": "^0.4.1",
+    "@drpc/types": "^0.5.0",
     "@loopback/metadata": "^3.3.2"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 {
   "name": "@drpc/packet",
   "description": "Encode and Decode DRPC packets",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,9 +22,9 @@
     "prebenchmark": "npm run clean && npm run build"
   },
   "dependencies": {
+    "@drpc/types": "^0.5.0",
     "@libit/bufio": "^0.4.2",
     "@libit/emittery": "^0.10.1",
-    "@drpc/types": "^0.4.1",
     "binio": "^0.3.0",
     "msgpackr": "^1.4.3",
     "mutable-buffer": "^4.0.2",

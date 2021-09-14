@@ -1,7 +1,7 @@
 {
   "name": "@drpc/client-ws",
   "description": "The WebSocket client connector",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,16 +20,16 @@
     "verify": "npm pack && tar xf drpc-client-ws*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/client": "^0.8.0",
-    "@drpc/transport-ws": "^0.1.0",
+    "@drpc/client": "^0.9.0",
+    "@drpc/transport-ws": "^0.2.0",
     "debug": "^4.3.2",
     "tily": "^2.8.3",
     "ts-essentials": "^8.1.0",
     "ws": "^8.2.1"
   },
   "devDependencies": {
-    "@drpc/server": "^0.13.0",
-    "@drpc/testsuite": "^0.9.0",
+    "@drpc/server": "^0.14.0",
+    "@drpc/testsuite": "^0.10.0",
     "@loopback/build": "^7.0.0",
     "@loopback/eslint-config": "^11.0.0",
     "@loopback/testlab": "^3.4.2",

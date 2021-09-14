@@ -1,7 +1,7 @@
 {
   "name": "@drpc/example-ecdsa",
   "description": "An authentication example with ECDSA",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "keywords": [],
   "main": "dist/index.js",
@@ -21,12 +21,12 @@
     "verify": "npm pack && tar xf drpc-example-ecdsa*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/client": "^0.8.0",
-    "@drpc/client-tcp": "^0.1.0",
-    "@drpc/core": "^0.14.0",
-    "@drpc/registry": "^0.1.0",
-    "@drpc/server": "^0.13.0",
-    "@drpc/transport-tcp": "^0.1.0",
+    "@drpc/client": "^0.9.0",
+    "@drpc/client-tcp": "^0.2.0",
+    "@drpc/core": "^0.15.0",
+    "@drpc/registry": "^0.2.0",
+    "@drpc/server": "^0.14.0",
+    "@drpc/transport-tcp": "^0.2.0",
     "@libit/josa": "^0.4.4"
   },
   "devDependencies": {
