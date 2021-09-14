@@ -2,6 +2,7 @@
   "name": "@drpc/example-ecdsa",
   "description": "An authentication example with ECDSA",
   "version": "0.1.0",
+  "private": true,
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
