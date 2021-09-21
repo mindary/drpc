@@ -1,7 +1,7 @@
 import {assert} from 'ts-essentials';
-import {ActionPacketType, OnIncoming} from '@drpc/core';
+import {ActionPacketType, CallRequest, OnIncoming} from '@drpc/core';
 import {MixinTarget} from '../mixin-target';
-import {DefaultRegistry, Registrable, Registry, ServiceInvokeRequest} from '../registry';
+import {DefaultRegistry, Registrable, Registry} from '../registry';
 
 export interface WithOnRequest {
   onincoming?: OnIncoming;
@@ -19,18 +19,15 @@ export function RegistryMixin<T extends MixinTarget<WithOnRequest>>(superClass: 
       super(...args);
 
       this.registry = (this as any).options?.registry ?? new DefaultRegistry();
-      this.onincoming = async (request, next) => {
-        if (request.type === 'call') {
-          return this.invokeWithRegistry({
-            name: request.message.name,
-            params: request.message.payload,
-          });
+      this.onincoming = async (carrier, next) => {
+        if (carrier.type === 'call') {
+          return this.invokeWithRequest(carrier.req as CallRequest);
         }
         return next();
       };
     }
 
-    async invokeWithRegistry(request: ServiceInvokeRequest) {
+    async invokeWithRequest(request: CallRequest) {
       assert(this.registry, 'remote invoking is not supported for current socket');
       return this.registry.invoke(request);
     }

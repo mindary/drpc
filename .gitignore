@@ -6,6 +6,7 @@ npm-debug.log
 coverage
 .nyc_output
 **/*.tgz
+benchmark/dist
 packages/*/dist
 transports/*/dist
 channels/*/dist

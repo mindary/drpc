@@ -56,3 +56,14 @@ export class Request<T extends RequestPacketType, SOCKET extends Socket = any> {
     return this.type === 'event';
   }
 }
+
+export type CallRequest<SOCKET extends Socket = any> = Request<'call', SOCKET>;
+export type EventRequest<SOCKET extends Socket = any> = Request<'event', SOCKET>;
+
+export function isRequest(x?: any): x is Request<any> {
+  return x && typeof x.type === 'string' && x.message;
+}
+
+export function isCallRequest(x?: any): x is Request<any> {
+  return isRequest(x) && x.type === 'call';
+}

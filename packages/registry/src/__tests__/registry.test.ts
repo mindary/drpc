@@ -1,19 +1,20 @@
-import {Method, protoKeys, UnimplementedError} from '@drpc/core';
+import {protoKeys, UnimplementedError} from '@drpc/core';
 import {expect} from '@loopback/testlab';
 import {Monster, monster, MonsterService} from '@drpc/testlab';
-import {drpc, getAllRpcMethodMetadata} from '@drpc/decorators';
+import {drpc, getAllDrpcMethodMetadata} from '@drpc/decorators';
 import {DefaultRegistry} from '../registry';
+import {Method} from '../method';
 
 describe('registry', function () {
   describe('register', function () {
     describe('service', function () {
       it('should only register decorated methods', function () {
-        const keys = Object.keys(getAllRpcMethodMetadata(MonsterService) ?? {});
+        const keys = Object.keys(getAllDrpcMethodMetadata(MonsterService) ?? {});
         const registry = new DefaultRegistry();
         registry.register(monster);
         expect(Object.keys(registry.methods)).deepEqual(keys);
         // assert monster
-        Object.values(registry.methods).forEach(m => expect(m.scope).equal(monster));
+        Object.values(registry.methods).forEach(m => expect(m.owner).equal(monster));
       });
 
       it('should register a service with all methods with wildcard', function () {
@@ -22,7 +23,7 @@ describe('registry', function () {
         registry.register(monster, '*');
         expect(Object.keys(registry.methods)).deepEqual(keys);
         // assert monster
-        Object.values(registry.methods).forEach(m => expect(m.scope).equal(monster));
+        Object.values(registry.methods).forEach(m => expect(m.owner).equal(monster));
       });
 
       it('should register extra methods if specified', function () {

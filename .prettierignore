@@ -1,5 +1,6 @@
 .github/
 /coverage
+benchmark/dist
 packages/*/dist
 transports/*/dist
 connectors/*/dist

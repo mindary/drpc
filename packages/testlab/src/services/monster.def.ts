@@ -8,4 +8,6 @@ export class Monster {
   sleep: (ms: number) => Promise<number>;
   empty: () => void;
   noArgs: () => boolean;
+  getRequestIdFromRequest: () => number;
+  getRequestIdFromResponse: () => number;
 }

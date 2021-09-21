@@ -26,6 +26,7 @@
     "@drpc/core": "^0.15.2",
     "@drpc/decorators": "^0.2.1",
     "@drpc/types": "^0.5.1",
+    "@loopback/metadata": "^3.3.3",
     "debug": "^4.3.2",
     "micromatch": "^4.0.4",
     "tily": "^2.8.3",

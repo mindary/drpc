@@ -1,19 +1,21 @@
 import {assert} from 'ts-essentials';
 import micromatch from 'micromatch';
-import toArray from 'tily/array/toArray';
-import debugFactory from 'debug';
-import {Method, UnimplementedError} from '@drpc/core';
-import {getAllRpcMethodMetadata, getDrpcMetadata} from '@drpc/decorators';
-import flatten from 'tily/array/flatten';
 import uniq from 'tily/array/uniq';
+import toArray from 'tily/array/toArray';
+import flatten from 'tily/array/flatten';
+import debugFactory from 'debug';
+import {CallRequest, Request, UnimplementedError} from '@drpc/core';
+import {getAllDrpcMethodMetadata, getDrpcMetadata} from '@drpc/decorators';
+import {Method} from './method';
+import {resolveInjectedArguments} from './resolver';
 
 const debug = debugFactory('drpc:core:registry');
 
-export interface ServiceInvokeRequest {
-  name: string;
-  params?: any;
-  payload?: any; // alias for params
-}
+// export interface ServiceInvokeRequest {
+//   name: string;
+//   params?: any;
+//   payload?: any; // alias for params
+// }
 
 export interface Registrable {
   register<SERVICE extends object>(namespace: string, service: SERVICE, scope?: object): void;
@@ -36,7 +38,7 @@ export interface Registry extends Registrable {
 
   call(name: string, args: any): Promise<any>;
 
-  invoke(request: ServiceInvokeRequest): Promise<any>;
+  invoke(request: Request<'call'>): Promise<any>;
 }
 
 export class DefaultRegistry implements Registry {
@@ -62,7 +64,7 @@ export class DefaultRegistry implements Registry {
     }
 
     // Using a fresh meta but not use direct MetadataMap for avoid poison the original metadata store
-    const meta = Object.assign({}, getAllRpcMethodMetadata(args.service.constructor));
+    const meta = Object.assign({}, getAllDrpcMethodMetadata(args.service.constructor));
     if (args.names?.length) {
       uniq(
         flatten<string>(
@@ -85,7 +87,11 @@ export class DefaultRegistry implements Registry {
         assert(!this._methods[name], `Method already bound: "${name}"`);
         const alias = meta[name].name ?? name;
         const qualified = args.namespace ? args.namespace + '.' + alias : alias;
-        this._methods[qualified] = new Method(args.service[name], args.scope);
+        this._methods[qualified] = new Method(args.service[name], {
+          namespace: args.namespace,
+          owner: args.scope,
+          name,
+        });
         if (debug.enabled) {
           debug(`register method: ${qualified}`);
         }
@@ -117,16 +123,17 @@ export class DefaultRegistry implements Registry {
     return this.get(name).invoke(args);
   }
 
-  async invoke(request: ServiceInvokeRequest) {
-    const {name, params, payload} = request;
-    return this.call(name, params ?? payload);
+  async invoke(request: CallRequest) {
+    let args: any;
+    const {name, payload} = request.message;
+    const m = this.get(name);
+    if (m.target && m.name) {
+      args = resolveInjectedArguments(m.target, m.name, request, payload);
+    }
+    return this.call(name, args);
   }
 }
 
-// register<T extends object>(namespace: string, service: T, scope?: any): void;
-// register<T extends object>(namespace: string, service: T, names: string[], scope?: any): void;
-// register<T extends object>(service: T, scope?: any): void;
-// register<T extends object>(service: T, names: string[], scope?: any): void;
 function resolveRegisterArgs(
   arg1: any,
   arg2?: any,

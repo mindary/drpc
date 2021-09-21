@@ -208,10 +208,16 @@ export abstract class Socket<
    * Send event to remote socket
    *
    */
-  async emit(eventName: string, metadata?: Metadata): Promise<void>;
-  async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void>;
-  async emit(eventName: string, eventData?: any, metadata?: Metadata): Promise<void> {
-    assert(!SOCKET_RESERVED_EVENTS.has(eventName), `"${eventName}" event is reserved`);
+  async emit(eventName: string | symbol, metadata?: Metadata): Promise<void>;
+  async emit(eventName: string | symbol, eventData?: any, metadata?: Metadata): Promise<void>;
+  async emit(eventName: string | symbol, eventData?: any, metadata?: Metadata): Promise<void> {
+    if (typeof eventName === 'symbol') {
+      return super.emit(eventName as any);
+    }
+
+    if (SOCKET_RESERVED_EVENTS.has(eventName)) {
+      throw new Error(`"${eventName}" event is reserved`);
+    }
 
     if (Metadata.isMetadata(eventData)) {
       metadata = eventData;

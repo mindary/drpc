@@ -3,7 +3,6 @@ export * from './keys';
 export * from './errors';
 export * from './alive';
 export * from './utils';
-export * from './method';
 export * from './transport';
 export * from './sockets';
 export * from './request';

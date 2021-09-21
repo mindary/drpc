@@ -16,7 +16,7 @@ export namespace RpcSuite {
 
     const registry = new DefaultRegistry();
     registry.register(Monster.namespace, monster);
-    app.onincoming = async request => request.isCall() && registry.invoke(request.message);
+    app.onincoming = async carrier => carrier.isCall() && registry.invoke(carrier.req as any);
 
     app.on('connection', setupSocket);
     return app;
@@ -25,7 +25,7 @@ export namespace RpcSuite {
   export function setupClient(client: Client) {
     const registry = new DefaultRegistry();
     registry.register(Monster.namespace, monster);
-    client.onincoming = async request => request.isCall() && registry.invoke(request.message);
+    client.onincoming = async carrier => carrier.isCall() && registry.invoke(carrier.req as any);
 
     setupSocket(client);
   }

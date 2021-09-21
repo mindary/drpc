@@ -1,10 +1,9 @@
 import delay from 'delay';
-import {RemoteError} from '@drpc/core';
+import {CallRequest, Response, RemoteError} from '@drpc/core';
 import {drpc} from '@drpc/decorators';
-import {Monster} from './monster.def';
 
-export class MonsterService implements Monster {
-  foo = 'bar';
+export class MonsterService {
+  name = 'monster';
 
   prefix = 'Hello';
 
@@ -41,6 +40,16 @@ export class MonsterService implements Monster {
 
   @drpc.method() noArgs(): boolean {
     return true;
+  }
+
+  @drpc.method()
+  getRequestIdFromRequest(@drpc.request() req: CallRequest) {
+    return req.message.id;
+  }
+
+  @drpc.method()
+  getRequestIdFromResponse(@drpc.response() res: Response<'call'>) {
+    return res.id;
   }
 
   /* istanbul ignore next */
