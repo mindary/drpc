@@ -88,7 +88,7 @@ export namespace RpcSuite {
             const start = Date.now();
             expect(await service.call('sleep', [10])).equal(10);
             const elapse = Date.now() - start;
-            expect(elapse).greaterThan(10);
+            expect(elapse).greaterThanOrEqual(10);
             expect(elapse).lessThan(20);
           });
 
