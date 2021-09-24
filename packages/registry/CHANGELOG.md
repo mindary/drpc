@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://gitr.net/mindary/drpc/compare/@drpc/registry@0.2.2...@drpc/registry@0.3.0) (2021-09-24)
+
+
+### Features
+
+* support injecting request and response for RPC methods ([3afdf60](https://gitr.net/mindary/drpc/commits/3afdf604075e6e3dabe292f5f68b9baae14d26cc))
+
+
+
+
+
 ## [0.2.2](https://gitr.net/mindary/drpc/compare/@drpc/registry@0.2.1...@drpc/registry@0.2.2) (2021-09-14)
 
 **Note:** Version bump only for package @drpc/registry

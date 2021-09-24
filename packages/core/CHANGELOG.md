@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/mindary/drpc/compare/@drpc/core@0.15.2...@drpc/core@0.16.0) (2021-09-24)
+
+
+### Features
+
+* support injecting request and response for RPC methods ([3afdf60](https://github.com/mindary/drpc/commit/3afdf604075e6e3dabe292f5f68b9baae14d26cc))
+
+
+
+
+
 ## [0.15.2](https://github.com/mindary/drpc/compare/@drpc/core@0.15.1...@drpc/core@0.15.2) (2021-09-14)
 
 **Note:** Version bump only for package @drpc/core

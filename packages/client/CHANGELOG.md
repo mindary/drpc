@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://gitr.net/mindary/drpc/compare/@drpc/client@0.9.2...@drpc/client@0.10.0) (2021-09-24)
+
+
+### Features
+
+* support injecting request and response for RPC methods ([3afdf60](https://gitr.net/mindary/drpc/commits/3afdf604075e6e3dabe292f5f68b9baae14d26cc))
+
+
+
+
+
 ## [0.9.2](https://gitr.net/mindary/drpc/compare/@drpc/client@0.9.1...@drpc/client@0.9.2) (2021-09-14)
 
 **Note:** Version bump only for package @drpc/client

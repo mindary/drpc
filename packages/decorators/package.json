@@ -1,7 +1,7 @@
 {
   "name": "@drpc/decorators",
   "description": "The default drpc decorators",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

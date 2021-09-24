@@ -1,7 +1,7 @@
 {
   "name": "@drpc/transport-ws",
   "description": "The WebSocket transport",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "keywords": [],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,7 @@
     "verify": "npm pack && tar xf drpc-transport-ws*.tgz && tree package && npm run clean"
   },
   "dependencies": {
-    "@drpc/core": "^0.15.2",
+    "@drpc/core": "^0.16.0",
     "tily": "^2.8.3",
     "ws": "^8.2.1"
   },
