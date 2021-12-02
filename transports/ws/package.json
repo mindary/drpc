@@ -24,15 +24,15 @@
   },
   "dependencies": {
     "@drpc/core": "^0.16.0",
-    "tily": "^2.8.3",
-    "ws": "^8.2.1"
+    "tily": "^2.8.4",
+    "ws": "^8.3.0"
   },
   "devDependencies": {
-    "@loopback/build": "^7.0.0",
-    "@loopback/eslint-config": "^11.0.0",
-    "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.7.13",
-    "@types/ws": "^7.4.7"
+    "@loopback/build": "^8.0.0",
+    "@loopback/eslint-config": "^12.0.0",
+    "@loopback/testlab": "^4.0.0",
+    "@types/node": "^16.11.11",
+    "@types/ws": "^8.2.1"
   },
   "files": [
     "README.md",

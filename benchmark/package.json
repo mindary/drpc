@@ -30,18 +30,18 @@
     "@drpc/registry": "^0.3.0",
     "@drpc/server": "^0.15.0",
     "a-callback": "^0.1.1",
-    "benny": "^3.6.15",
+    "benny": "^3.7.1",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "get-port": "^5.1.1",
-    "poisson-process": "^1.0.0",
-    "tily": "^2.8.3"
+    "get-port": "^6.0.0",
+    "poisson-process": "^1.0.1",
+    "tily": "^2.8.4"
   },
   "devDependencies": {
-    "@loopback/build": "^7.0.0",
-    "@loopback/eslint-config": "^11.0.0",
-    "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.4.1"
+    "@loopback/build": "^8.0.0",
+    "@loopback/eslint-config": "^12.0.0",
+    "@loopback/testlab": "^4.0.0",
+    "@types/node": "^16.11.11"
   },
   "files": [
     "README.md",

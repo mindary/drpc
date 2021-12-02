@@ -23,10 +23,10 @@
     "verify": "npm pack && tar xf drpc-types*.tgz && tree package && npm run clean"
   },
   "devDependencies": {
-    "@loopback/build": "^7.0.0",
-    "@loopback/eslint-config": "^11.0.0",
-    "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.7.13"
+    "@loopback/build": "^8.0.0",
+    "@loopback/eslint-config": "^12.0.0",
+    "@loopback/testlab": "^4.0.0",
+    "@types/node": "^16.11.11"
   },
   "files": [
     "README.md",

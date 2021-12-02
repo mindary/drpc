@@ -30,13 +30,13 @@
     "@drpc/testlab": "^0.12.0",
     "@drpc/types": "^0.5.1",
     "delay": "^5.0.0",
-    "ts-essentials": "^8.1.0"
+    "ts-essentials": "^9.0.0"
   },
   "devDependencies": {
-    "@loopback/build": "^7.0.0",
-    "@loopback/eslint-config": "^11.0.0",
-    "@loopback/testlab": "^3.4.2",
-    "@types/node": "^16.7.13",
+    "@loopback/build": "^8.0.0",
+    "@loopback/eslint-config": "^12.0.0",
+    "@loopback/testlab": "^4.0.0",
+    "@types/node": "^16.11.11",
     "a-defer": "^0.1.1"
   },
   "files": [
