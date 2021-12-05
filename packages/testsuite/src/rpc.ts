@@ -80,7 +80,7 @@ export namespace RpcSuite {
             const start = Date.now();
             expect(await service.call('addSlow', [1, 2, true])).equal(3);
             const elapse = Date.now() - start;
-            expect(elapse).greaterThan(15);
+            expect(elapse).greaterThanOrEqual(15);
             expect(elapse).lessThan(25);
           });
 

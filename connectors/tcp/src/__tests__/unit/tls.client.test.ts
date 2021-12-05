@@ -72,7 +72,7 @@ describe('tls client', function () {
       });
 
       const error = await client.once('error');
-      expect(error.message).match(/self signed certificate/);
+      expect(error.message).match(/self.signed certificate/);
     });
 
     it('should emit close on TLS error', async () => {
